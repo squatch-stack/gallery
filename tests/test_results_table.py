@@ -167,9 +167,10 @@ def test_new_sections(records):
     page, _ = results.generate(index, jobs, "results/sweep.svg")
     assert "| alpha-matched | 75.00% | 25.00% | 12.50% |" in page
     assert "| unmasked | unavailable | unavailable | unavailable |" in page
-    assert "| fixture | place | 480,000 | 1,234 | FAIL (web-mobile) | " in page
+    assert "| fixture | place | 480,000 | not applicable | not applicable | 1,234 | FAIL (web-mobile) | " in page
     assert "--target-count 480000; --crop-shape cylinder | candidate |" in page
-    assert "| missing | object | unavailable | unavailable | unavailable (unavailable) | unavailable |" in page
+    assert ("| missing | object | unavailable | not applicable | not applicable | unavailable | "
+            "unavailable (unavailable) | unavailable |") in page
     assert "L-infinity" in page
     assert str(root) not in page
 
@@ -199,6 +200,64 @@ def test_new_sources_freshness(records, source):
         data[0]["subject"] = "object"
     else:
         data["inputs"]["cleaning"].append("--alpha-min 0.05")
+    path.write_text(json.dumps(data))
+    assert results.main([*args, "--check"]) == 1
+    assert results.main(args) == 0
+    assert results.main([*args, "--check"]) == 0
+
+
+@pytest.fixture
+def mesh_records(records):
+    root, _, _ = records
+    catalog_path = root / "scenes.json"
+    catalog = json.loads(catalog_path.read_text())
+    catalog.append({"stem": "mesh", "mesh": "scenes/mesh.glb", "triangles": 999})
+    catalog_path.write_text(json.dumps(catalog))
+    checks_path = root / "checks.json"
+    checks = json.loads(checks_path.read_text())
+    checks["results"].append({
+        "scene": "mesh", "file": "scenes/mesh.glb", "count": 0,
+        "triangles": 123456, "texture_bytes": 2345678, "size_bytes": 3456789,
+        "passed": True, "platform": "web-mobile",
+    })
+    checks_path.write_text(json.dumps(checks))
+    return records
+
+
+def test_mesh_cleaning_evidence(mesh_records):
+    _, index, jobs = mesh_records
+    page, _ = results.generate(index, jobs, "results/sweep.svg")
+    assert ("| mesh | object | not applicable | 123,456 | 2,345,678 | 3,456,789 | "
+            "PASS (web-mobile) | unavailable | unavailable |") in page
+
+
+@pytest.mark.parametrize("value", [None, 0])
+def test_mesh_missing_and_zero_metrics(mesh_records, value):
+    root, _, _ = mesh_records
+    path = root / "checks.json"
+    data = json.loads(path.read_text())
+    record = data["results"][-1]
+    for key in ("triangles", "texture_bytes"):
+        if value is None:
+            record.pop(key)
+        else:
+            record[key] = value
+    path.write_text(json.dumps(data))
+    expected = "unavailable" if value is None else "0"
+    assert f"| mesh | object | not applicable | {expected} | {expected} |" in "\n".join(
+        results.cleaning_section(root)
+    )
+
+
+@pytest.mark.parametrize("metric", ["triangles", "texture_bytes"])
+def test_mesh_metrics_freshness(mesh_records, metric):
+    root, _, _ = mesh_records
+    args = ["--out", str(root / "docs/results.md")]
+    assert results.main(args) == 0
+    assert results.main([*args, "--check"]) == 0
+    path = root / "checks.json"
+    data = json.loads(path.read_text())
+    data["results"][-1][metric] += 1
     path.write_text(json.dumps(data))
     assert results.main([*args, "--check"]) == 1
     assert results.main(args) == 0

@@ -133,8 +133,9 @@ def cleaning_section(root):
         "Recorded delivery outcomes from checks.json; subject profiles come from scenes.json "
         "(default object, as in the checker), and flags come from provenance sidecars without inferred defaults.",
         "",
-        "| Scene | Subject profile | Splats | Bytes | Verdict (platform) | Cleaning flags | Cleaning source |",
-        "|---|---|---:|---:|---|---|---|",
+        "| Scene | Subject profile | Splats | Triangles | Texture bytes | Bytes | Verdict (platform) | "
+        "Cleaning flags | Cleaning source |",
+        "|---|---|---:|---:|---:|---:|---|---|---|",
     ]
     for scene in catalog:
         stem = scene["stem"]
@@ -147,11 +148,17 @@ def cleaning_section(root):
         matches = [r for r in checks if r["scene"] == stem] or [{}]
         for record in matches:
             count, size = record.get("count"), record.get("size_bytes")
+            mesh = Path(record.get("file", "")).suffix.lower() in {".glb", ".obj", ".fbx"}
+            if not record.get("file"):
+                mesh = bool(scene.get("mesh"))
+            triangles, texture_bytes = record.get("triangles"), record.get("texture_bytes")
             verdict = {True: "PASS", False: "FAIL", None: "unavailable"}[record.get("passed")]
             values = [
                 stem,
                 scene.get("subject", "object"),
-                f"{count:,}" if count is not None else "unavailable",
+                "not applicable" if mesh else f"{count:,}" if count is not None else "unavailable",
+                (f"{triangles:,}" if triangles is not None else "unavailable") if mesh else "not applicable",
+                (f"{texture_bytes:,}" if texture_bytes is not None else "unavailable") if mesh else "not applicable",
                 f"{size:,}" if size is not None else "unavailable",
                 f"{verdict} ({record.get('platform', 'unavailable')})",
                 flags or "unavailable",
@@ -163,6 +170,10 @@ def cleaning_section(root):
             "",
             "Verdicts are recorded checker results, not a visual-quality rating; "
             "places retain surroundings, and missing flags do not mean no cleaning occurred.",
+            "Mesh triangles and embedded texture bytes come from recorded checker evidence; "
+            "unavailable means not recorded. Triangles count stored topology, not scene instances; "
+            "texture bytes are embedded image bytes, while Bytes is the total delivery size. "
+            "Splat counts do not apply to meshes; mesh metrics do not apply to splats.",
             "",
         ]
     )

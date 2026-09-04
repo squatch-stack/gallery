@@ -186,7 +186,73 @@ writes current/candidate metrics, attempts, and an exact promotion preview.
 Missing/malformed files or unknown stems raise errors. Person: open the SOG in
 the viewer and compare it with the current scene; a PASS is not visual approval.
 
-## 8. Provenance and promotion decision
+## 8. Mesh reconstruction side path
+
+Choose a mesh for rigid surfaces such as trunks, stone, and architecture;
+foliage is a poor fit. Use the inspected subject masks from stage 4. This is
+an alternative reconstruction path to the splat training and cleaning stages.
+
+- [ ] In the sibling posekit repository, reconstruct at full detail with masks,
+  then convert the OBJ to a textured GLB. These are external-tool examples
+  (quoted as text so this repository's CLI tests do not validate posekit flags).
+  Resolve `<subject>` and `<job>` from that repository's working directory.
+
+```text
+.build/release/posekit <subject>/images --out <job>/mesh --sequential --model full --masks <subject>/masks
+.venv/bin/python tools/obj_to_glb.py <job>/mesh/model.obj <job>/mesh/model.glb
+```
+
+The first command writes the mesh under `<job>/mesh`; the second converts
+`model.obj` to `model.glb`. Keep the OBJ's material and texture assets available
+for conversion. Inspect the converted GLB for complete surfaces, textures,
+orientation, and retained background before considering promotion.
+
+- [ ] Back in this repository, check the GLB candidate outside `scenes/`.
+  Use `--subject place` for architecture that retains its surroundings.
+
+```sh
+python3 tools/check_deliverable.py <job>/mesh/model.glb --platform web-mobile --subject object --json
+```
+
+The checker records `triangles` (stored primitive topology, not scene instances)
+and `texture_bytes` (embedded image bytes), plus total `size_bytes`. Splat
+cleanliness proxies do not apply to meshes. Malformed GLBs and textures that
+are not embedded in buffer views fail the format check. A new stem can fail
+provenance before promotion creates its catalog entry and provenance page;
+inspect every rule rather than treating that as a geometry failure.
+
+The first budget a textured mesh can hit is total delivery bytes: web-mobile
+allows 20,000,000 bytes, not 20 MiB. `springhouse-outside` is 26,858,880 bytes
+and fails that budget; `cannon-mesh` is 17,549,488 bytes and passes the recorded
+web-mobile check. There is no triangle budget in this checker; a zero internal
+splat count does not make a large mesh cheap. Reduce texture resolution or
+encoding size, and mesh detail as needed, then convert, inspect, and check again.
+The current snapshot lacks triangle/texture measurements for these examples;
+the results page reports those missing measurements as unavailable.
+
+- [ ] Preview promotion as a sibling `-mesh` stem, as with `cannon-mesh`
+  beside `cannon`. Replace the ellipses with quoted title, blurb, and an honest
+  source summary; use a source commit that documents the reconstruction.
+
+```sh
+python3 tools/promote_scene.py <job>/mesh/model.glb --stem <stem>-mesh --title ... --blurb ... --source ... --source-commit HEAD --cleaning "posekit --model full --masks" --up 0,1,0 --dry-run
+```
+
+For replacement, use the existing stem and add `--replace` to that preview.
+Review the GLB, orientation, metadata diff, source evidence, cleaning detail,
+and deliverable verdict. Only after approval repeat without `--dry-run`.
+Replacement archives the displaced scene and provenance; a sibling preserves
+the existing splat entry. Mesh promotion copies the GLB, records its mesh path
+and triangle count, generates app-export provenance, and runs the web-mobile
+check. It requires an identified mesher and detail setting in `--cleaning`,
+plus `--source` and `--source-commit` or recoverable existing app-export evidence.
+Do not use `--provenance-from` for meshes or invent splat training statistics.
+An existing stem without `--replace`, a candidate inside current scene files,
+or missing mesh/source evidence is refused. After promotion, refresh gallery
+evidence using stage 11; a promotion dry run only previews changes and does
+not perform the deliverable check.
+
+## 9. Provenance and promotion decision
 
 For a solved/trained subject, promotion can generate provenance from the solve
 and metrics. First preview the exact change:
@@ -221,7 +287,7 @@ review. Revert refuses missing/foreign archives, mismatched archived entries,
 or promotion flags mixed with `--revert`; it archives the displaced version,
 restores files/catalog metadata, and reruns the deliverable check.
 
-## 9. App-exported scene side path (no solve)
+## 10. App-exported scene side path (no solve)
 
 Use this when the delivered scene came from an app and raw solve inputs are not
 available. Create provenance from explicit evidence first:
@@ -241,7 +307,7 @@ Preview replacement with `promote_scene.py --replace --dry-run` and
 approval. Promotion preserves app-export evidence through the sidecar; without
 it, exact cleaning flags are required. Do not invent solve/training statistics.
 
-## 10. Refresh gallery evidence
+## 11. Refresh gallery evidence
 
 - [ ] After any delivered file, catalog, or provenance change, refresh checks.
 
@@ -266,7 +332,7 @@ is reported but does not alone change exit status. Negative `--stale-days` is
 refused.
 
 - [ ] Regenerate the measured-results page only when its sanitized job records
-  intentionally change; otherwise check freshness.
+  or delivery/check/provenance records intentionally change; otherwise check freshness.
 
 ```sh
 python3 tools/results_table.py --check
@@ -287,7 +353,7 @@ It reads `viewer.html` and `index.html`, optionally rewrites the statement, and
 prints per-rule JSON. Any failed measured rule exits 1. File/read failures raise
 errors; a PASS remains a limited static self-assessment, not a full audit.
 
-## 11. Gates and handoff
+## 12. Gates and handoff
 
 The full local and CI gate is:
 
