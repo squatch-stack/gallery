@@ -6,6 +6,7 @@ import datetime as dt
 import difflib
 import html
 import json
+import math
 import re
 import shutil
 import subprocess
@@ -15,8 +16,10 @@ import zipfile
 from pathlib import Path
 
 try:
+    from tools import scene_up
     from tools.check_deliverable import glb_summary
 except ModuleNotFoundError:
+    import scene_up
     from check_deliverable import glb_summary
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -43,9 +46,66 @@ def parse_up(value):
         up = [float(part) for part in value.split(",")]
     except ValueError as exc:
         raise argparse.ArgumentTypeError("up must be x,y,z") from exc
-    if len(up) != 3:
-        raise argparse.ArgumentTypeError("up must be x,y,z")
+    if len(up) != 3 or not all(math.isfinite(v) for v in up) or not any(up):
+        raise argparse.ArgumentTypeError("up must be a finite, nonzero x,y,z vector")
     return up
+
+
+def choose_up(args, parser):
+    """Resolve splat gravity before any promotion writes or archival moves."""
+    if args.up is not None:
+        print(f"up (explicit): {json.dumps(args.up)}")
+        return args.up, {"up_source": "explicit", "up": args.up}
+    try:
+        estimate = scene_up.cloud_estimate(args.candidate)
+        extent = estimate["extent"]
+        reason = estimate["reason"]
+        if estimate["up"] is None:
+            reason = reason or "cloud estimate returned no up vector"
+        elif estimate["inliers"] < args.up_min_inliers:
+            reason = f"inliers {estimate['inliers']:.6f} below --up-min-inliers {args.up_min_inliers:g}"
+        elif not extent or min(extent) <= 0 or min(extent) < 0.25 * max(extent):
+            reason = "plane footprint smaller extent is less than one quarter of the larger"
+        if reason is None:
+            confidence = {"inliers": estimate["inliers"], "extent": extent,
+                          "footprint_ratio": min(extent) / max(extent),
+                          "min_inliers": args.up_min_inliers}
+            print(f"up (cloud): {json.dumps(estimate['up'])}; confidence: {json.dumps(confidence)}")
+            return estimate["up"], {"up_source": "cloud", "up": estimate["up"],
+                                    "up_confidence": confidence}
+    except (OSError, ValueError, KeyError, IndexError, TypeError, EOFError, ImportError, zipfile.BadZipFile) as exc:
+        reason = f"cloud estimate failed: {exc}"
+    message = f"cannot choose splat up: {reason}."
+    if args.provenance_from:
+        try:
+            candidates = scene_up.camera_candidates(args.provenance_from)
+            message += "\nCamera-axis candidates (catalog/viewer frame):"
+            for axis, vector in candidates.items():
+                if vector is None:
+                    message += f"\n  {axis}: unavailable (camera axes cancel; inspect and supply --up manually)."
+                    continue
+                option = ",".join(str(v) for v in vector)
+                message += f"\n  {axis}: {json.dumps(vector)}; stage with --up={option} and look."
+            message += (f"\nAfter staging each candidate with --up, inspect "
+                        f"viewer.html?scene={args.stem}&az=30&el=10&d=1.6. "
+                        "This URL cannot inspect an unpromoted candidate.")
+        except (OSError, ValueError, RuntimeError, ImportError) as exc:
+            message += f"\nCamera-axis candidates unavailable: {exc}."
+    parser.error(message + "\nPromotion refused; pass --up=x,y,z after inspection to proceed.")
+
+
+def record_up(root, entry, inputs):
+    """Augment generated/preserved provenance, or create an up-only sidecar."""
+    page = provenance_path(root, entry) or root / "provenance" / f"{entry['stem']}.html"
+    path = page.with_suffix(".json")
+    data = json.loads(path.read_text()) if path.is_file() else {
+        "schema_version": 1, "mode": "promotion", "argv": [],
+        "date": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"), "inputs": {},
+    }
+    data.setdefault("inputs", {}).pop("up_confidence", None)
+    data["inputs"].update(inputs)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(data, indent=2) + "\n")
 
 
 def scene_files(root, stem):
@@ -80,17 +140,18 @@ def provenance_path(root, entry):
     return path
 
 
-def provenance_files(root, entry):
+def provenance_files(root, entry, stem=None):
     """Return an existing provenance page and its generator sidecar."""
     page = provenance_path(root, entry)
     if not page:
-        return []
+        sidecar = root / "provenance" / f"{stem}.json"
+        return [sidecar] if stem and sidecar.is_file() else []
     return [path for path in (page, page.with_suffix(".json")) if path.is_file()]
 
 
 def archive_current(root, stem, entry, archive, dry_run=False):
     files = [(p, archive / p.name) for p in scene_files(root, stem)]
-    for page in provenance_files(root, entry):
+    for page in provenance_files(root, entry, stem):
         files.append((page, archive / page.relative_to(root)))
     for source, target in files:
         print(f"move {source.relative_to(root)} -> {target.relative_to(root)}")
@@ -141,6 +202,11 @@ def revert(args, root, catalog_path, entries, parser):
             archived = source / target.relative_to(root)
             if archived.is_file():
                 files.append((archived, target))
+    else:
+        target = root / "provenance" / f"{stem}.json"
+        archived = source / target.relative_to(root)
+        if archived.is_file():
+            files.append((archived, target))
     archive = new_archive(root, stem)
     archive_current(root, stem, existing, archive, dry_run=args.dry_run)
     for old, target in files:
@@ -236,6 +302,8 @@ def main(argv=None, root=ROOT):
     parser.add_argument("--title")
     parser.add_argument("--blurb")
     parser.add_argument("--up", type=parse_up)
+    parser.add_argument("--up-min-inliers", type=float, default=0.35,
+                        help="minimum cloud ground-plane inlier fraction (default: 0.35)")
     parser.add_argument("--place", default="")
     parser.add_argument("--captured", default="")
     parser.add_argument("--provenance-from", type=Path)
@@ -256,6 +324,8 @@ def main(argv=None, root=ROOT):
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--catalog", type=Path, help=argparse.SUPPRESS)
     args = parser.parse_args(argv)
+    if not 0 <= args.up_min_inliers <= 1:
+        parser.error("--up-min-inliers must be finite and in [0, 1]")
     root = root.resolve()
     allowed = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_"
     stem = args.revert if args.revert is not None else args.stem
@@ -344,6 +414,9 @@ def main(argv=None, root=ROOT):
 
     if args.candidate.resolve() in [p.resolve() for p in scene_files(root, args.stem)]:
         parser.error("candidate must be outside the current scene files")
+    up_inputs = None
+    if not mesh:
+        args.up, up_inputs = choose_up(args, parser)
     entry = dict(existing or {})
     entry.pop("mesh", None)
     entry.pop("triangles", None)
@@ -379,6 +452,10 @@ def main(argv=None, root=ROOT):
         page = provenance_path(root, existing)
         if page and not args.provenance_from and not app_inputs and (archive / page.relative_to(root)).is_file():
             shutil.copy2(archive / page.relative_to(root), page)
+        if page and not args.provenance_from and not app_inputs:
+            old_sidecar = archive / page.with_suffix(".json").relative_to(root)
+            if old_sidecar.is_file():
+                shutil.copy2(old_sidecar, page.with_suffix(".json"))
     destination.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(args.candidate, destination)
     destination.touch()
@@ -410,6 +487,8 @@ def main(argv=None, root=ROOT):
         if cleaning_record:
             print(f"using cleaning flags from {cleaning_record}")
         subprocess.run(command, check=True)
+    if up_inputs:
+        record_up(root, entry, up_inputs)
     return check_deliverable(root, args.stem)
 
 

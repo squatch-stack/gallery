@@ -54,7 +54,7 @@ def test_dry_run_changes_nothing(gallery, tmp_path, capsys):
     before = (gallery / "scenes.json").read_text()
     assert promote_scene.main([
         str(candidate), "--stem", "preview", "--title", "Preview",
-        "--blurb", "Only a preview.", "--dry-run",
+        "--blurb", "Only a preview.", "--dry-run", "--up", "0,1,0",
     ], root=gallery) == 0
     assert (gallery / "scenes.json").read_text() == before
     assert not (gallery / "scenes/preview.sog").exists()
@@ -71,7 +71,7 @@ def test_replace_archives_files_and_preserves_unknown_keys(gallery, tmp_path, mo
     monkeypatch.setattr(promote_scene.subprocess, "run", Mock(return_value=Mock(returncode=0)))
     assert promote_scene.main([
         str(candidate), "--stem", "same", "--title", "Fresh",
-        "--blurb", "Replacement.", "--replace",
+        "--blurb", "Replacement.", "--replace", "--up", "0,1,0",
     ], root=gallery) == 0
     entry = json.loads((gallery / "scenes.json").read_text())[0]
     assert entry["custom"] == {"keep": True}
@@ -205,7 +205,7 @@ def seed_replacement(gallery, monkeypatch):
 
 def replace(gallery, candidate, *extra):
     return promote_scene.main([str(candidate), "--stem", "same", "--title", "Replacement",
-                               "--blurb", "New", "--replace", *extra], root=gallery)
+                               "--blurb", "New", "--replace", "--up", "0,1,0", *extra], root=gallery)
 
 
 def test_archive_round_trip(gallery, monkeypatch, capsys):
@@ -302,3 +302,120 @@ def test_revert_runs_real_checker(gallery, capfd):
     output = capfd.readouterr().out
     assert "[FAIL] format:" in output
     assert "check_deliverable verdict: FAIL" in output
+
+
+def promotion_args(candidate):
+    return [str(candidate), "--stem", "ground", "--title", "Ground", "--blurb", "Scan"]
+
+
+@pytest.mark.parametrize("dry_run", [False, True])
+def test_cloud_promotes_known_up(gallery, monkeypatch, capsys, dry_run):
+    from test_scene_up import angle, cloud, rotation, write_cloud
+
+    positions, alpha, expected = cloud(rotation([0.7, 0.2, -0.4, 0.5]))
+    candidate = gallery / "ground.sog"
+    write_cloud(candidate, positions * [1, -1, -1], alpha)
+    monkeypatch.setattr(promote_scene.subprocess, "run", Mock(return_value=Mock(returncode=0)))
+    before = {p.relative_to(gallery): p.read_bytes() for p in gallery.rglob("*") if p.is_file()}
+    args = promotion_args(candidate) + (["--dry-run"] if dry_run else [])
+    assert promote_scene.main(args, root=gallery) == 0
+    assert "up (cloud):" in capsys.readouterr().out
+    if dry_run:
+        assert before == {p.relative_to(gallery): p.read_bytes() for p in gallery.rglob("*") if p.is_file()}
+    else:
+        entry = json.loads((gallery / "scenes.json").read_text())[0]
+        assert angle(entry["up"], expected) < 2
+        inputs = json.loads((gallery / "provenance/ground.json").read_text())["inputs"]
+        assert inputs["up_source"] == "cloud"
+        assert inputs["up"] == entry["up"]
+        assert 0.40 < inputs["up_confidence"]["inliers"] < 0.46
+        assert inputs["up_confidence"]["footprint_ratio"] >= 0.25
+
+
+@pytest.mark.parametrize("subject", [False, True])
+def test_no_plane_refuses_before_writes(gallery, monkeypatch, capsys, subject):
+    import sys
+    import types
+
+    import numpy as np
+    from test_scene_up import write_cloud
+
+    candidate = gallery / "volume.sog"
+    write_cloud(candidate, np.random.default_rng(4).normal(size=(4200, 3)), np.full(4200, 0.9))
+    pose = types.SimpleNamespace(rotation=types.SimpleNamespace(matrix=lambda: np.eye(3)))
+    monkeypatch.setitem(sys.modules, "pycolmap", types.SimpleNamespace(
+        Reconstruction=lambda path: types.SimpleNamespace(
+            images={0: types.SimpleNamespace(cam_from_world=lambda: pose)})))
+    before = {p.relative_to(gallery): p.read_bytes() for p in gallery.rglob("*") if p.is_file()}
+    args = promotion_args(candidate)
+    if subject:
+        args += ["--provenance-from", "subject", "--trained", "metrics.json"]
+    with pytest.raises(SystemExit, match="2"):
+        promote_scene.main(args, root=gallery)
+    error = capsys.readouterr().err
+    assert "Promotion refused; pass --up=x,y,z after inspection to proceed." in error
+    if subject:
+        for axis in promote_scene.scene_up.AXES:
+            assert f"  {axis}: [" in error
+        assert "stage with --up=" in error
+        assert "viewer.html?scene=ground&az=30&el=10&d=1.6" in error
+        assert "cannot inspect an unpromoted candidate" in error
+    assert before == {p.relative_to(gallery): p.read_bytes() for p in gallery.rglob("*") if p.is_file()}
+
+
+def test_explicit_bypasses_estimate_and_records_source(gallery, monkeypatch):
+    candidate = gallery / "explicit.sog"
+    fake_sog(candidate)
+    estimate = Mock(side_effect=AssertionError("must not estimate"))
+    monkeypatch.setattr(promote_scene.scene_up, "cloud_estimate", estimate)
+    monkeypatch.setattr(promote_scene.subprocess, "run", Mock(return_value=Mock(returncode=0)))
+    assert promote_scene.main([*promotion_args(candidate), "--up=1,0,0"], root=gallery) == 0
+    estimate.assert_not_called()
+    inputs = json.loads((gallery / "provenance/ground.json").read_text())["inputs"]
+    assert inputs == {"up_source": "explicit", "up": [1, 0, 0]}
+
+
+@pytest.mark.parametrize(("inliers", "extent", "threshold", "accepted"), [
+    (0.35, [1, 4], 0.35, True), (0.349, [1, 4], 0.35, False),
+    (0.9, [0.99, 4], 0.35, False), (0.4, [4, 4], 0.5, False),
+    (0.3, [4, 4], 0.25, True),
+])
+def test_cloud_acceptance_boundaries(gallery, monkeypatch, inliers, extent, threshold, accepted):
+    candidate = gallery / "boundary.sog"
+    fake_sog(candidate)
+    monkeypatch.setattr(promote_scene.scene_up, "cloud_estimate", lambda path: {
+        "up": [0, 1, 0], "reason": None, "inliers": inliers, "extent": extent})
+    args = [*promotion_args(candidate), "--dry-run", "--up-min-inliers", str(threshold)]
+    if accepted:
+        assert promote_scene.main(args, root=gallery) == 0
+    else:
+        with pytest.raises(SystemExit, match="2"):
+            promote_scene.main(args, root=gallery)
+
+
+@pytest.mark.parametrize("threshold", ["nan", "inf", "-0.1", "1.1"])
+def test_invalid_inlier_threshold(threshold):
+    with pytest.raises(SystemExit, match="2"):
+        promote_scene.main(["--up-min-inliers", threshold])
+
+
+def test_up_only_sidecar_round_trip(gallery, monkeypatch):
+    candidate = gallery / "ground.sog"
+    fake_sog(candidate)
+    monkeypatch.setattr(promote_scene.subprocess, "run", Mock(return_value=Mock(returncode=0)))
+    args = promotion_args(candidate)
+    assert promote_scene.main([*args, "--up=0,1,0"], root=gallery) == 0
+    sidecar = gallery / "provenance/ground.json"
+    original = sidecar.read_bytes()
+    assert promote_scene.main([*args, "--replace", "--up=1,0,0"], root=gallery) == 0
+    assert sidecar.read_bytes() != original
+    assert promote_scene.main(["--revert", "ground"], root=gallery) == 0
+    assert sidecar.read_bytes() == original
+
+
+def test_failed_estimate_does_not_reuse_existing_up(gallery, monkeypatch, capsys):
+    _, candidate, _ = seed_replacement(gallery, monkeypatch)
+    with pytest.raises(SystemExit, match="2"):
+        promote_scene.main([*promotion_args(candidate), "--stem", "same", "--replace"], root=gallery)
+    assert "cloud estimate failed:" in capsys.readouterr().err
+    assert not (gallery / "archive").exists()

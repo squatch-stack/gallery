@@ -69,6 +69,17 @@ here cost a scan or an hour on 2026-09-04; none of it is theory.
 
 ### Gravity and cloud coordinates
 
+Splat promotion now runs the cloud estimate automatically unless `--up=x,y,z`
+is explicit. It accepts an oriented plane with at least `--up-min-inliers`
+(default 0.35) support and a smaller footprint width at least one quarter of
+the larger. Dry runs print the same decision and confidence without writing.
+If the estimate fails these checks, promotion refuses; with
+`--provenance-from`, it lists the four camera-axis alternatives. Stage an
+alternative with explicit `--up` (and `--replace` when already staged), then
+look in the viewer before choosing it. The inspection URL only works after
+staging. Provenance sidecar inputs record `up_source`, `up`, and, for cloud
+decisions, `up_confidence` with inliers, widths, their ratio, and the threshold.
+
 Both gravity estimates are in the catalog/viewer frame **before gravity
 alignment**: file `(x, y, z)` becomes `(x, -y, -z)`, matching the loader in
 `clean_export.py` and the viewer's 180-degree X rotation. The shared PLY/SOG

@@ -176,6 +176,32 @@ def parse_args(argv=None):
     return args
 
 
+def axis_candidates(rotations, min_norm=0):
+    """Camera gravity alternatives without needing a solvable orbit focus."""
+    import numpy as np
+
+    result = {}
+    for name, axis in AXES.items():
+        u = np.array([R.T @ np.array(axis, dtype=float) for R in rotations]).mean(axis=0)
+        length = np.linalg.norm(u)
+        result[name] = None
+        if np.isfinite(u).all() and length > min_norm:
+            u /= length
+            result[name] = [round(float(v), 4) for v in (u[0], -u[1], -u[2])]
+    return result
+
+
+def camera_candidates(subject):
+    import pycolmap
+
+    sparse = pathlib.Path(subject).expanduser() / "sparse"
+    rec = pycolmap.Reconstruction(sparse / "0" if (sparse / "0").is_dir() else sparse)
+    rotations = [im.cam_from_world().rotation.matrix() for im in rec.images.values()]
+    if not rotations:
+        raise ValueError("solve contains no registered cameras")
+    return axis_candidates(rotations, min_norm=1e-12)
+
+
 def camera_estimate(args):
     import numpy as np
     import pycolmap
@@ -218,11 +244,7 @@ def camera_estimate(args):
         centers.append(c)
     focus = np.linalg.solve(A, b)
     orbit = float(np.mean([np.linalg.norm(c - focus) for c in centers]))
-    alt = {n: None for n in ("-y", "+y", "-x", "+x")}
-    for name, axis in AXES.items():
-        u = np.array([R.T @ np.array(axis, dtype=float) for R in Rs]).mean(axis=0)
-        u /= np.linalg.norm(u)
-        alt[name] = [round(float(v), 4) for v in (u[0], -u[1], -u[2])]
+    alt = axis_candidates(Rs)
     viewer = np.array([up[0], -up[1], -up[2]])
     return {"subject": subject.name, "views": len(Rs), "camera_up_axis": axis_name,
                       "spread_deg": round(spread, 1), "up": [round(float(v), 4) for v in viewer],
