@@ -26,11 +26,20 @@ def load_runs(index_path, jobs_dir):
         if not re.fullmatch(r"[a-zA-Z0-9_-]+", job_id):
             raise ValueError("invalid job id")
         job = json.loads((jobs_dir / f"{job_id}.json").read_text())
+        local = job.get("origin") == "local"
         for key in ("max_res", "steps", "images", "seconds_per_1k_steps", "wall_seconds", "splats", "peak_rss_mb"):
             value = job[key]
+            if local and key == "peak_rss_mb" and value is None:
+                continue
             if type(value) not in (int, float) or not math.isfinite(value) or value <= 0:
                 raise ValueError(f"invalid {key}")
-        if job["rc"] != 0 or job["seed"] != index["seed"] or job["max_splats"] != index["cap"]:
+        if local:
+            for key, minimum in (("seed", 0), ("max_splats", 1)):
+                if type(job[key]) is not int or job[key] < minimum:
+                    raise ValueError(f"invalid {key}")
+        if job["rc"] != 0 and not (local and job["rc"] is None):
+            raise ValueError("failed job")
+        if not local and (job["seed"] != index["seed"] or job["max_splats"] != index["cap"]):
             raise ValueError("failed job or inconsistent training settings")
         rows.append((job_id, run, job))
     return index, rows
@@ -38,6 +47,9 @@ def load_runs(index_path, jobs_dir):
 
 def chart(rows):
     """Plot all cannon 30k arms, with distinct markers and explicit units."""
+    if not rows:
+        return ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 460" role="img">'
+                '<title>No measured cannon 30k runs available</title></svg>\n')
     xmax = max(megapixels(j) for _, _, j in rows) * 1.15
     ymax = max(j["seconds_per_1k_steps"] for _, _, j in rows) * 1.2
     parts = [
@@ -185,10 +197,12 @@ def generate(index_path, jobs_dir, image_src):
     full = [
         (i, r, j)
         for i, r, j in rows
-        if r["subject"] == "cannon" and r["arm"] in ARMS and j["steps"] == 30000 and not r.get("probe")
+        if r["subject"] == "cannon" and r["arm"] in ARMS and j["steps"] == 30000
+        and not r.get("probe") and j.get("origin") != "local"
     ]
     sweep = sorted((row for row in full if row[1]["arm"] == "unmasked"), key=lambda row: row[2]["max_res"])
-    baseline = next(j["splats"] for _, _, j in sweep if j["max_res"] == 1920)
+    baseline = next((j["splats"] for _, _, j in sweep if j["max_res"] == 1920), None)
+    baseline_text = f"{baseline:,}" if baseline is not None else "unavailable"
     lines = [
         "# Training results",
         "",
@@ -213,9 +227,11 @@ def generate(index_path, jobs_dir, image_src):
     high = [j for _, _, j in sweep if j["max_res"] >= 2856]
     costs = [j["seconds_per_1k_steps"] / megapixels(j) for j in high]
     flat = len(costs) >= 2 and max(costs) / min(costs) <= 1.05
-    binds = all(j["splats"] >= index["cap"] for _, _, j in sweep)
+    binds = bool(sweep) and all(j["splats"] >= index["cap"] for _, _, j in sweep)
     reading = "Per-megapixel cost is approximately flat from 2856 px upward" if flat else "Per-megapixel cost varies"
     reading += "; the cap binds at every resolution." if binds else "; the cap does not bind at every resolution."
+    if not sweep:
+        reading = "No measured resolution sweep is available."
     lines.extend(["", reading, ""])
     if costs:
         native_mp = 5712 * 4284 / 1_000_000
@@ -260,16 +276,17 @@ def generate(index_path, jobs_dir, image_src):
         cleaned = f"{count:,}" if count is not None else "unavailable"
         size = clean.get("sog_bytes")
         size_text = f"{size:,}" if size is not None else "unavailable"
-        reduction = f"{100 * (1 - count / baseline):.2f}%" if count is not None else "unavailable"
+        reduction = f"{100 * (1 - count / baseline):.2f}%" if count is not None and baseline else "unavailable"
+        raw_reduction = f"{100 * (1 - j['splats'] / baseline):.2f}%" if baseline else "unavailable"
         lines.append(
             f"| {run['arm']} | {job_id} | {j['images']} | {j['wall_seconds']:.1f} | "
             f"{j['splats']:,} | {cleaned} | {clean.get('quantile', 'unavailable')} | {size_text} | "
-            f"{100 * (1 - j['splats'] / baseline):.2f}% | {reduction} |"
+            f"{raw_reduction} | {reduction} |"
         )
     lines.extend(
         [
             "",
-            f"Both reduction columns use the unmasked raw baseline ({baseline:,} splats): "
+            f"Both reduction columns use the unmasked raw baseline ({baseline_text} splats): "
             "100 * (1 - count / baseline). SOG sizes are recorded exports, not estimates; "
             "unavailable means not recorded.",
             "",
@@ -289,12 +306,36 @@ def generate(index_path, jobs_dir, image_src):
         ]
     )
     for job_id, run, j in rows:
-        if run.get("probe") or j["steps"] < 30000:
+        if j.get("origin") != "local" and (run.get("probe") or j["steps"] < 30000):
             lines.append(
                 f"| {job_id} | {run['subject']} | {run['arm']} | {j['steps']:,} | {j['max_res']} | "
                 f"{j['images']} | {j['seconds_per_1k_steps']:.2f} | {j['wall_seconds']:.1f} | "
                 f"{j['splats']:,} | {j['peak_rss_mb']:.1f} |"
             )
+    local_rows = [(i, r, j) for i, r, j in rows if j.get("origin") == "local"]
+    if local_rows:
+        lines.extend([
+            "", "## Local runs", "",
+            "Reconstructed exports; excluded from the measured GPU comparisons and extrapolation.", "",
+            "| Job | Subject | Trainer | Steps | max_res (px) | Seed | Splat cap | Images | "
+            "s / 1k steps | Wall (s) | Splats | Peak RSS (MB) |",
+            "|---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
+        ])
+        for job_id, run, j in local_rows:
+            marker = "[^local-wall]" if j.get("wall_seconds_estimate") else ""
+            rss = "unavailable" if j["peak_rss_mb"] is None else f"{j['peak_rss_mb']:.1f}"
+            lines.append(
+                f"| {job_id}{marker} | {cell(run['subject'])} | {cell(j.get('trainer', 'unavailable'))} | "
+                f"{j['steps']:,} | {j['max_res']} | {j['seed']} | {j['max_splats']:,} | {j['images']} | "
+                f"{j['seconds_per_1k_steps']:.2f} | {j['wall_seconds']:.1f} | {j['splats']:,} | {rss} |"
+            )
+        if any(j.get("wall_seconds_estimate") for _, _, j in local_rows):
+            lines.extend([
+                "", "[^local-wall]: Wall time is an estimate from dataset directory ctime to final PLY mtime; "
+                "it includes dataset build time if the dataset was built into the job dir. "
+                "Filesystem metadata changes can distort this interval. Seconds per 1k steps is also estimated. "
+                "Unknown exit status and peak memory are not inferred from the export.",
+            ])
     lines.extend(["", *isolation_section(index_path.parent / "isolation.json"), *cleaning_section(ROOT)])
     lines.extend(
         [

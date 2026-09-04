@@ -262,3 +262,43 @@ def test_mesh_metrics_freshness(mesh_records, metric):
     assert results.main([*args, "--check"]) == 1
     assert results.main(args) == 0
     assert results.main([*args, "--check"]) == 0
+
+
+@pytest.mark.parametrize("local_only", [False, True])
+def test_local_reconstructed_row(records, tmp_path, local_only):
+    import os
+    from tools import local_run_metrics
+
+    _, index, jobs = records
+    job_dir = tmp_path / "local-job"
+    dataset = job_dir / "dataset"
+    (dataset / "images").mkdir(parents=True)
+    for i in range(3):
+        (dataset / "images" / f"{i}.jpg").write_bytes(b"fixture")
+    ply = job_dir / "oak-30000.ply"
+    ply.write_bytes(b"ply\nformat ascii 1.0\nelement vertex 2\nproperty float x\nend_header\n0\n0\n")
+    end = dataset.stat().st_ctime + 120
+    os.utime(ply, (end, end))
+    local_run_metrics.main([
+        str(job_dir), "--dataset", str(dataset), "--out", str(jobs / "local.json"),
+        "--max-res", "1920", "--seed", "0", "--max-splats", "2000",
+    ])
+    data = json.loads(index.read_text())
+    if local_only:
+        data["runs"] = {}
+    data["runs"]["local"] = {"subject": "oak", "arm": "unmasked"}
+    index.write_text(json.dumps(data))
+    _, rows = results.load_runs(index, jobs)
+    assert any(i == "local" for i, _, _ in rows)
+    page, svg = results.generate(index, jobs, "results/sweep.svg")
+    assert ("| local[^local-wall] | oak | Brush 0.3.0 (Mac, Metal) | 30,000 | 1920 | 0 | 2,000 | 3 | "
+            "4.00 | 120.0 | 2 | unavailable |") in page
+    assert "[^local-wall]: Wall time is an estimate" in page
+    assert "includes dataset build time" in page
+    assert "local" not in svg
+    path = jobs / "local.json"
+    local = json.loads(path.read_text())
+    local["rc"] = 1
+    path.write_text(json.dumps(local))
+    with pytest.raises(ValueError, match="failed job"):
+        results.load_runs(index, jobs)
