@@ -44,7 +44,18 @@ here cost a scan or an hour on 2026-09-04; none of it is theory.
    incremental mapper fragmented a connected 145-view orbit into four pieces;
    global mapping registered all 145 in 37 seconds.
 2. Read the gravity and the crop centre from the solve
-   (`tools/scene_up.py`), not by eye.
+   (`tools/scene_up.py`). If most photographs point up into a canopy, compare
+   the camera estimate with ground in the trained cloud:
+   `python tools/scene_up.py captures/oak --from-cloud exports/oak.ply`.
+   Omit `captures/oak` to run without a solve or pycolmap; SOG v2 is also
+   supported (its image decoder requires Pillow). The estimator itself uses
+   only NumPy and runs on CPU. `--alpha-min` defaults to 0.2.
+   With a solve, the existing top-level `up` remains the camera estimate;
+   `from_cloud.up` is the ground estimate. Without a solve, top-level `up`
+   also contains the ground estimate. A rejected estimate is `null` with a
+   reason. Inspect `from_cloud.inliers` (fraction of finite splats above the
+   opacity floor), `extent` (two robust in-plane widths), and `agreement_deg`
+   (angle to each camera candidate; null without cameras) before using it.
 3. Make subject masks (`tools/make_subject_masks.py --prompt "<subject>"`).
    Class-based masks fail on subjects that share a colour with their
    surroundings (an olive cannon on grass reads as "plant"); name the subject
@@ -55,6 +66,30 @@ here cost a scan or an hour on 2026-09-04; none of it is theory.
 5. Clean and export (`tools/clean_export.py`), then write the provenance
    sheet (`tools/provenance.py`). The sheet is generated from the files;
    do not type numbers into it.
+
+### Gravity and cloud coordinates
+
+Both gravity estimates are in the catalog/viewer frame **before gravity
+alignment**: file `(x, y, z)` becomes `(x, -y, -z)`, matching the loader in
+`clean_export.py` and the viewer's 180-degree X rotation. The shared PLY/SOG
+decoders used by `scene_up.py` return file coordinates, so the tool applies
+that conversion once. Do not flip its reported vector again. The viewer
+then rotates catalog `up` onto +Y.
+
+Brush can rescale cloud coordinates relative to the solve. Plane widths
+are therefore in cloud units, not guaranteed metres or solve units; camera
+focus and orbit radius remain in solve units. Translation and a positive
+uniform scale do not change gravity direction. A separately rotated export
+must share the solve's orientation for camera agreement to be meaningful.
+
+The cloud method assumes the dominant broad plane is ground with the subject
+on one side. It uses a fixed sample and RANSAC seed, prefers dense planar
+neighbourhoods with low density gradients, and rejects weak, narrow or thick
+support. A dominant wall, ceiling or table can still be mistaken for ground;
+the confidence values measure plane support, not semantic certainty. It does
+not independently classify trunks. A weighted median projected onto the
+normal determines its sign; if that median is exactly on the plane, off-plane
+mass resolves the sign, or the tool reports that orientation is unavailable.
 
 ## What the numbers looked like on the first day
 
