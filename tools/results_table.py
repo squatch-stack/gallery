@@ -13,6 +13,24 @@ import tempfile
 ROOT = Path(__file__).resolve().parents[1]
 STAMP = re.compile(r"(?m)^Generated at: .* UTC$")
 ARMS = ("unmasked", "masks-folder", "alpha-matched")
+SUPERVISION_ARMS = (*ARMS, "alpha-matched+ground")
+
+
+def arm_order(arm):
+    return (SUPERVISION_ARMS.index(arm) if arm in SUPERVISION_ARMS else len(SUPERVISION_ARMS), arm)
+
+
+def heading(title, subject, legacy):
+    return f"## {title}" if legacy else f"## {cell(subject.capitalize())} — {title}"
+
+
+def job_label(job_id, job):
+    return job_id + ("[^local-wall]" if job.get("wall_seconds_estimate") else "")
+
+
+def memory(job):
+    return "unavailable" if job["peak_rss_mb"] is None else f"{job['peak_rss_mb']:.1f}"
+
 
 
 def megapixels(job):
@@ -104,18 +122,28 @@ def cell(value):
     return str(value).replace("&", "&amp;").replace("<", "&lt;").replace("|", "&#124;").replace("\n", " ")
 
 
-def isolation_section(path):
+def isolation_section(path, legacy=None):
     data = json.loads(path.read_text())
+    subjects = data.get("subjects", {data.get("subject", "cannon"): data})
+    legacy = legacy is not False and set(subjects) == {"cannon"}
+    lines = []
+    for subject, entry in sorted(subjects.items()):
+        lines.extend(isolation_table(subject, entry, legacy))
+    return lines
+
+
+def isolation_table(subject, data, legacy):
     lines = [
-        "## Isolation",
+        heading("Isolation", subject, legacy),
         "",
-        "Cannon training arms; alpha-weighted coordinate medians define the centre and the weighted median "
+        f"{cell(subject.capitalize())} training arms; alpha-weighted coordinate medians define the centre "
+        "and the weighted median "
         "L-infinity distance defines MAD; fractions count finite splats equally, with inclusive radius bounds.",
         "",
         "| Arm | Within 3x MAD | Longest axis > 0.25 world units | Longest axis > 1.0 world units |",
         "|---|---:|---:|---:|",
     ]
-    for arm in ARMS:
+    for arm in sorted(data["arms"], key=arm_order):
         stats = data["arms"][arm]
         values = (
             [stats["within_mad"]["3"], stats["long_axis_fraction"]["0.25"], stats["long_axis_fraction"]["1.0"]]
@@ -123,7 +151,7 @@ def isolation_section(path):
             else [None] * 3
         )
         formatted = ["unavailable" if v is None else f"{100 * v:.2f}%" for v in values]
-        lines.append(f"| {arm} | " + " | ".join(formatted) + " |")
+        lines.append(f"| {cell(arm)} | " + " | ".join(formatted) + " |")
     lines.extend(
         [
             "",
@@ -192,48 +220,40 @@ def cleaning_section(root):
     return lines
 
 
-def generate(index_path, jobs_dir, image_src):
-    index, rows = load_runs(index_path, jobs_dir)
-    full = [
-        (i, r, j)
-        for i, r, j in rows
-        if r["subject"] == "cannon" and r["arm"] in ARMS and j["steps"] == 30000
-        and not r.get("probe") and j.get("origin") != "local"
-    ]
-    sweep = sorted((row for row in full if row[1]["arm"] == "unmasked"), key=lambda row: row[2]["max_res"])
-    baseline = next((j["splats"] for _, _, j in sweep if j["max_res"] == 1920), None)
-    baseline_text = f"{baseline:,}" if baseline is not None else "unavailable"
+def resolution_section(subject, sweep, legacy):
+    arms = {r["arm"] for _, r, _ in sweep}
     lines = [
-        "# Training results",
+        heading("Resolution sweep", subject, legacy),
         "",
-        f"{index['trainer']}; seed {index['seed']}; splat cap {index['cap']:,}.",
-        "",
-        "Frame pixels = max_res * (max_res * 3 / 4), assuming 4:3 frames; megapixels = pixels / 1,000,000.",
-        "",
-        "## Resolution sweep",
-        "",
-        "Cannon, unmasked, 30,000 steps. All table values are measured or calculated from records.",
+        f"{cell(subject.capitalize())}, {', '.join(sorted(arms, key=arm_order))}, 30,000 steps. "
+        "All table values are measured or calculated from records.",
         "",
         "| Job | max_res (px) | Images | Megapixels | s / 1k steps | s / 1k / MP | Wall (s) | Splats | Peak RSS (MB) |",
         "|---|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
-    for job_id, _, j in sweep:
+    if len(arms) > 1:
+        lines[-2] = lines[-2].replace("| Job |", "| Arm | Job |")
+        lines[-1] = "|---" + lines[-1]
+    for job_id, run, j in sweep:
         mp = megapixels(j)
         lines.append(
-            f"| {job_id} | {j['max_res']} | {j['images']} | {mp:.4f} | "
+            f"| {job_label(job_id, j)} | {j['max_res']} | {j['images']} | {mp:.4f} | "
             f"{j['seconds_per_1k_steps']:.2f} | {j['seconds_per_1k_steps'] / mp:.2f} | "
-            f"{j['wall_seconds']:.1f} | {j['splats']:,} | {j['peak_rss_mb']:.1f} |"
+            f"{j['wall_seconds']:.1f} | {j['splats']:,} | {memory(j)} |"
         )
-    high = [j for _, _, j in sweep if j["max_res"] >= 2856]
+        if len(arms) > 1:
+            lines[-1] = lines[-1].replace("| ", f"| {cell(run['arm'])} | ", 1)
+    high = [j for _, _, j in sweep if j["max_res"] >= 2856 and j.get("origin") != "local"]
     costs = [j["seconds_per_1k_steps"] / megapixels(j) for j in high]
     flat = len(costs) >= 2 and max(costs) / min(costs) <= 1.05
-    binds = bool(sweep) and all(j["splats"] >= index["cap"] for _, _, j in sweep)
+    binds = bool(sweep) and all(j["splats"] >= j["max_splats"] for _, _, j in sweep)
     reading = "Per-megapixel cost is approximately flat from 2856 px upward" if flat else "Per-megapixel cost varies"
     reading += "; the cap binds at every resolution." if binds else "; the cap does not bind at every resolution."
-    if not sweep:
-        reading = "No measured resolution sweep is available."
+    if not legacy and (len(arms) > 1 or any(j.get("origin") == "local" for _, _, j in sweep)):
+        reading = ("Rows may differ in supervision and training settings; estimated local timing is marked. "
+                   "These rows do not isolate the effect of resolution.")
     lines.extend(["", reading, ""])
-    if costs:
+    if costs and subject == "cannon" and arms == {"unmasked"}:
         native_mp = 5712 * 4284 / 1_000_000
         rate = sum(costs) / len(costs)
         lines.extend(
@@ -247,30 +267,35 @@ def generate(index_path, jobs_dir, image_src):
                 "",
             ]
         )
-    lines.extend(
-        [
-            f'<img src="{image_src}" alt="Measured cannon 30k seconds per 1k steps against megapixels, '
-            'labelled by resolution and arm">',
-            "",
-            "## Masking A/B",
-            "",
-            "Cannon, 1920 px, 30,000 steps.",
-            "",
-            "Unmasked supervises the entire image, including the background.",
-            "",
-            'Masks-folder zeroes loss outside the subject ("don\'t care"), leaving stray splats there unpunished.',
-            "",
-            'Alpha-matched uses the mask as the RGBA alpha target ("render nothing here"), supervising '
-            "transparency outside the subject.",
-            "",
-            "| Arm | Job | Images | Wall (s) | Raw splats | Cleaned splats | Quantile | SOG (bytes) | "
-            "Raw reduction | Cleaned reduction |",
-            "|---|---|---:|---:|---:|---:|---:|---:|---:|---:|",
-        ]
-    )
-    for job_id, run, j in sorted(full, key=lambda row: (ARMS.index(row[1]["arm"]), row[0])):
-        if j["max_res"] != 1920:
-            continue
+    return lines
+
+
+def masking_section(subject, resolution, rows, legacy):
+    baseline = next((j["splats"] for _, r, j in rows if r["arm"] == "unmasked"), None)
+    baseline_text = f"{baseline:,}" if baseline is not None else "unavailable"
+    lines = [
+        heading("Masking A/B" if legacy else "Masking / supervision", subject, legacy),
+        "",
+        f"{cell(subject.capitalize())}, {resolution} px, 30,000 steps.",
+        "",
+        "| Arm | Job | Images | Wall (s) | Raw splats | Cleaned splats | Quantile | SOG (bytes) | "
+        "Raw reduction | Cleaned reduction |",
+        "|---|---|---:|---:|---:|---:|---:|---:|---:|---:|",
+    ]
+    descriptions = {
+        "unmasked": "Unmasked supervises the entire image, including the background.",
+        "masks-folder": 'Masks-folder zeroes loss outside the subject ("don\'t care"), '
+                        "leaving stray splats there unpunished.",
+        "alpha-matched": 'Alpha-matched uses the mask as the RGBA alpha target ("render nothing here"), '
+                         "supervising transparency outside the subject.",
+        "alpha-matched+ground": "Alpha-matched+ground uses the subject and included ground as the RGBA alpha "
+                                "target, supervising transparency outside their combined mask.",
+    }
+    prose = []
+    for arm in sorted({r["arm"] for _, r, _ in rows}, key=arm_order):
+        prose.extend([descriptions[arm], ""])
+    lines[4:4] = prose
+    for job_id, run, j in sorted(rows, key=lambda row: (arm_order(row[1]["arm"]), row[0])):
         clean = run.get("cleaned", {})
         count = clean.get("splats")
         cleaned = f"{count:,}" if count is not None else "unavailable"
@@ -279,7 +304,7 @@ def generate(index_path, jobs_dir, image_src):
         reduction = f"{100 * (1 - count / baseline):.2f}%" if count is not None and baseline else "unavailable"
         raw_reduction = f"{100 * (1 - j['splats'] / baseline):.2f}%" if baseline else "unavailable"
         lines.append(
-            f"| {run['arm']} | {job_id} | {j['images']} | {j['wall_seconds']:.1f} | "
+            f"| {run['arm']} | {job_label(job_id, j)} | {j['images']} | {j['wall_seconds']:.1f} | "
             f"{j['splats']:,} | {cleaned} | {clean.get('quantile', 'unavailable')} | {size_text} | "
             f"{raw_reduction} | {reduction} |"
         )
@@ -290,33 +315,90 @@ def generate(index_path, jobs_dir, image_src):
             "100 * (1 - count / baseline). SOG sizes are recorded exports, not estimates; "
             "unavailable means not recorded.",
             "",
-            "Image counts differ for the alpha arm; cleaning quantiles also differ, so cleaned "
-            "counts are not a controlled "
-            "comparison of supervision alone. Smaller raw scenes plus cleaning and SOG packing "
-            "yield smaller deliveries; "
-            "these records do not establish visual quality or a compression ratio by themselves.",
-            "",
-            "## Probes",
-            "",
-            "Short runs only; excluded from the 30k comparisons and chart.",
-            "",
-            "| Job | Subject | Arm | Steps | max_res (px) | Images | s / 1k steps | Wall (s) | "
-            "Splats | Peak RSS (MB) |",
-            "|---|---|---|---:|---:|---:|---:|---:|---:|---:|",
         ]
     )
+    if legacy or (len({j["images"] for _, _, j in rows}) > 1 and len(
+        {r.get("cleaned", {}).get("quantile") for _, r, _ in rows}
+    ) > 1 and "alpha-matched" in {r["arm"] for _, r, _ in rows}):
+        lines.extend([
+            "Image counts differ for the alpha arm; cleaning quantiles also differ, so cleaned "
+            "counts are not a controlled comparison of supervision alone. Smaller raw scenes plus cleaning "
+            "and SOG packing yield smaller deliveries; these records do not establish visual quality or a "
+            "compression ratio by themselves.",
+            "",
+        ])
+    else:
+        lines.extend([
+            "These records do not establish visual quality or a controlled comparison of supervision alone; "
+            "training settings, image counts and cleaning may differ.",
+            "",
+        ])
+    return lines
+
+
+def probes_section(subject, rows, legacy):
+    lines = [
+        heading("Probes", subject, legacy),
+        "",
+        "Short runs only; excluded from the 30k comparisons and chart.",
+        "",
+        "| Job | Subject | Arm | Steps | max_res (px) | Images | s / 1k steps | Wall (s) | "
+        "Splats | Peak RSS (MB) |",
+        "|---|---|---|---:|---:|---:|---:|---:|---:|---:|",
+    ]
     for job_id, run, j in rows:
-        if j.get("origin") != "local" and (run.get("probe") or j["steps"] < 30000):
+        if run.get("probe") or j["steps"] < 30000:
             lines.append(
-                f"| {job_id} | {run['subject']} | {run['arm']} | {j['steps']:,} | {j['max_res']} | "
+                f"| {job_label(job_id, j)} | {run['subject']} | {run['arm']} | {j['steps']:,} | {j['max_res']} | "
                 f"{j['images']} | {j['seconds_per_1k_steps']:.2f} | {j['wall_seconds']:.1f} | "
-                f"{j['splats']:,} | {j['peak_rss_mb']:.1f} |"
+                f"{j['splats']:,} | {memory(j)} |"
             )
+    return lines
+
+
+def generate(index_path, jobs_dir, image_src):
+    index, rows = load_runs(index_path, jobs_dir)
+    subjects = sorted({r["subject"] for _, r, _ in rows})
+    legacy = subjects == ["cannon"]
+    chart_rows = [(i, r, j) for i, r, j in rows
+                  if r["subject"] == "cannon" and r["arm"] in ARMS and j["steps"] == 30000
+                  and not r.get("probe") and j.get("origin") != "local"]
+    lines = [
+        "# Training results", "",
+        f"{index['trainer']}; seed {index['seed']}; splat cap {index['cap']:,}.", "",
+        "Frame pixels = max_res * (max_res * 3 / 4), assuming 4:3 frames; megapixels = pixels / 1,000,000.", "",
+    ]
+    for subject in subjects:
+        if lines[-1] != "":
+            lines.append("")
+        group = [(i, r, j) for i, r, j in rows if r["subject"] == subject]
+        full = [(i, r, j) for i, r, j in group
+                if j["steps"] == 30000 and not r.get("probe") and r["arm"] in SUPERVISION_ARMS]
+        if len({j["max_res"] for _, _, j in full}) >= 2:
+            # Keep the historical unmasked sweep when it covers all resolutions.
+            unmasked = [row for row in full if row[1]["arm"] == "unmasked"]
+            sweep = unmasked if {j["max_res"] for _, _, j in unmasked} == {
+                j["max_res"] for _, _, j in full
+            } else full
+            lines.extend(resolution_section(subject, sorted(sweep, key=lambda row: (row[2]["max_res"], row[0])),
+                                            legacy))
+            if subject == "cannon" and chart_rows:
+                lines.extend([
+                    f'<img src="{image_src}" alt="Measured cannon 30k seconds per 1k steps against megapixels, '
+                    'labelled by resolution and arm">', "",
+                ])
+        for resolution in sorted({j["max_res"] for _, _, j in full}):
+            arms = [row for row in full if row[2]["max_res"] == resolution]
+            if len({r["arm"] for _, r, _ in arms}) >= 2:
+                lines.extend(masking_section(subject, resolution, arms, legacy))
+        if any(r.get("probe") or j["steps"] < 30000 for _, r, j in group):
+            lines.extend(probes_section(subject, group, legacy))
     local_rows = [(i, r, j) for i, r, j in rows if j.get("origin") == "local"]
     if local_rows:
         lines.extend([
             "", "## Local runs", "",
-            "Reconstructed exports; excluded from the measured GPU comparisons and extrapolation.", "",
+            "Reconstructed exports; local rows retain their own training settings. "
+            "Local timing is excluded from the chart and extrapolation.", "",
             "| Job | Subject | Trainer | Steps | max_res (px) | Seed | Splat cap | Images | "
             "s / 1k steps | Wall (s) | Splats | Peak RSS (MB) |",
             "|---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
@@ -336,7 +418,7 @@ def generate(index_path, jobs_dir, image_src):
                 "Filesystem metadata changes can distort this interval. Seconds per 1k steps is also estimated. "
                 "Unknown exit status and peak memory are not inferred from the export.",
             ])
-    lines.extend(["", *isolation_section(index_path.parent / "isolation.json"), *cleaning_section(ROOT)])
+    lines.extend(["", *isolation_section(index_path.parent / "isolation.json", legacy), *cleaning_section(ROOT)])
     lines.extend(
         [
             "",
@@ -349,7 +431,7 @@ def generate(index_path, jobs_dir, image_src):
             "",
         ]
     )
-    return "\n".join(lines), chart(full)
+    return "\n".join(lines), chart(chart_rows)
 
 
 def main(argv=None):

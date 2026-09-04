@@ -302,3 +302,161 @@ def test_local_reconstructed_row(records, tmp_path, local_only):
     path.write_text(json.dumps(local))
     with pytest.raises(ValueError, match="failed job"):
         results.load_runs(index, jobs)
+
+
+@pytest.fixture
+def two_subjects(records):
+    root, index, jobs = records
+    data = json.loads(index.read_text())
+    base = json.loads((jobs / "alpha.json").read_text())
+    for job_id, arm, local in [
+        ("oak-alpha", "alpha-matched", False),
+        ("oak-ground", "alpha-matched+ground", True),
+    ]:
+        data["runs"][job_id] = {
+            "subject": "oak", "arm": arm, "steps_label": "30k",
+            "cleaned": {"splats": 80, "quantile": 0.8, "sog_bytes": 900},
+        }
+        job = dict(base, splats=160, max_res=2560)
+        if local:
+            job.update(origin="local", wall_seconds_estimate=True, rc=None, peak_rss_mb=None,
+                       seed=0, max_splats=2000, trainer="Brush 0.3.0 (Mac, Metal)")
+        (jobs / f"{job_id}.json").write_text(json.dumps(job))
+    index.write_text(json.dumps(data))
+    path = index.parent / "isolation.json"
+    cannon = json.loads(path.read_text())
+    path.write_text(json.dumps({"schema_version": 2, "subjects": {
+        "cannon": cannon,
+        "oak": {"arms": {
+            "alpha-matched": {"within_mad": {"3": 0.8}, "long_axis_fraction": {"0.25": 0.1, "1.0": 0.01}},
+            "alpha-matched+ground": None,
+        }},
+    }}))
+    return root, index, jobs
+
+
+def test_subject_groups_and_local_masking(two_subjects):
+    _, index, jobs = two_subjects
+    page, svg = results.generate(index, jobs, "results/sweep.svg")
+    assert "## Cannon — Resolution sweep" in page
+    assert "## Cannon — Masking / supervision" in page
+    assert "## Cannon — Probes" in page
+    assert "## Oak — Resolution sweep" not in page
+    assert "## Oak — Probes" not in page
+    oak = page.split("## Oak — Masking / supervision")[1].split("## Local runs")[0]
+    assert "Oak, 2560 px, 30,000 steps." in oak
+    assert "| alpha-matched | oak-alpha | 56 | 570.0 | 160 | 80 | 0.8 | 900 | unavailable | unavailable |" in oak
+    assert "| alpha-matched+ground | oak-ground[^local-wall] | 56 | 570.0 |" in oak
+    assert "Alpha-matched uses the mask" in oak
+    assert "Alpha-matched+ground uses the subject and included ground" in oak
+    assert "Unmasked supervises" not in oak
+    assert "Masks-folder zeroes" not in oak
+    assert "Image counts differ" not in oak
+    isolation = page.split("## Oak — Isolation")[1].split("## Cleaning")[0]
+    assert "| alpha-matched | 80.00% | 10.00% | 1.00% |" in isolation
+    assert "| alpha-matched+ground | unavailable | unavailable | unavailable |" in isolation
+    assert "| unmasked |" not in isolation
+    assert "## Cannon — Isolation" in page
+    assert "[^local-wall]: Wall time is an estimate" in page
+    assert "oak" not in svg
+    assert "2560" not in svg
+
+
+def test_subject_check_idempotence(two_subjects):
+    root, index, jobs = two_subjects
+    args = ["--out", str(root / "docs/results.md")]
+    assert results.main(args) == 0
+    page = (root / "docs/results.md").read_bytes()
+    svg = (index.parent / "sweep.svg").read_bytes()
+    assert results.main([*args, "--check"]) == 0
+    assert results.main(args) == 0
+    assert (root / "docs/results.md").read_bytes() == page
+    assert (index.parent / "sweep.svg").read_bytes() == svg
+    path = jobs / "oak-ground.json"
+    job = json.loads(path.read_text())
+    job["wall_seconds"] += 1
+    path.write_text(json.dumps(job))
+    assert results.main([*args, "--check"]) == 1
+    assert results.main(args) == 0
+    assert results.main([*args, "--check"]) == 0
+
+
+def test_subject_resolution_and_probe_boundaries(two_subjects):
+    _, index, jobs = two_subjects
+    data = json.loads(index.read_text())
+    ground = json.loads((jobs / "oak-ground.json").read_text())
+    # Same-arm repeats cannot create a masking comparison at another resolution.
+    for name, resolution, steps, probe in [
+        ("oak-large", 3840, 30000, False),
+        ("oak-repeat", 3840, 30000, False),
+        ("oak-probe", 5120, 3000, False),
+        ("oak-flagged", 6000, 30000, True),
+        ("oak-long", 7000, 40000, False),
+    ]:
+        data["runs"][name] = {"subject": "oak", "arm": "alpha-matched+ground", "probe": probe}
+        (jobs / f"{name}.json").write_text(json.dumps(dict(ground, max_res=resolution, steps=steps)))
+    index.write_text(json.dumps(data))
+    page, _ = results.generate(index, jobs, "results/sweep.svg")
+    sweep = page.split("## Oak — Resolution sweep")[1].split("## Oak — Masking / supervision")[0]
+    assert "| Arm | Job |" in sweep
+    assert "| alpha-matched+ground | oak-large[^local-wall] | 3840 |" in sweep
+    assert "| oak-probe" not in sweep
+    assert "| oak-flagged" not in sweep
+    assert "| oak-long" not in sweep
+    assert "extrapolation" not in sweep
+    assert page.count("## Oak — Masking / supervision") == 1
+    probes = page.split("## Oak — Probes")[1].split("## Local runs")[0]
+    assert "| oak-probe[^local-wall] | oak | alpha-matched+ground | 3,000 |" in probes
+    assert "| oak-flagged[^local-wall] | oak | alpha-matched+ground | 30,000 |" in probes
+
+
+def test_isolation_legacy_and_subject_map_equivalence(records):
+    _, index, _ = records
+    path = index.parent / "isolation.json"
+    original = results.isolation_section(path)
+    data = json.loads(path.read_text())
+    path.write_text(json.dumps({"schema_version": 2, "subjects": {"cannon": data}}))
+    assert results.isolation_section(path) == original
+
+
+def test_checked_in_results_unchanged():
+    assert results.main(["--check"]) == 0
+
+
+def test_masking_baselines_stay_with_subject_and_resolution(two_subjects):
+    _, index, jobs = two_subjects
+    data = json.loads(index.read_text())
+    base = json.loads((jobs / "base.json").read_text())
+    for name, arm, resolution, count in [
+        ("oak-base", "unmasked", 2560, 800),
+        ("oak-base-large", "unmasked", 3840, 400),
+        ("oak-alpha-large", "alpha-matched", 3840, 100),
+    ]:
+        data["runs"][name] = {"subject": "oak", "arm": arm}
+        (jobs / f"{name}.json").write_text(json.dumps(dict(base, max_res=resolution, splats=count)))
+    index.write_text(json.dumps(data))
+    page, _ = results.generate(index, jobs, "results/sweep.svg")
+    small, large = page.split("## Oak — Masking / supervision")[1:]
+    assert "(800 splats)" in small
+    assert "| 80.00% | 90.00% |" in small
+    assert "(400 splats)" in large
+    assert "| 75.00% | unavailable |" in large
+
+
+def test_oak_only_and_independent_isolation_subjects(two_subjects):
+    _, index, jobs = two_subjects
+    data = json.loads(index.read_text())
+    data["runs"] = {i: r for i, r in data["runs"].items() if r["subject"] == "oak"}
+    index.write_text(json.dumps(data))
+    page, _ = results.generate(index, jobs, "results/sweep.svg")
+    assert "## Oak — Masking / supervision" in page
+    assert "## Resolution sweep" not in page
+    assert "## Probes" not in page
+    assert "## Cannon — Isolation" in page
+    assert "## Oak — Isolation" in page
+    # Isolation headings must remain distinct even when training has only cannon.
+    data["runs"] = {"base": {"subject": "cannon", "arm": "unmasked"}}
+    index.write_text(json.dumps(data))
+    page, _ = results.generate(index, jobs, "results/sweep.svg")
+    assert "## Cannon — Isolation" in page
+    assert "## Oak — Isolation" in page
