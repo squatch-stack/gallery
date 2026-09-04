@@ -52,6 +52,41 @@ def records(tmp_path, monkeypatch):
         (jobs / f"{job_id}.json").write_text(json.dumps(job))
     index = directory / "runs.json"
     index.write_text(json.dumps({"trainer": "Brush 0.3.0", "seed": 42, "cap": 1000, "runs": runs}))
+    (directory / "isolation.json").write_text(json.dumps({"arms": dict.fromkeys(results.ARMS)}))
+    (tmp_path / "scenes.json").write_text(
+        json.dumps(
+            [
+                {"stem": "fixture", "subject": "place"},
+                {"stem": "missing"},
+            ]
+        )
+    )
+    (tmp_path / "checks.json").write_text(
+        json.dumps(
+            {
+                "results": [
+                    {
+                        "scene": "fixture",
+                        "count": 480000,
+                        "size_bytes": 1234,
+                        "passed": False,
+                        "platform": "web-mobile",
+                    },
+                ]
+            }
+        )
+    )
+    (tmp_path / "provenance").mkdir()
+    (tmp_path / "provenance/fixture.json").write_text(
+        json.dumps(
+            {
+                "inputs": {
+                    "cleaning": ["--target-count 480000", "--crop-shape cylinder"],
+                    "cleaning_source": "candidate",
+                }
+            }
+        )
+    )
     return tmp_path, index, jobs
 
 
@@ -92,7 +127,7 @@ def test_check_and_repeatability(records):
     assert results.main(args) == 0
     original, chart = output.read_text(), svg.read_text()
     assert results.main(args) == 0
-    assert results.STAMP.sub("", output.read_text()) == results.STAMP.sub("", original)
+    assert output.read_text() == original
     assert svg.read_text() == chart
     output.write_text(results.STAMP.sub("Generated at: 2000-01-01 00:00:00 UTC", original))
     assert results.main([*args, "--check"]) == 0
@@ -118,3 +153,53 @@ def test_custom_output_links_to_shared_chart(records):
     output = root / "preview/page.md"
     assert results.main(["--out", str(output)]) == 0
     assert 'src="../docs/results/sweep.svg"' in output.read_text()
+
+
+def test_new_sections(records):
+    root, index, jobs = records
+    isolation = index.parent / "isolation.json"
+    data = json.loads(isolation.read_text())
+    data["arms"]["alpha-matched"] = {
+        "within_mad": {"3": 0.75},
+        "long_axis_fraction": {"0.25": 0.25, "1.0": 0.125},
+    }
+    isolation.write_text(json.dumps(data))
+    page, _ = results.generate(index, jobs, "results/sweep.svg")
+    assert "| alpha-matched | 75.00% | 25.00% | 12.50% |" in page
+    assert "| unmasked | unavailable | unavailable | unavailable |" in page
+    assert "| fixture | place | 480,000 | 1,234 | FAIL (web-mobile) | " in page
+    assert "--target-count 480000; --crop-shape cylinder | candidate |" in page
+    assert "| missing | object | unavailable | unavailable | unavailable (unavailable) | unavailable |" in page
+    assert "L-infinity" in page
+    assert str(root) not in page
+
+
+@pytest.mark.parametrize("source", ["isolation", "checks", "catalog", "sidecar"])
+def test_new_sources_freshness(records, source):
+    root, index, _ = records
+    args = ["--out", str(root / "docs/results.md")]
+    assert results.main(args) == 0
+    assert results.main([*args, "--check"]) == 0
+    paths = {
+        "isolation": index.parent / "isolation.json",
+        "checks": root / "checks.json",
+        "catalog": root / "scenes.json",
+        "sidecar": root / "provenance/fixture.json",
+    }
+    path = paths[source]
+    data = json.loads(path.read_text())
+    if source == "isolation":
+        data["arms"]["unmasked"] = {
+            "within_mad": {"3": 0.5},
+            "long_axis_fraction": {"0.25": 0, "1.0": 0},
+        }
+    elif source == "checks":
+        data["results"][0]["passed"] = True
+    elif source == "catalog":
+        data[0]["subject"] = "object"
+    else:
+        data["inputs"]["cleaning"].append("--alpha-min 0.05")
+    path.write_text(json.dumps(data))
+    assert results.main([*args, "--check"]) == 1
+    assert results.main(args) == 0
+    assert results.main([*args, "--check"]) == 0

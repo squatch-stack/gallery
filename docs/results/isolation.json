@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "subject": "cannon",
+  "distance": "L-infinity (maximum absolute coordinate offset)",
+  "population": "finite splats, as in check_deliverable.cleanliness; fractions are unweighted counts",
+  "center": "coordinate-wise alpha-weighted median",
+  "mad": "alpha-weighted median distance from center",
+  "expected_clouds": {
+    "unmasked": "docs/results/clouds/unmasked.ply",
+    "masks-folder": "docs/results/clouds/masks-folder.ply",
+    "alpha-matched": "docs/results/clouds/alpha-matched.ply"
+  },
+  "arms": {
+    "unmasked": {
+      "splats": 1500000,
+      "finite_splats": 1500000,
+      "nonfinite_count": 0,
+      "center": [
+        1.254089117050171,
+        0.4912147521972656,
+        0.8870099782943726
+      ],
+      "mad": 2.234136939048767,
+      "within_mad": {
+        "1": 0.46925,
+        "3": 0.6077026666666666,
+        "5": 0.7200926666666667,
+        "10": 0.93953
+      },
+      "long_axis_fraction": {
+        "0.25": 0.116304,
+        "1.0": 0.010531333333333334
+      },
+      "long_axis_percentiles": {
+        "p50": 0.03670550101294659,
+        "p90": 0.28031084547805496,
+        "p99": 1.023530232367614
+      }
+    },
+    "masks-folder": {
+      "splats": 358785,
+      "finite_splats": 358785,
+      "nonfinite_count": 0,
+      "center": [
+        1.1244317293167114,
+        0.3996899425983429,
+        0.7396100163459778
+      ],
+      "mad": 1.672907829284668,
+      "within_mad": {
+        "1": 0.504990453893,
+        "3": 0.7258915506501108,
+        "5": 0.7672645177473975,
+        "10": 0.899714313586131
+      },
+      "long_axis_fraction": {
+        "0.25": 0.08502027676742338,
+        "1.0": 0.009749571470379196
+      },
+      "long_axis_percentiles": {
+        "p50": 0.038537856138583806,
+        "p90": 0.21869015307430734,
+        "p99": 0.9844037135528797
+      }
+    },
+    "alpha-matched": {
+      "splats": 177579,
+      "finite_splats": 177579,
+      "nonfinite_count": 0,
+      "center": [
+        0.8461117744445801,
+        0.4292141795158386,
+        0.813271164894104
+      ],
+      "mad": 1.3750794529914856,
+      "within_mad": {
+        "1": 0.5085736489111888,
+        "3": 0.9771932492017638,
+        "5": 0.9771932492017638,
+        "10": 0.9893681122204765
+      },
+      "long_axis_fraction": {
+        "0.25": 0.005890336132087691,
+        "1.0": 0.00018583278428192522
+      },
+      "long_axis_percentiles": {
+        "p50": 0.022950216917494104,
+        "p90": 0.07711958541759584,
+        "p99": 0.20492493756626354
+      }
+    }
+  }
+}
