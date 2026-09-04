@@ -76,9 +76,13 @@ def test_solve_legacy_positional_flags():
 @pytest.mark.parametrize("axis", [None, "-y", "+y", "-x", "+x"])
 def test_scene_up_legacy_positionals(sparse, axis):
     argv = ["~/Documents/subject", *sparse, *([] if axis is None else ["--axis", axis])]
-    assert vars(load_tool("scene_up").parse_args(argv)) == {
+    parsed = vars(load_tool("scene_up").parse_args(argv))
+    # The legacy call form must parse to the same values; newer options
+    # (--from-cloud and its knobs) may exist but must stay at their defaults.
+    assert {k: parsed[k] for k in ("subject", "sparse", "axis")} == {
         "subject": "~/Documents/subject", "sparse": sparse[0] if sparse else "sparse", "axis": axis or "-y",
     }
+    assert parsed.get("from_cloud") is None
 
 
 def test_scan_help_does_not_scan(monkeypatch, capsys):
