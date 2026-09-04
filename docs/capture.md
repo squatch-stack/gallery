@@ -60,6 +60,16 @@ here cost a scan or an hour on 2026-09-04; none of it is theory.
    Class-based masks fail on subjects that share a colour with their
    surroundings (an olive cannon on grass reads as "plant"); name the subject
    instead. Check the preview.
+   For a tree with a lawn patch, combine tree-only masks with ground masks:
+   `python tools/combine_masks.py captures/oak --subject-masks masks --ground-masks masks-ground
+   --out masks-patch --radius 0.25 --feather 8`.
+   The radius is a fraction of the tree mask's bounding-box height, centred
+   at its bottom edge midpoint on the raw photo grid. The tree stays opaque;
+   only ground inside the disc is added, with an optional inward alpha ramp.
+   Compare the printed mean coverage and inspect the masks before training;
+   0.25 is a starting choice, not a measured optimum. The payload tool reads
+   `masks/`, so use `masks-patch` as `masks/` in a separate staging copy of the
+   subject (with its images and solve), preserving the tree-only originals.
 4. Train with the mask as an **alpha channel** on the images, not as a
    `masks/` folder: the folder means "ignore these pixels", which lets stray
    splats grow unpunished; alpha means "render nothing here".

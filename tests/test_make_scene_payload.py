@@ -1,6 +1,7 @@
 """Exercise payload construction with a tiny, pycolmap-free reconstruction double."""
 
 import importlib.util
+import io
 import json
 from pathlib import Path
 import sys
@@ -10,7 +11,7 @@ from types import SimpleNamespace
 import pytest
 
 Image = pytest.importorskip("PIL.Image", reason="payload fixtures require Pillow")
-pytest.importorskip("numpy", reason="alpha-mask filtering requires numpy")
+np = pytest.importorskip("numpy", reason="alpha-mask filtering requires numpy")
 
 
 @pytest.fixture
@@ -101,3 +102,18 @@ def test_reject_limit_below_eight(payload, limit, capsys):
     with pytest.raises(SystemExit, match="2"):
         run("--limit", limit)
     assert "--limit must be at least 8" in capsys.readouterr().err
+
+
+def test_partial_alpha_preserves_rgb_and_only_zero_alpha_blacks_rgb(payload):
+    subject, run = payload
+    mask = Image.new("L", (4, 4))
+    mask.putdata([0, 1, 128, 255] * 4)
+    mask.save(subject / "masks/shot-00.png")
+    contents = run("--embed-images", "--alpha-from-masks")
+    with Image.open(subject / "images/shot-00.jpg") as source:
+        original = np.asarray(source.convert("RGB"))
+    with Image.open(io.BytesIO(contents["oak/images/shot-00.png"])) as result:
+        assert result.mode == "RGBA"
+        rgba = np.asarray(result)
+        np.testing.assert_array_equal(rgba[..., 3], np.tile([0, 1, 128, 255], (4, 1)))
+        np.testing.assert_array_equal(rgba[..., :3], original * (rgba[..., 3, None] > 0))
