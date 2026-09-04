@@ -33,7 +33,6 @@ for the source selections used for the nine additional sheets.
 ## Capturing a site
 
 The field checklist, written from the first day's mistakes: [docs/capture.md](docs/capture.md).
-For the complete field-to-gallery command sequence, use the [operator runbook](docs/runbook.md).
 
 ## Results
 

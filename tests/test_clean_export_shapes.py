@@ -8,8 +8,6 @@ import sys
 import numpy as np
 import pytest
 
-pytest.importorskip("holo", reason="tools/clean_export.py exports through hdc-holo; CI has no holo")
-
 TOOL = Path(__file__).resolve().parents[1] / "tools/clean_export.py"
 SPEC = importlib.util.spec_from_file_location("clean_export_shapes", TOOL)
 clean = importlib.util.module_from_spec(SPEC)

@@ -46,25 +46,6 @@ def json_value(value):
     return value
 
 
-def portable(value, repo):
-    """Paths in a tracked sidecar must not carry this machine's home directory:
-    repo paths become repo-relative, other home paths start with ~."""
-    if isinstance(value, list):
-        return [portable(v, repo) for v in value]
-    if isinstance(value, dict):
-        return {k: portable(v, repo) for k, v in value.items()}
-    if isinstance(value, pathlib.Path):
-        value = str(value)
-    if isinstance(value, str) and value.startswith("/"):
-        try:
-            return str(pathlib.Path(value).resolve().relative_to(repo.resolve()))
-        except ValueError:
-            home = str(pathlib.Path.home())
-            if value.startswith(home + "/"):
-                return "~" + value[len(home):]
-    return value
-
-
 def write_sidecar(a, mode, argv=None, generated=None):
     """Save the inputs needed to reproduce a provenance sheet."""
     stamp = generated or dt.datetime.now(dt.timezone.utc)
@@ -76,7 +57,6 @@ def write_sidecar(a, mode, argv=None, generated=None):
         "date": stamp.isoformat(timespec="seconds"),
         "inputs": inputs,
     }
-    data = portable(data, pathlib.Path(__file__).resolve().parent.parent)
     path = a.out.with_suffix(".json")
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n")

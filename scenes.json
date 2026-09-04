@@ -4,7 +4,7 @@
     "title": "Springhouse",
     "place": "Wilson's Creek, Missouri",
     "captured": "2026-08-30",
-    "splats": 480000,
+    "splats": 608472,
     "blurb": "Scanned from inside the old springhouse \u2014 the view opens within its walls, where the capture was made.",
     "start": "interior",
     "provenance": "provenance/brookline-station.html",
@@ -62,7 +62,7 @@
     "title": "The Oak",
     "place": "Wilson's Creek, Missouri",
     "captured": "2026-08-30",
-    "splats": 480000,
+    "splats": 935656,
     "blurb": "A lone oak by the road, orbited twice with the studio's own capture app \u2014 LiDAR pinned the trunk, the canopy carries soft.",
     "provenance": "provenance/oak.html",
     "subject": "object"
@@ -82,7 +82,7 @@
     "title": "Wilson's Creek",
     "place": "Wilson's Creek National Battlefield, Missouri",
     "captured": "",
-    "splats": 480000,
+    "splats": 716722,
     "blurb": "Battlefield ground, scanned where the line once stood.",
     "provenance": "provenance/wilsons-creek.html",
     "subject": "place"
@@ -92,7 +92,7 @@
     "title": "Red Rock",
     "place": "",
     "captured": "",
-    "splats": 480000,
+    "splats": 633302,
     "blurb": "The studio's flagship scan \u2014 the capture every pipeline number was measured against.",
     "provenance": "provenance/redrock.html",
     "subject": "place"
@@ -102,7 +102,7 @@
     "title": "Saguaro",
     "place": "Tucson, Arizona",
     "captured": "",
-    "splats": 480000,
+    "splats": 642602,
     "blurb": "A saguaro stand in the desert light, the studio's first big field scan.",
     "provenance": "provenance/saguaro.html",
     "subject": "place"

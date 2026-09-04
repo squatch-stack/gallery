@@ -1,0 +1,16 @@
+{
+  "name": "the pilot",
+  "applicant": "PILOT NONPROFIT",
+  "vendor": "Squatch Stack",
+  "program": "National Park Service ABPP Battlefield Interpretation Grants",
+  "location": "PILOT HISTORIC SITE",
+  "purpose": "Document one historic building for public interpretation and grant planning.",
+  "subjects": [
+    {"name": "the pilot", "type": "building", "scope": "Accessible exterior only; one rigid building, ground-level orbit."}
+  ],
+  "days_on_site": 1,
+  "travel_miles": 0,
+  "hosting_months": 0,
+  "donated_capture_days": 0.5,
+  "options": {"mesh": false, "accessibility_pass": false, "dataset_publication": false, "rush": false}
+}

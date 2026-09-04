@@ -1,0 +1,22 @@
+{
+  "currency": "USD",
+  "status": "PLACEHOLDER — OWNER APPROVAL REQUIRED",
+  "capture_day": 1500,
+  "baseline_production": 1000,
+  "site_production_base": 1500,
+  "site_additional_subject": 1500,
+  "program_production_per_subject": 1000,
+  "mesh_per_subject": 600,
+  "accessibility_pass": 500,
+  "dataset_publication": 350,
+  "travel_per_mile": 0.75,
+  "hosting_per_month": 25,
+  "rush_fraction": 0.25,
+  "day_hours": 8,
+  "estimate_valid_days": 30,
+  "draft_business_days": 15,
+  "rush_draft_business_days": 7,
+  "review_business_days": 10,
+  "revision_business_days": 5,
+  "archive_retention_months": 12
+}

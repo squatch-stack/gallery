@@ -157,20 +157,3 @@ def test_refresh_preserves_snapshot_on_errors(tmp_path, mode):
         assert result.returncode != 0
         assert snapshot.read_text() == "previous snapshot"
     assert not list(root.glob(".checks.*"))
-
-
-def test_sidecar_paths_are_portable(tmp_path):
-    # A sidecar is tracked and published: repo paths are repo-relative and any
-    # other home path starts with ~, so no machine's home directory travels.
-    import pathlib
-
-    import provenance as prov
-
-    repo = tmp_path / "repo"
-    (repo / "scenes").mkdir(parents=True)
-    inside = str(repo / "scenes" / "x.sog")
-    home = str(pathlib.Path.home()) + "/Documents/captures/x.ply"
-    out = prov.portable({"argv": [inside, home, "--flag", "text"], "n": 3}, repo)
-    assert out["argv"][0] == "scenes/x.sog"
-    assert out["argv"][1].startswith("~/")
-    assert out["argv"][2:] == ["--flag", "text"] and out["n"] == 3

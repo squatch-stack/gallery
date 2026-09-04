@@ -5,25 +5,25 @@
       "scene": "brookline-station",
       "file": "scenes/brookline-station.sog",
       "platform": "web-mobile",
-      "passed": true,
-      "count": 480000,
-      "size_bytes": 6302790,
+      "passed": false,
+      "count": 608472,
+      "size_bytes": 7927035,
       "metrics": {
         "nonfinite_count": 0,
         "floater_fraction": 0.0,
         "fog_fraction": 0.0,
-        "translucent_fraction": 4.166666666666667e-06,
+        "translucent_fraction": 6.409497889796079e-05,
         "extent": [
           4.572998046875001,
           2.908203125,
           5.14331066608429
         ],
         "center": [
-          -0.7909078303390975,
-          -0.22707607698604354,
-          0.9618048041875893
+          -0.8856049056235128,
+          -0.3691703700757824,
+          0.9459661088875704
         ],
-        "mad": 1.2874187872345173
+        "mad": 1.2458576616435644
       },
       "checks": [
         {
@@ -33,18 +33,18 @@
         },
         {
           "name": "count",
-          "status": "pass",
-          "detail": "480000 splats; budget 500000"
+          "status": "fail",
+          "detail": "608472 splats; budget 500000"
         },
         {
           "name": "size",
           "status": "pass",
-          "detail": "6302790 bytes; budget 20000000"
+          "detail": "7927035 bytes; budget 20000000"
         },
         {
           "name": "catalog",
           "status": "pass",
-          "detail": "file 480000; catalog 480000; tolerance 1% of file count"
+          "detail": "file 608472; catalog 608472; tolerance 1% of file count"
         },
         {
           "name": "floater",
@@ -59,7 +59,7 @@
         {
           "name": "translucent",
           "status": "pass",
-          "detail": "0.000417% < 10%"
+          "detail": "0.006409% < 10%"
         },
         {
           "name": "nonfinite",
@@ -328,25 +328,25 @@
       "scene": "oak",
       "file": "scenes/oak.sog",
       "platform": "web-mobile",
-      "passed": true,
-      "count": 480000,
-      "size_bytes": 6760418,
+      "passed": false,
+      "count": 935656,
+      "size_bytes": 12793340,
       "metrics": {
         "nonfinite_count": 0,
-        "floater_fraction": 0.0,
+        "floater_fraction": 0.03917465393264191,
         "fog_fraction": 0.0,
-        "translucent_fraction": 0.0,
+        "translucent_fraction": 0.20791401968244738,
         "extent": [
-          3.2385528087615967,
-          2.4152109622955322,
-          3.2385110855102512
+          7.047711133956907,
+          5.316227674484253,
+          7.047886848449709
         ],
         "center": [
-          0.24738254691033726,
-          1.1623366851765173,
-          8.137039396676192
+          0.2679228577201321,
+          1.0760602766925405,
+          8.160839563197568
         ],
-        "mad": 0.8164403449346356
+        "mad": 1.0895754407957299
       },
       "checks": [
         {
@@ -356,23 +356,23 @@
         },
         {
           "name": "count",
-          "status": "pass",
-          "detail": "480000 splats; budget 500000"
+          "status": "fail",
+          "detail": "935656 splats; budget 500000"
         },
         {
           "name": "size",
           "status": "pass",
-          "detail": "6760418 bytes; budget 20000000"
+          "detail": "12793340 bytes; budget 20000000"
         },
         {
           "name": "catalog",
           "status": "pass",
-          "detail": "file 480000; catalog 480000; tolerance 1% of file count"
+          "detail": "file 935656; catalog 935656; tolerance 1% of file count"
         },
         {
           "name": "floater",
-          "status": "pass",
-          "detail": "0.000000% < 2%"
+          "status": "fail",
+          "detail": "3.917465% < 2%"
         },
         {
           "name": "fog",
@@ -381,8 +381,8 @@
         },
         {
           "name": "translucent",
-          "status": "pass",
-          "detail": "0.000000% < 10%"
+          "status": "fail",
+          "detail": "20.791402% < 10%"
         },
         {
           "name": "nonfinite",
@@ -482,25 +482,25 @@
       "scene": "wilsons-creek",
       "file": "scenes/wilsons-creek.sog",
       "platform": "web-mobile",
-      "passed": true,
-      "count": 480000,
-      "size_bytes": 6384325,
+      "passed": false,
+      "count": 716722,
+      "size_bytes": 9347609,
       "metrics": {
         "nonfinite_count": 0,
-        "floater_fraction": 0.42814375,
+        "floater_fraction": 0.30038703988436244,
         "fog_fraction": 0.0,
-        "translucent_fraction": 3.3333333333333335e-05,
+        "translucent_fraction": 2.3719098897480474e-05,
         "extent": [
           125.63232421874999,
           85.20996093749999,
           125.62329101562497
         ],
         "center": [
-          1.229274904785471,
-          -0.25424616430724156,
-          0.43427007261170575
+          0.9458795106025975,
+          -0.14267047402171526,
+          0.5638547168573075
         ],
-        "mad": 2.5416139917116727
+        "mad": 1.7389813686361313
       },
       "checks": [
         {
@@ -510,23 +510,23 @@
         },
         {
           "name": "count",
-          "status": "pass",
-          "detail": "480000 splats; budget 500000"
+          "status": "fail",
+          "detail": "716722 splats; budget 500000"
         },
         {
           "name": "size",
           "status": "pass",
-          "detail": "6384325 bytes; budget 20000000"
+          "detail": "9347609 bytes; budget 20000000"
         },
         {
           "name": "catalog",
           "status": "pass",
-          "detail": "file 480000; catalog 480000; tolerance 1% of file count"
+          "detail": "file 716722; catalog 716722; tolerance 1% of file count"
         },
         {
           "name": "floater",
           "status": "info",
-          "detail": "42.814375% far from centre; a place is its surroundings, so this is scenery, not floaters (catalog subject: place)"
+          "detail": "30.038704% far from centre; a place is its surroundings, so this is scenery, not floaters (catalog subject: place)"
         },
         {
           "name": "fog",
@@ -536,7 +536,7 @@
         {
           "name": "translucent",
           "status": "pass",
-          "detail": "0.003333% < 10%"
+          "detail": "0.002372% < 10%"
         },
         {
           "name": "nonfinite",
@@ -559,25 +559,25 @@
       "scene": "redrock",
       "file": "scenes/redrock.sog",
       "platform": "web-mobile",
-      "passed": true,
-      "count": 480000,
-      "size_bytes": 6324827,
+      "passed": false,
+      "count": 633302,
+      "size_bytes": 8205946,
       "metrics": {
         "nonfinite_count": 0,
-        "floater_fraction": 0.3260875,
+        "floater_fraction": 0.2789159042605266,
         "fog_fraction": 0.0,
-        "translucent_fraction": 1.4583333333333333e-05,
+        "translucent_fraction": 1.26322039090355e-05,
         "extent": [
           92.5595703125,
           60.4755859375,
           92.85693359375003
         ],
         "center": [
-          -0.3984745163991837,
-          -0.12966724969685017,
-          0.3778701550809848
+          -0.40309005598308834,
+          -0.04175915949665229,
+          0.3033645422412018
         ],
-        "mad": 1.5034450325779816
+        "mad": 1.1525753045479885
       },
       "checks": [
         {
@@ -587,23 +587,23 @@
         },
         {
           "name": "count",
-          "status": "pass",
-          "detail": "480000 splats; budget 500000"
+          "status": "fail",
+          "detail": "633302 splats; budget 500000"
         },
         {
           "name": "size",
           "status": "pass",
-          "detail": "6324827 bytes; budget 20000000"
+          "detail": "8205946 bytes; budget 20000000"
         },
         {
           "name": "catalog",
           "status": "pass",
-          "detail": "file 480000; catalog 480000; tolerance 1% of file count"
+          "detail": "file 633302; catalog 633302; tolerance 1% of file count"
         },
         {
           "name": "floater",
           "status": "info",
-          "detail": "32.608750% far from centre; a place is its surroundings, so this is scenery, not floaters (catalog subject: place)"
+          "detail": "27.891590% far from centre; a place is its surroundings, so this is scenery, not floaters (catalog subject: place)"
         },
         {
           "name": "fog",
@@ -613,7 +613,7 @@
         {
           "name": "translucent",
           "status": "pass",
-          "detail": "0.001458% < 10%"
+          "detail": "0.001263% < 10%"
         },
         {
           "name": "nonfinite",
@@ -636,25 +636,25 @@
       "scene": "saguaro",
       "file": "scenes/saguaro.sog",
       "platform": "web-mobile",
-      "passed": true,
-      "count": 480000,
-      "size_bytes": 5640538,
+      "passed": false,
+      "count": 642602,
+      "size_bytes": 8164393,
       "metrics": {
         "nonfinite_count": 0,
-        "floater_fraction": 0.27868125,
+        "floater_fraction": 0.29514069361751133,
         "fog_fraction": 0.0,
-        "translucent_fraction": 3.541666666666667e-05,
+        "translucent_fraction": 3.7348156401629626e-05,
         "extent": [
           44.21459960937499,
           20.897705078124993,
           44.211669921875014
         ],
         "center": [
-          -0.5032173700231312,
-          1.1299450264862945,
-          1.7824077441266628
+          -0.484180925641682,
+          1.1423712927389387,
+          1.7075096330965054
         ],
-        "mad": 1.4715739633876392
+        "mad": 0.9366533363447278
       },
       "checks": [
         {
@@ -664,23 +664,23 @@
         },
         {
           "name": "count",
-          "status": "pass",
-          "detail": "480000 splats; budget 500000"
+          "status": "fail",
+          "detail": "642602 splats; budget 500000"
         },
         {
           "name": "size",
           "status": "pass",
-          "detail": "5640538 bytes; budget 20000000"
+          "detail": "8164393 bytes; budget 20000000"
         },
         {
           "name": "catalog",
           "status": "pass",
-          "detail": "file 480000; catalog 480000; tolerance 1% of file count"
+          "detail": "file 642602; catalog 642602; tolerance 1% of file count"
         },
         {
           "name": "floater",
           "status": "info",
-          "detail": "27.868125% far from centre; a place is its surroundings, so this is scenery, not floaters (catalog subject: place)"
+          "detail": "29.514069% far from centre; a place is its surroundings, so this is scenery, not floaters (catalog subject: place)"
         },
         {
           "name": "fog",
@@ -690,7 +690,7 @@
         {
           "name": "translucent",
           "status": "pass",
-          "detail": "0.003542% < 10%"
+          "detail": "0.003735% < 10%"
         },
         {
           "name": "nonfinite",
