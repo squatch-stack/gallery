@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Promote a candidate SOG into the gallery catalog and validate it."""
+"""Promote a candidate SOG or GLB into the gallery catalog and validate it."""
 
 import argparse
 import datetime as dt
@@ -10,8 +10,14 @@ import re
 import shutil
 import subprocess
 import sys
+import struct
 import zipfile
 from pathlib import Path
+
+try:
+    from tools.check_deliverable import glb_summary
+except ModuleNotFoundError:
+    from check_deliverable import glb_summary
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -235,7 +241,10 @@ def main(argv=None, root=ROOT):
     parser.add_argument("--provenance-from", type=Path)
     parser.add_argument("--trained", type=Path)
     parser.add_argument("--cleaning", action="append", default=[],
-                        help="actual clean_export flags for an app-export candidate; repeatable")
+                        help="clean_export flags, or mesher and detail level "
+                             "(e.g. posekit --model full --masks); repeatable")
+    parser.add_argument("--source", help="app-export operator source summary; required for new mesh provenance")
+    parser.add_argument("--source-commit", action="append", default=[], help="source history to quote; repeatable")
     parser.add_argument("--supervision", choices=["masks", "alpha"], default=None,
                        help="passed to provenance.py with --masked: how the masks reached the trainer")
     parser.add_argument("--provenance-python", default=sys.executable,
@@ -257,20 +266,27 @@ def main(argv=None, root=ROOT):
     entries = json.loads(old_text)
     if args.revert is not None:
         if (args.candidate or args.stem or args.title or args.blurb or args.provenance_from
-                or args.trained or args.cleaning):
+                or args.trained or args.cleaning or args.source or args.source_commit):
             parser.error("--revert cannot be combined with promotion arguments")
         return revert(args, root, catalog_path, entries, parser)
     if args.from_archive:
         parser.error("--from requires --revert")
     if args.candidate is None or args.title is None or args.blurb is None:
         parser.error("promotion requires candidate, --stem, --title, and --blurb")
-    if args.candidate.suffix.lower() != ".sog" or not args.candidate.is_file():
-        parser.error("candidate must be an existing .sog file")
+    if args.candidate.suffix.lower() not in {".sog", ".glb"} or not args.candidate.is_file():
+        parser.error("candidate must be an existing .sog or .glb file")
+    mesh = args.candidate.suffix.lower() == ".glb"
+    if mesh and args.provenance_from:
+        parser.error("mesh promotion uses app-export provenance; use --source and --source-commit")
+    if args.source and (not args.source.strip() or args.provenance_from):
+        parser.error("--source must be nonblank and cannot be combined with --provenance-from")
+    if bool(args.source) != bool(args.source_commit):
+        parser.error("--source and --source-commit must be used together")
     if bool(args.provenance_from) != bool(args.trained):
         parser.error("--provenance-from and --trained must be used together")
     existing = next((item for item in entries if item.get("stem") == args.stem), None)
-    destination = root / "scenes" / f"{args.stem}.sog"
-    if (existing or destination.exists()) and not args.replace:
+    destination = root / "scenes" / f"{args.stem}{args.candidate.suffix.lower()}"
+    if (existing or scene_files(root, args.stem)) and not args.replace:
         parser.error(f"scene {args.stem!r} already exists; pass --replace to replace it")
 
     app_inputs = None
@@ -288,11 +304,11 @@ def main(argv=None, root=ROOT):
         old_page and old_page.is_file() and "Operator source summary:" in old_page.read_text()
     )
     is_app_export = sidecar_mode == "app-export" or (sidecar_mode is None and legacy_app_page)
-    if existing and old_page and not args.provenance_from and is_app_export:
+    if existing and old_page and not args.provenance_from and is_app_export and not args.source:
         if not old_page.is_file():
             parser.error(f"catalog provenance page does not exist: {old_page.relative_to(root)}")
         candidate_cleaning, cleaning_record = cleaning_from_candidate(args.candidate)
-        if candidate_cleaning:
+        if candidate_cleaning and not cleaning:
             cleaning = candidate_cleaning
         if not sidecar.is_file() and not cleaning:
             parser.error(
@@ -308,15 +324,36 @@ def main(argv=None, root=ROOT):
                 "app-export promotion has no candidate cleaning record; pass --cleaning \"<flags>\""
             )
 
+    if args.source:
+        app_inputs = (args.source, args.source_commit, [])
+    if mesh:
+        if not cleaning:
+            cleaning, cleaning_record = cleaning_from_candidate(args.candidate)
+        # Require an identified tool plus a model/detail/quality setting, not a generic mesh note.
+        description = " ".join(cleaning or []).strip()
+        if not re.search(r"\b[\w.-]+\s+.*(?:--(?:model|detail|quality|resolution|preset)(?:\s+|=)\S+|"
+                         r"(?:detail|quality|resolution|model)\s*[:=]\s*\S+)", description, re.IGNORECASE):
+            parser.error('mesh promotion requires --cleaning "<mesher> --model <detail>" or a candidate record')
+        if not app_inputs:
+            parser.error("mesh provenance requires --source and --source-commit or existing app-export provenance")
+    try:
+        triangles = glb_summary(args.candidate)[0] if mesh else None
+        count = 0 if mesh else sog_count(args.candidate)
+    except (ValueError, OSError, KeyError, IndexError, TypeError, struct.error) as exc:
+        parser.error(f"invalid candidate: {exc}")
+
     if args.candidate.resolve() in [p.resolve() for p in scene_files(root, args.stem)]:
         parser.error("candidate must be outside the current scene files")
     entry = dict(existing or {})
     entry.pop("mesh", None)
+    entry.pop("triangles", None)
     entry.update(stem=args.stem, title=args.title, place=args.place,
-                 captured=args.captured, splats=sog_count(args.candidate), blurb=args.blurb)
+                 captured=args.captured, splats=count, blurb=args.blurb)
+    if mesh:
+        entry.update(mesh=str(destination.relative_to(root)), triangles=triangles)
     if args.up is not None:
         entry["up"] = args.up
-    if args.provenance_from:
+    if args.provenance_from or app_inputs:
         entry["provenance"] = f"provenance/{args.stem}.html"
     if existing:
         entries[entries.index(existing)] = entry
@@ -329,7 +366,7 @@ def main(argv=None, root=ROOT):
     if args.dry_run:
         if args.replace:
             archive_current(root, args.stem, existing, archive, dry_run=True)
-        print(f"copy {args.candidate.name} -> scenes/{args.stem}.sog")
+        print(f"copy {args.candidate.name} -> {destination.relative_to(root)}")
         print("".join(difflib.unified_diff(old_text.splitlines(True), new_text.splitlines(True),
                                            fromfile=catalog_path.name, tofile=catalog_path.name)))
         if app_inputs:
@@ -346,7 +383,7 @@ def main(argv=None, root=ROOT):
     shutil.copy2(args.candidate, destination)
     destination.touch()
     sibling = args.candidate.with_suffix(".spz")
-    if sibling.is_file():
+    if not mesh and sibling.is_file():
         shutil.copy2(sibling, destination.with_suffix(".spz"))
         destination.with_suffix(".spz").touch()
     catalog_path.write_text(new_text)

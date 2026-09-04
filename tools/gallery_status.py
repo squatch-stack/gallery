@@ -10,7 +10,7 @@ import time
 from html import unescape
 from pathlib import Path
 
-from promote_scene import archives_for, scene_files, sog_count
+from promote_scene import archives_for, glb_summary, scene_files, sog_count
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -101,10 +101,16 @@ def gallery_status(root=ROOT, stale_days=None, now=None):
         count = entry.get("splats")
         if primary.is_file():
             count = file_count(primary)
+        triangles = entry.get("triangles")
+        if entry.get("mesh") and primary.is_file() and primary.suffix.lower() == ".glb":
+            try:
+                triangles = glb_summary(primary)[0]
+            except (OSError, ValueError, KeyError, IndexError, TypeError, struct.error):
+                triangles = None
         passed = result.get("passed") if result else None
         rows.append({
             "stem": stem, "title": entry.get("title", ""), "kind": "mesh" if entry.get("mesh") else "splat",
-            "splats": count, "size_bytes": sum(p.stat().st_size for p in files),
+            "splats": count, "triangles": triangles, "size_bytes": sum(p.stat().st_size for p in files),
             "file": str(primary.relative_to(root)), "file_present": primary.is_file(),
             "web_mobile": "PASS" if passed is True else "FAIL" if passed is False else "UNKNOWN",
             "stale": stale, "checks_rule": rule, "checks_aged": aged,
@@ -116,7 +122,7 @@ def gallery_status(root=ROOT, stale_days=None, now=None):
 
 def table(rows):
     lines = [
-        "| Stem | Title | Kind | Splats | Bytes on disk | Web-mobile | Checks | Provenance | "
+        "| Stem | Title | Kind | Splats / Triangles | Bytes on disk | Web-mobile | Checks | Provenance | "
         "Generated | Captured | Archives |",
         "|---|---|---|---:|---:|---|---|---|---|---|---:|",
     ]
@@ -128,7 +134,8 @@ def table(rows):
             freshness += "; aged"
         if not row["file_present"]:
             freshness += "; file missing"
-        values = [row["stem"], row["title"], row["kind"], row["splats"], row["size_bytes"], row["web_mobile"],
+        count = row["triangles"] if row["kind"] == "mesh" else row["splats"]
+        values = [row["stem"], row["title"], row["kind"], count, row["size_bytes"], row["web_mobile"],
                   freshness, "yes" if row["provenance_present"] else "no", row["provenance_generated"],
                   row["captured"], row["archive_count"]]
         cells = [str(v).replace("|", "\\|").replace("\n", " ") if v is not None else "—" for v in values]

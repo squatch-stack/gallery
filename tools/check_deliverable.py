@@ -204,6 +204,43 @@ def cleanliness(arrays):
     return metrics
 
 
+def glb_summary(path):
+    """Read GLB 2 JSON; count stored mesh triangles, not scene instances.
+
+    Counts describe primitive topology (including degenerate triangles), without
+    decoding geometry. Non-triangle primitives contribute no triangles.
+    """
+    with path.open("rb") as stream:
+        magic, version, length = struct.unpack("<4sII", stream.read(12))
+        if magic != b"glTF" or version != 2 or length != path.stat().st_size:
+            raise ValueError("invalid GLB 2 header or length")
+        size, kind = struct.unpack("<II", stream.read(8))
+        if kind != 0x4E4F534A or size % 4 or size > length - 20:
+            raise ValueError("invalid GLB JSON chunk")
+        data = json.loads(stream.read(size))
+    triangles = 0
+    for mesh in data.get("meshes", []):
+        for primitive in mesh["primitives"]:
+            mode = primitive.get("mode", 4)
+            if mode not in (4, 5, 6):
+                continue
+            accessor = primitive.get("indices", primitive["attributes"]["POSITION"])
+            count = data["accessors"][accessor]["count"]
+            if type(count) is not int or count < 0 or (mode == 4 and count % 3):
+                raise ValueError("invalid triangle accessor count")
+            triangles += count // 3 if mode == 4 else max(0, count - 2)
+    texture_bytes = 0
+    for image in data.get("images", []):
+        if "bufferView" not in image:
+            raise ValueError("GLB textures must be embedded in binary buffer views")
+        view = data["bufferViews"][image["bufferView"]]
+        size = view["byteLength"]
+        if type(size) is not int or size < 0:
+            raise ValueError("invalid texture byte length")
+        texture_bytes += size
+    return triangles, texture_bytes
+
+
 def check_scene(target, platform="web-mobile", root=ROOT, subject=None):
     catalog = json.loads((root / "scenes.json").read_text())
     supplied = Path(target)
@@ -234,6 +271,7 @@ def check_scene(target, platform="web-mobile", root=ROOT, subject=None):
 
     ext, count, arrays, issue = path.suffix.lower(), None, None, None
     size = path.stat().st_size if path.is_file() else None
+    triangles, texture_bytes = None, None
     mesh = ext in {".glb", ".obj", ".fbx"}
     try:
         if size is None or size == 0:
@@ -245,6 +283,8 @@ def check_scene(target, platform="web-mobile", root=ROOT, subject=None):
         elif ext == ".spz":
             count, arrays, issue = read_spz(path)
         elif mesh:
+            if ext == ".glb":
+                triangles, texture_bytes = glb_summary(path)
             count = 0
         else:
             raise ValueError("unrecognized format")
@@ -267,6 +307,9 @@ def check_scene(target, platform="web-mobile", root=ROOT, subject=None):
         EOFError,
     ) as exc:
         add("format", False, f"{ext}: {exc}")
+    if triangles is not None:
+        checks.append({"name": "mesh", "status": "info",
+                       "detail": f"{triangles} triangles; {texture_bytes} embedded texture bytes"})
     max_count, max_size = BUDGETS[platform]
     add(
         "count",
@@ -279,7 +322,7 @@ def check_scene(target, platform="web-mobile", root=ROOT, subject=None):
         f"{size} bytes; budget {max_size if max_size is not None else 'unspecified'}",
     )
     expected = scene.get("splats") if scene else None
-    delivered = path.parent == root / "scenes"
+    delivered = path.resolve().is_relative_to((root / "scenes").resolve())
     if supplied.suffix and not delivered:
         checks.append({
             "name": "catalog",
@@ -336,6 +379,8 @@ def check_scene(target, platform="web-mobile", root=ROOT, subject=None):
         "platform": platform,
         "passed": all(c["status"] != "fail" for c in checks),
         "count": count,
+        "triangles": triangles,
+        "texture_bytes": texture_bytes,
         "size_bytes": size,
         "metrics": metrics,
         "checks": checks,
