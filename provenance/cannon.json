@@ -1,0 +1,47 @@
+{
+  "argv": [
+    "~/Documents/squatch-captures/photo-subjects/cannon",
+    "--title",
+    "Cannon",
+    "--place",
+    "Wilson's Creek, Missouri",
+    "--trained",
+    "<external>/metrics.json",
+    "--export",
+    "scenes/cannon.sog",
+    "--out",
+    "provenance/cannon.html",
+    "--masked",
+    "--supervision",
+    "alpha"
+  ],
+  "date": "2026-09-04T23:41:30+00:00",
+  "inputs": {
+    "app_export": false,
+    "cleaning": [],
+    "cleaning_source": "source-commit",
+    "export": [
+      "scenes/cannon.sog"
+    ],
+    "mapper": "incremental",
+    "masked": true,
+    "note": [],
+    "out": "provenance/cannon.html",
+    "place": "Wilson's Creek, Missouri",
+    "source": null,
+    "source_commit": [],
+    "sparse": "sparse",
+    "subject": "~/Documents/squatch-captures/photo-subjects/cannon",
+    "supervision": "alpha",
+    "title": "Cannon",
+    "trained": "<external>/metrics.json",
+    "up": [
+      -0.3973,
+      -0.5569,
+      0.7294
+    ],
+    "up_source": "explicit"
+  },
+  "mode": "solve",
+  "schema_version": 1
+}

@@ -62,6 +62,10 @@ def portable(value, repo):
             home = str(pathlib.Path.home())
             if value.startswith(home + "/"):
                 return "~" + value[len(home):]
+            # Anywhere else on this machine (a scratch directory, a mounted
+            # volume) can carry a username in its path too: keep the file
+            # name only, marked as external.
+            return "<external>/" + pathlib.Path(value).name
     return value
 
 

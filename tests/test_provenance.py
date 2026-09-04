@@ -174,3 +174,5 @@ def test_sidecar_paths_are_portable(tmp_path):
     assert out["argv"][0] == "scenes/x.sog"
     assert out["argv"][1].startswith("~/")
     assert out["argv"][2:] == ["--flag", "text"] and out["n"] == 3
+    # A path outside both the repo and the home directory keeps only its name.
+    assert prov.portable("/private/tmp/some-scratch-dir/job/metrics.json", repo) == "<external>/metrics.json"
