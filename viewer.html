@@ -58,6 +58,38 @@ const params = new URLSearchParams(location.search);
 const stem = params.get("scene") || "brookline-station";
 const viewSyncEnabled = params.get("sync") === "1" && window.parent !== window;
 
+// Camera inspection angles use the gravity-aligned world axes: +Y is up,
+// az=0 is +Z, and az=90 is +X. Missing fields use the contact-sheet defaults.
+function inspectionView(search) {
+  const keys = ["az", "el", "d"];
+  if (!keys.some(key => search.has(key))) return null;
+  const defaults = [30, 15, 1.4];
+  const values = keys.map((key, i) => {
+    if (!search.has(key)) return defaults[i];
+    const raw = search.get(key).trim();
+    return raw === "" ? NaN : Number(raw);
+  });
+  const [az, el, d] = values;
+  if (!values.every(Number.isFinite) || el < -90 || el > 90 || d <= 0) return null;
+  return { az: (az % 360) * Math.PI / 180, el: el * Math.PI / 180, d };
+}
+const inspection = inspectionView(params);
+
+function applyInspectionView(controls, target, span) {
+  if (!inspection) return;
+  const { az, el, d } = inspection;
+  const radius = span * d;
+  camera.position.set(
+    target.x + radius * Math.cos(el) * Math.sin(az),
+    target.y + radius * Math.sin(el),
+    target.z + radius * Math.cos(el) * Math.cos(az));
+  controls.target.copy(target);
+  // A requested close view should not inherit the interior minimum distance.
+  controls.minDistance = 0;
+  camera.lookAt(target);
+  controls.update();
+}
+
 function enableViewSync(controls) {
   if (!viewSyncEnabled) return;
   let applyingRemoteView = false;
@@ -155,6 +187,7 @@ if (entry && entry.mesh) {
   controls.listenToKeyEvents(renderer.domElement);
   controls.target.copy(target);
   controls.enableDamping = true;
+  applyInspectionView(controls, target, span);
   enableViewSync(controls);
   document.getElementById("stats").textContent = "textured mesh";
   const el = document.getElementById("load");
@@ -235,6 +268,7 @@ if (entry && entry.start === "interior") {
 }
 controls.enableDamping = true;
 controls.dampingFactor = 0.08;
+applyInspectionView(controls, target, span);
 enableViewSync(controls);
 
 await spark.update({ scene, camera });

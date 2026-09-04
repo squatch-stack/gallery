@@ -15,6 +15,9 @@ pending DNS).
 - `tools/clean_export.py` — opacity floor, alpha-weighted median crop centre, fog cull,
   and export, all through holo's own writers
 
+Inspection URLs fix the camera: `viewer.html?scene=cannon&az=30&el=15&d=1.4` (degrees around up, degrees above horizon, distance in framing spans).
+Generate a lazy-loading contact sheet with `python3 tools/inspect_page.py --out compare/inspect.html [stems...] --angles "30,15,1.4;200,25,1.4;120,60,2.2"`; omit stems for the whole catalog.
+
 Raw captures are archived off-repo.
 
 Catalog cards show the saved web-mobile checks in `checks.json`. After changing
