@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Squatch Stack — scan viewer</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #0d0b09; overflow: hidden; }
+  #hud, #load, #back {
+    color: #cfc7b8; font: 12px/1.5 ui-monospace, Menlo, monospace;
+  }
+  #hud {
+    position: fixed; left: 14px; bottom: 12px; z-index: 2;
+    background: rgba(13, 11, 9, 0.72); border: 1px solid #3a332a;
+    border-radius: 6px; padding: 8px 12px; pointer-events: none;
+    max-width: min(85vw, 34rem);
+  }
+  #hud b { color: #e58a5e; font-weight: 600; }
+  #back {
+    position: fixed; left: 14px; top: 12px; z-index: 2;
+    background: rgba(13, 11, 9, 0.72); border: 1px solid #3a332a;
+    border-radius: 6px; padding: 8px 12px; text-decoration: none;
+  }
+  #back:hover, #back:focus-visible { border-color: #e58a5e; color: #e58a5e; outline: none; }
+  canvas:focus-visible { outline: 2px solid #e58a5e; outline-offset: -2px; }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden;
+    clip: rect(0 0 0 0); white-space: nowrap; }
+  #load {
+    position: fixed; inset: 0; display: grid; place-items: center; z-index: 3;
+    background: #0d0b09; transition: opacity 0.4s; font-size: 14px;
+  }
+  #load.err { color: #e58a5e; padding: 2rem; text-align: center; }
+  @media (prefers-reduced-motion: reduce) {
+    #load { transition: none; }
+  }
+</style>
+</head>
+<body>
+<a id="back" href="index.html">&#8592; all scans</a>
+<div id="load">loading <span id="name">scan</span> — <span id="pct">0</span>%</div>
+<div id="hud"><b id="title">scan</b> · <span id="stats">…</span> ·
+drag orbit / right-drag pan / scroll zoom / arrow keys pan</div>
+<p id="desc" class="sr-only"></p>
+<script type="importmap">
+{ "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/",
+    "@sparkjsdev/spark": "https://sparkjs.dev/releases/spark/2.1.0/spark.module.js"
+} }
+</script>
+<script type="module">
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { SparkRenderer, SplatLoader, SplatMesh } from "@sparkjsdev/spark";
+
+const params = new URLSearchParams(location.search);
+const stem = params.get("scene") || "brookline-station";
+const viewSyncEnabled = params.get("sync") === "1" && window.parent !== window;
+
+function enableViewSync(controls) {
+  if (!viewSyncEnabled) return;
+  let applyingRemoteView = false;
+  controls.addEventListener("change", () => {
+    if (applyingRemoteView) return;
+    window.parent.postMessage({
+      type: "squatch-gallery-view",
+      position: camera.position.toArray(),
+      target: controls.target.toArray(),
+    }, location.origin);
+  });
+  addEventListener("message", (event) => {
+    const data = event.data;
+    if (event.source !== window.parent || event.origin !== location.origin ||
+        !data || data.type !== "squatch-gallery-view" ||
+        !Array.isArray(data.position) || !Array.isArray(data.target) ||
+        data.position.length !== 3 || data.target.length !== 3) return;
+    applyingRemoteView = true;
+    camera.position.fromArray(data.position);
+    controls.target.fromArray(data.target);
+    controls.update();
+    applyingRemoteView = false;
+  });
+}
+const catalog = await fetch("scenes.json").then(r => r.json()).catch(() => []);
+const entry = catalog.find(s => s.stem === stem);
+const src = `scenes/${stem}.sog`;
+const title = entry ? entry.title : stem;
+document.getElementById("name").textContent = title;
+document.getElementById("title").textContent = title;
+document.title = `Squatch Stack — ${title}`;
+if (entry && entry.provenance) {
+  // How this scan was made: device, solve, training, checksums. A buyer's
+  // question, answered as a page beside the scan rather than a promise.
+  const a = document.createElement("a");
+  a.href = entry.provenance; a.textContent = "provenance";
+  a.style.cssText = "color:#e58a5e;pointer-events:auto;margin-left:6px";
+  document.getElementById("hud").append(" · ", a);
+}
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(
+  60, innerWidth / innerHeight, 0.01, 1000);
+const renderer = new THREE.WebGLRenderer({ antialias: false });
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+document.body.appendChild(renderer.domElement);
+// The canvas is the page's one content element: name it, describe it, and
+// make it reachable and operable from the keyboard (WCAG 2.1 AA is a
+// contractual requirement for state and federal heritage work).
+const blurb = entry && entry.blurb ? entry.blurb : "";
+renderer.domElement.setAttribute("role", "img");
+renderer.domElement.setAttribute("tabindex", "0");
+renderer.domElement.setAttribute("aria-label",
+  `${title}: interactive 3D scan. ${blurb} Drag or use the arrow keys to move the view.`);
+document.getElementById("desc").textContent =
+  `${title}. ${blurb} An interactive three-dimensional scan; drag to orbit, right-drag or arrow keys to pan, scroll to zoom.`;
+const spark = new SparkRenderer({ renderer });
+scene.add(spark);
+
+// COLMAP-solved scenes have an arbitrary tilt — gravity is not in the
+// solve. scenes.json carries the measured up vector (mean of the solved
+// cameras' up axes) and everything below rotates through this.
+const qAlign = new THREE.Quaternion();
+if (entry && entry.up) {
+  qAlign.setFromUnitVectors(
+    new THREE.Vector3(...entry.up).normalize(), new THREE.Vector3(0, 1, 0));
+}
+
+// A scene may be a textured mesh instead of a splat (Scaniverse mesh
+// exports, Apple Object Capture output). Same page, different loader.
+if (entry && entry.mesh) {
+  const gltf = await new GLTFLoader().loadAsync(entry.mesh, (e) => {
+    if (e.lengthComputable) {
+      document.getElementById("pct").textContent =
+        Math.round(100 * e.loaded / e.total);
+    }
+  }).catch(err => {
+    const el = document.getElementById("load");
+    el.className = "err";
+    el.textContent = `could not load "${entry.mesh}" — ${err}`;
+    throw err;
+  });
+  gltf.scene.quaternion.premultiply(qAlign);
+  scene.add(gltf.scene);
+  scene.add(new THREE.AmbientLight(0xffffff, 1.1));
+  const sun = new THREE.DirectionalLight(0xfff3e0, 1.6);
+  sun.position.set(3, 6, 2);
+  scene.add(sun);
+  const box = new THREE.Box3().setFromObject(gltf.scene);
+  const target = box.getCenter(new THREE.Vector3());
+  const span = box.getSize(new THREE.Vector3()).length() * 0.6;
+  camera.position.set(target.x + span, target.y + span * 0.45, target.z + span);
+  const controls = new OrbitControls(camera, renderer.domElement);
+  controls.listenToKeyEvents(renderer.domElement);
+  controls.target.copy(target);
+  controls.enableDamping = true;
+  enableViewSync(controls);
+  document.getElementById("stats").textContent = "textured mesh";
+  const el = document.getElementById("load");
+  el.style.opacity = "0";
+  setTimeout(() => el.remove(), 450);
+  addEventListener("resize", () => {
+    camera.aspect = innerWidth / innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(innerWidth, innerHeight);
+  });
+  renderer.setAnimationLoop(() => {
+    controls.update();
+    renderer.render(scene, camera);
+  });
+  throw new Error("mesh-path-complete"); // stop the splat path below
+}
+
+let packedSplats;
+try {
+  // Load the data FIRST, then build the mesh, then await one explicit
+  // sort — a url-constructed SplatMesh added before its data arrives
+  // can sit unsorted as a black first frame.
+  packedSplats = await new SplatLoader().loadAsync(src, (e) => {
+    if (e.type === "progress" && e.lengthComputable) {
+      document.getElementById("pct").textContent =
+        Math.round(100 * e.loaded / e.total);
+    }
+  });
+} catch (err) {
+  const el = document.getElementById("load");
+  el.className = "err";
+  el.textContent = `could not load "${src}" — ${err}`;
+  throw err;
+}
+
+const splats = new SplatMesh({ packedSplats });
+// The studio's SOG files carry COLMAP-style y-down axes like its PLY
+// exports; the 180-degree flip about x is the same one the pipeline's
+// loaders apply on the way in. Gravity alignment composes on top.
+splats.quaternion.set(1, 0, 0, 0);
+splats.quaternion.premultiply(qAlign);
+scene.add(splats);
+
+// Frame the SUBJECT, not the scene: field captures put a long tail of
+// background far beyond the subject, so a bounding box aims the camera
+// at empty sky. Median center, then a low quantile of distance.
+const xs = [], ys = [], zs = [];
+packedSplats.forEachSplat((i, center) => {
+  if (i % 37 === 0) { xs.push(center.x); ys.push(center.y); zs.push(center.z); }
+});
+const pct = (a, q) => {
+  const b = a.slice().sort((u, v) => u - v);
+  return b[Math.min(b.length - 1, Math.max(0, Math.floor(q * b.length)))];
+};
+const target = new THREE.Vector3(pct(xs, 0.5), pct(ys, 0.5), pct(zs, 0.5));
+const dist = xs.map((x, i) => Math.max(
+  Math.abs(x - target.x), Math.abs(ys[i] - target.y),
+  Math.abs(zs[i] - target.z)));
+const span = Math.max(2.4 * pct(dist, 0.4), 0.5);
+target.y *= -1; target.z *= -1;   // same space as the flipped mesh
+target.applyQuaternion(qAlign);   // and gravity-aligned with it
+
+const controls = new OrbitControls(camera, renderer.domElement);
+if (entry && entry.start === "interior") {
+  // The capture was made from INSIDE the subject (a room scanned from
+  // within), so an orbiting exterior view shows only the shell. Stand
+  // where the operator stood — the scan's center of mass — and look
+  // at a wall; orbiting then turns in place, which is how the space
+  // was actually seen.
+  camera.position.copy(target);
+  controls.target.set(target.x + span * 0.35, target.y,
+                      target.z + span * 0.1);
+  controls.minDistance = 0.02;
+} else {
+  camera.position.set(target.x + span, target.y + span * 0.45,
+                      target.z + span);
+  controls.target.copy(target);
+}
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+enableViewSync(controls);
+
+await spark.update({ scene, camera });
+document.getElementById("stats").textContent =
+  `${packedSplats.numSplats.toLocaleString()} splats`;
+const el = document.getElementById("load");
+el.style.opacity = "0";
+setTimeout(() => el.remove(), 450);
+
+addEventListener("resize", () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+
+renderer.setAnimationLoop(() => {
+  controls.update();
+  renderer.render(scene, camera);
+});
+</script>
+</body>
+</html>

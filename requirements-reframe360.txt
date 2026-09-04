@@ -1,0 +1,8 @@
+numpy==2.5.2
+Pillow==12.3.0
+# Optional acceleration; tools/reframe360.py falls back to NumPy without it.
+opencv-python-headless==5.0.0.93
+
+# Test/lint tooling.
+pytest==9.1.1
+ruff==0.16.6

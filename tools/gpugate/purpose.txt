@@ -1,0 +1,15 @@
+Train Gaussian splats with Brush on the 5090, from solves computed on the Mac, using the full-resolution photos you already hold.
+
+Why Brush: your note 17 (docs/splat/17-brush-alternative.md) — verified on this box, binary already present, no CUDA coupling, Apache-2.0, and it is the trainer the Mac side runs (Brush v0.3.0 on Metal), so results compare like for like. Our M1 Max takes ~2 h for 30k steps on a 57-view scene that your measured 10k-steps-in-103-s suggests is 5-10 min here.
+
+What the client uploads: scene.tar, tens of MB — sparse/0/{cameras,images,points3D}.bin (a pycolmap 4.2 solve at native resolution; your colmap_read.py parses it, verified — the .bin gap in your reader does not arise for the photo subjects) plus names.txt, the registered image filenames. No photos travel: the job reads them by name from --photos_dir, your verified copy of brookline-2026-08-30-photos.tar (report 3e4be8, all digests matched) — a read-only bind mount into the sandbox is your call. For scenes you do not hold, the tar may carry images/ instead and --photos_dir is ignored.
+
+Params: steps (30000), max_splats (1500000), max_res (0 = native 5712x4284; 2856 / 1920 fallbacks), seed (0). Artifacts: point_cloud.ply, metrics.json (splat count, wall seconds, resolution, PLY sha256, argv), train.log.
+
+Budgets: 12288 MB requested, the holo-scene envelope. Native-resolution VRAM is UNMEASURED — the first run should be watched, and max_res is the fallback. Timeout 1800 s.
+
+Code is stdlib-only python3 (tarfile filter='data'), reads ./scene.tar and --photos_dir, writes ./, no network, no HOME. The docstring carries the contract in the bench/RECIPE.md shape your note 07 adopted; the .toml is a contract sketch, not a guess at your recipe schema.
+
+Verification: the same tar, steps, seed and max_res trains on the Mac; splat count must match and the PLY must load in our viewer. Same result first, then clocks.
+
+First job on pin: the Brookline cannon (57 registered of 60, 13,841 points), then the oak (169 views), then a 1920 / 2856 / native sweep on the cannon to settle whether native buys visible detail.

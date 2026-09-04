@@ -1,0 +1,64 @@
+{
+ "trainer": "Brush 0.3.0",
+ "seed": 42,
+ "cap": 1500000,
+ "runs": {
+  "5ddf4dd587a1": {
+   "subject": "cannon",
+   "arm": "unmasked",
+   "steps_label": "30k",
+   "cleaned": {
+    "quantile": 0.55,
+    "splats": 753314,
+    "sog_bytes": 10553423
+   }
+  },
+  "bd4c58622f13": {
+   "subject": "cannon",
+   "arm": "unmasked",
+   "steps_label": "30k",
+   "cleaned": {
+    "quantile": 0.55,
+    "splats": 778332,
+    "sog_bytes": 10961888
+   }
+  },
+  "ab7325928819": {
+   "subject": "cannon",
+   "arm": "unmasked",
+   "steps_label": "30k",
+   "cleaned": {
+    "quantile": 0.55,
+    "splats": 845883,
+    "sog_bytes": 11923529
+   }
+  },
+  "e6eacab11be5": {
+   "subject": "cannon",
+   "arm": "unmasked",
+   "steps_label": "3k probe",
+   "probe": true
+  },
+  "f46e17da4620": {
+   "subject": "cannon",
+   "arm": "masks-folder",
+   "steps_label": "30k",
+   "cleaned": {
+    "quantile": 0.55,
+    "splats": 204482,
+    "sog_bytes": 2944730
+   }
+  },
+  "b1c5b2ee634a": {
+   "subject": "cannon",
+   "arm": "alpha-matched",
+   "steps_label": "30k",
+   "notes": "56 views: the one fully-white mask view dropped",
+   "cleaned": {
+    "quantile": 0.9,
+    "splats": 159755,
+    "sog_bytes": 2248387
+   }
+  }
+ }
+}

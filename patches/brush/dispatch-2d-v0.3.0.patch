@@ -1,0 +1,204 @@
+diff --git a/crates/brush-kernel/src/shaders/wg.wgsl b/crates/brush-kernel/src/shaders/wg.wgsl
+index db47fed..4f25411 100644
+--- a/crates/brush-kernel/src/shaders/wg.wgsl
++++ b/crates/brush-kernel/src/shaders/wg.wgsl
+@@ -13,6 +13,8 @@ fn ceil_div(a: i32, b: i32) -> i32 {
+     return (a + b - 1) / b;
+ }
+ 
++const MAX_WORKGROUPS_PER_DIMENSION: i32 = 65535;
++
+ @compute
+ @workgroup_size(1, 1, 1)
+ fn main(@builtin(global_invocation_id) global_id: vec3u) {
+@@ -35,7 +37,9 @@ fn main(@builtin(global_invocation_id) global_id: vec3u) {
+         cz = thread_counts[2];
+     }
+ 
+-    wg_count[0] = ceil_div(cx, uniforms.wg_size_x);
+-    wg_count[1] = ceil_div(cy, uniforms.wg_size_y);
+-    wg_count[2] = ceil_div(cz, uniforms.wg_size_z);
++    let num_workgroups = ceil_div(cx, uniforms.wg_size_x) *
++        ceil_div(cy, uniforms.wg_size_y) * ceil_div(cz, uniforms.wg_size_z);
++    wg_count[0] = min(num_workgroups, MAX_WORKGROUPS_PER_DIMENSION);
++    wg_count[1] = ceil_div(num_workgroups, MAX_WORKGROUPS_PER_DIMENSION);
++    wg_count[2] = 1;
+ }
+diff --git a/crates/brush-render-bwd/src/render_bwd.rs b/crates/brush-render-bwd/src/render_bwd.rs
+index e799d8b..f5dcbc1 100644
+--- a/crates/brush-render-bwd/src/render_bwd.rs
++++ b/crates/brush-render-bwd/src/render_bwd.rs
+@@ -106,7 +106,7 @@ pub(crate) fn render_backward(
+         unsafe {
+             client.execute_unchecked(
+                 RasterizeBackwards::task(hard_floats, webgpu),
+-                CubeCount::Static(tile_bounds.x * tile_bounds.y, 1, 1),
++                CubeCount::Static(tile_bounds.x, tile_bounds.y, 1),
+                 Bindings::new().with_buffers(vec![
+                     uniforms_buffer.handle.clone().binding(),
+                     compact_gid_from_isect.handle.binding(),
+diff --git a/crates/brush-render-bwd/src/shaders/rasterize_backwards.wgsl b/crates/brush-render-bwd/src/shaders/rasterize_backwards.wgsl
+index 1ed9ca9..b24880b 100644
+--- a/crates/brush-render-bwd/src/shaders/rasterize_backwards.wgsl
++++ b/crates/brush-render-bwd/src/shaders/rasterize_backwards.wgsl
+@@ -66,7 +66,7 @@ var<workgroup> range_uniform: vec2u;
+ @compute
+ @workgroup_size(THREAD_COUNT, 1, 1)
+ fn main(
+-    @builtin(global_invocation_id) global_id: vec3u,
++    @builtin(workgroup_id) workgroup_id: vec3u,
+     @builtin(local_invocation_index) local_idx: u32,
+     @builtin(subgroup_invocation_id) subgroup_invocation_id: u32
+ ) {
+@@ -77,10 +77,12 @@ fn main(
+     var dones = array<bool, PIXELS_PER_THREAD>();
+     var rgb_pixel_finals = array<vec3f, PIXELS_PER_THREAD>();
+ 
++    let tile_loc = workgroup_id.xy;
+     for (var i = 0u; i < PIXELS_PER_THREAD; i++) {
+         // Process 4 consecutive pixels in the original linear order
+-        let thread_id = global_id.x * PIXELS_PER_THREAD + i;
+-        pix_locs[i] = helpers::map_1d_to_2d(thread_id, uniforms.tile_bounds.x);
++        let local_pix_id = local_idx * PIXELS_PER_THREAD + i;
++        let local_pix_loc = helpers::map_1d_to_2d(local_pix_id, helpers::TILE_WIDTH);
++        pix_locs[i] = tile_loc * helpers::TILE_WIDTH + local_pix_loc;
+         let pix_id = pix_locs[i].x + pix_locs[i].y * uniforms.img_size.x;
+         pix_ids[i] = pix_id;
+ 
+@@ -98,7 +100,6 @@ fn main(
+         pix_outs[i] = vec4f(0.0, 0.0, 0.0, 1.0);
+     }
+ 
+-    let tile_loc = vec2u(pix_locs[0].x / helpers::TILE_WIDTH, pix_locs[0].y / helpers::TILE_WIDTH);
+     let tile_id = tile_loc.x + tile_loc.y * uniforms.tile_bounds.x;
+ 
+     // have all threads in tile process the same gaussians in batches
+diff --git a/crates/brush-render/src/render.rs b/crates/brush-render/src/render.rs
+index 1e215e8..053c305 100644
+--- a/crates/brush-render/src/render.rs
++++ b/crates/brush-render/src/render.rs
+@@ -367,7 +367,7 @@ pub(crate) fn render_forward(
+     unsafe {
+         client.execute_unchecked(
+             raster_task,
+-            CubeCount::Static(tile_bounds.x * tile_bounds.y, 1, 1),
++            CubeCount::Static(tile_bounds.x, tile_bounds.y, 1),
+             bindings,
+         );
+     }
+diff --git a/crates/brush-render/src/shaders/map_gaussian_to_intersects.wgsl b/crates/brush-render/src/shaders/map_gaussian_to_intersects.wgsl
+index 5283c2e..e4a8418 100644
+--- a/crates/brush-render/src/shaders/map_gaussian_to_intersects.wgsl
++++ b/crates/brush-render/src/shaders/map_gaussian_to_intersects.wgsl
+@@ -14,11 +14,15 @@
+ 
+ @compute
+ @workgroup_size(256, 1, 1)
+-fn main(@builtin(global_invocation_id) gid: vec3u) {
+-    let compact_gid = gid.x;
++fn main(
++    @builtin(workgroup_id) workgroup_id: vec3u,
++    @builtin(local_invocation_index) local_idx: u32,
++) {
++    let group_id = workgroup_id.x + workgroup_id.y * 65535u;
++    let compact_gid = group_id * 256u + local_idx;
+ 
+ #ifndef PREPASS
+-    if gid.x == 0 {
++    if compact_gid == 0u {
+         num_intersections[0] = splat_cum_hit_counts[uniforms.num_visible];
+     }
+ #endif
+diff --git a/crates/brush-render/src/shaders/project_visible.wgsl b/crates/brush-render/src/shaders/project_visible.wgsl
+index 0be9926..c0d76e5 100644
+--- a/crates/brush-render/src/shaders/project_visible.wgsl
++++ b/crates/brush-render/src/shaders/project_visible.wgsl
+@@ -166,8 +166,12 @@ fn read_coeffs(base_id: ptr<function, u32>) -> vec3f {
+ 
+ @compute
+ @workgroup_size(256, 1, 1)
+-fn main(@builtin(global_invocation_id) gid: vec3u) {
+-    let compact_gid = gid.x;
++fn main(
++    @builtin(workgroup_id) workgroup_id: vec3u,
++    @builtin(local_invocation_index) local_idx: u32,
++) {
++    let group_id = workgroup_id.x + workgroup_id.y * 65535u;
++    let compact_gid = group_id * 256u + local_idx;
+ 
+     if compact_gid >= uniforms.num_visible {
+         return;
+diff --git a/crates/brush-render/src/shaders/rasterize.wgsl b/crates/brush-render/src/shaders/rasterize.wgsl
+index 7b3abd4..46a43ff 100644
+--- a/crates/brush-render/src/shaders/rasterize.wgsl
++++ b/crates/brush-render/src/shaders/rasterize.wgsl
+@@ -27,13 +27,14 @@ var<workgroup> local_batch: array<helpers::ProjectedSplat, helpers::TILE_SIZE>;
+ @compute
+ @workgroup_size(helpers::TILE_SIZE, 1, 1)
+ fn main(
+-    @builtin(global_invocation_id) global_id: vec3u,
++    @builtin(workgroup_id) workgroup_id: vec3u,
+     @builtin(local_invocation_index) local_idx: u32,
+ ) {
+-    let pix_loc = helpers::map_1d_to_2d(global_id.x, uniforms.tile_bounds.x);
++    let tile_loc = workgroup_id.xy;
++    let local_pix_loc = helpers::map_1d_to_2d(local_idx, helpers::TILE_WIDTH);
++    let pix_loc = tile_loc * helpers::TILE_WIDTH + local_pix_loc;
+     let pix_id = pix_loc.x + pix_loc.y * uniforms.img_size.x;
+     let pixel_coord = vec2f(pix_loc) + 0.5f;
+-    let tile_loc = vec2u(pix_loc.x / helpers::TILE_WIDTH, pix_loc.y / helpers::TILE_WIDTH);
+ 
+     let tile_id = tile_loc.x + tile_loc.y * uniforms.tile_bounds.x;
+     let inside = pix_loc.x < uniforms.img_size.x && pix_loc.y < uniforms.img_size.y;
+diff --git a/crates/brush-sort/src/shaders/sort_count.wgsl b/crates/brush-sort/src/shaders/sort_count.wgsl
+index 0e75150..db752a1 100644
+--- a/crates/brush-sort/src/shaders/sort_count.wgsl
++++ b/crates/brush-sort/src/shaders/sort_count.wgsl
+@@ -21,7 +21,7 @@ fn main(
+ 
+     // let num_keys = num_keys_arr[0];
+     let num_wgs = sorting::div_ceil(num_keys, sorting::BLOCK_SIZE);
+-    let group_id = gid.x;
++    let group_id = gid.x + gid.y * 65535u;
+ 
+     if group_id >= num_wgs {
+         return;
+diff --git a/crates/brush-sort/src/shaders/sort_reduce.wgsl b/crates/brush-sort/src/shaders/sort_reduce.wgsl
+index 39e12ad..9cbf095 100644
+--- a/crates/brush-sort/src/shaders/sort_reduce.wgsl
++++ b/crates/brush-sort/src/shaders/sort_reduce.wgsl
+@@ -17,7 +17,7 @@ fn main(
+     let num_wgs = sorting::div_ceil(num_keys, sorting::BLOCK_SIZE);
+     let num_reduce_wgs = sorting::BIN_COUNT * sorting::div_ceil(num_wgs, sorting::BLOCK_SIZE);
+ 
+-    let group_id = gid.x;
++    let group_id = gid.x + gid.y * 65535u;
+ 
+     if group_id >= num_reduce_wgs {
+         return;
+diff --git a/crates/brush-sort/src/shaders/sort_scan_add.wgsl b/crates/brush-sort/src/shaders/sort_scan_add.wgsl
+index 454d16e..459458d 100644
+--- a/crates/brush-sort/src/shaders/sort_scan_add.wgsl
++++ b/crates/brush-sort/src/shaders/sort_scan_add.wgsl
+@@ -18,7 +18,7 @@ fn main(
+     let num_wgs = sorting::div_ceil(num_keys, sorting::BLOCK_SIZE);
+     let num_reduce_wgs = sorting::BIN_COUNT * sorting::div_ceil(num_wgs, sorting::BLOCK_SIZE);
+ 
+-    let group_id = gid.x;
++    let group_id = gid.x + gid.y * 65535u;
+ 
+     if group_id >= num_reduce_wgs {
+         return;
+diff --git a/crates/brush-sort/src/shaders/sort_scatter.wgsl b/crates/brush-sort/src/shaders/sort_scatter.wgsl
+index a654ccd..85b836c 100644
+--- a/crates/brush-sort/src/shaders/sort_scatter.wgsl
++++ b/crates/brush-sort/src/shaders/sort_scatter.wgsl
+@@ -27,7 +27,7 @@ fn main(
+     // let num_keys = num_keys_arr[0];
+     let num_wgs = sorting::div_ceil(num_keys, sorting::BLOCK_SIZE);
+ 
+-    let group_id = gid.x;
++    let group_id = gid.x + gid.y * 65535u;
+ 
+     if group_id >= num_wgs {
+         return;

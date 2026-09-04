@@ -1,0 +1,37 @@
+# splat-brush - contract sketch, not the broker's schema. The host's triage
+# (report 20260904-65465a) confirmed the real one is
+#     [recipe] entrypoint = ["run.py"]        # an argv list
+# with parameters read from params.json in the job directory, and an
+#     [io] extra_ro = [...]
+# list that is INTERSECTED with the broker's allowed_ro_roots - a manifest
+# cannot widen its own reach. bench/RECIPE.md's rule still applies: wire this
+# into the runner's own format from the host side.
+
+name = "splat-brush"
+purpose = "Train a Gaussian splat with the Brush CLI from a client-uploaded COLMAP solve, reading the full-resolution photos from the host's verified capture copy"
+gpu = true
+vram_mb = 12288       # the pinned envelope; the watchdog's real net is 1.5x this
+timeout_s = 1800      # as scaffolded (limits.wall_clock_sec), under the broker's 3600 s ceiling; 900 s is queue_wait_max_s, not a run limit
+entrypoint = ["splat_brush_job.py"]
+
+[inputs]
+"scene.tar" = "COLMAP solve at native resolution: <root>/sparse/0/{cameras,images,points3D}.bin + <root>/names.txt (bare filenames only; each resolved path must stay under the photos directory); tens of MB. May carry <root>/images/ instead, for scenes the host does not hold. Exactly one scene per tar."
+
+[params]
+steps = 30000
+max_splats = 1500000
+max_res = 5712        # REQUIRED and always passed to Brush; there is no 0 = native sentinel (0 would fall through to Brush's default 1920)
+seed = 0
+
+[artifacts]
+"point_cloud.ply" = "standard 3DGS PLY (x,y,z,f_dc_*,f_rest_*,opacity,scale_*,rot_*)"
+"metrics.json"    = "steps, splat count, wall seconds, resolution used, PLY sha256, argv"
+"train.log"       = "Brush stdout/stderr"
+
+[io]
+extra_ro = ["<the host's Brush directory>", "<the host's brookline-photos directory>"]   # both must also be in the broker's allowed_ro_roots
+
+[environment]
+brush = "$BRUSH, the host's verified Brush CLI binary (brush-cli 0.3.0, docs/splat/17); the run refuses to start if it is not a file"
+python = "any python3 >= 3.12 (stdlib only; tarfile filter='data')"
+network = "none"

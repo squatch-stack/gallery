@@ -1,0 +1,110 @@
+[
+  {
+    "stem": "brookline-station",
+    "title": "Springhouse",
+    "place": "Wilson's Creek, Missouri",
+    "captured": "2026-08-30",
+    "splats": 480000,
+    "blurb": "Scanned from inside the old springhouse \u2014 the view opens within its walls, where the capture was made.",
+    "start": "interior",
+    "provenance": "provenance/brookline-station.html",
+    "subject": "place"
+  },
+  {
+    "stem": "springhouse-outside",
+    "title": "Springhouse \u2014 Outside",
+    "place": "Wilson's Creek, Missouri",
+    "captured": "2026-08-30",
+    "mesh": "scenes/springhouse-outside.glb",
+    "splats": 0,
+    "blurb": "The springhouse from the yard, as Scaniverse's textured mesh \u2014 arched stone face, dark doorway, mossed roof.",
+    "provenance": "provenance/springhouse-outside.html",
+    "subject": "place"
+  },
+  {
+    "stem": "brookline-station-2",
+    "title": "Split-Rail Fence",
+    "place": "Wilson's Creek, Missouri",
+    "captured": "2026-08-30",
+    "splats": 436384,
+    "blurb": "A worm fence on the battlefield line, weathered grey, scanned rail by rail.",
+    "provenance": "provenance/brookline-station-2.html",
+    "subject": "object"
+  },
+  {
+    "stem": "cannon",
+    "title": "Cannon",
+    "place": "Wilson's Creek, Missouri",
+    "captured": "2026-08-30",
+    "splats": 159755,
+    "blurb": "Field artillery on the line. Sixty photographs, solved on the studio's Mac; the piece was segmented out of the grass in every view and the trainer was asked to render nothing outside it, so the grass never became needles. Trained on the studio's own GPU box.",
+    "up": [
+      -0.3973,
+      -0.5569,
+      0.7294
+    ],
+    "provenance": "provenance/cannon.html",
+    "subject": "object"
+  },
+  {
+    "stem": "cannon-mesh",
+    "title": "Cannon \u2014 Mesh",
+    "place": "Wilson's Creek, Missouri",
+    "captured": "2026-08-30",
+    "mesh": "scenes/cannon-mesh.glb",
+    "splats": 0,
+    "blurb": "The same gun as Scaniverse's textured mesh \u2014 spoked wheels and carriage on a patch of shadowed grass.",
+    "provenance": "provenance/cannon-mesh.html",
+    "subject": "object"
+  },
+  {
+    "stem": "oak",
+    "title": "The Oak",
+    "place": "Wilson's Creek, Missouri",
+    "captured": "2026-08-30",
+    "splats": 480000,
+    "blurb": "A lone oak by the road, orbited twice with the studio's own capture app \u2014 LiDAR pinned the trunk, the canopy carries soft.",
+    "provenance": "provenance/oak.html",
+    "subject": "object"
+  },
+  {
+    "stem": "research-library",
+    "title": "At the Research Library",
+    "place": "Wilson's Creek National Battlefield, Missouri",
+    "captured": "2026-08-30",
+    "splats": 631726,
+    "blurb": "The wooded grounds by the Hulston Civil War Research Library \u2014 tree line, lawn, and the light coming through.",
+    "provenance": "provenance/research-library.html",
+    "subject": "place"
+  },
+  {
+    "stem": "wilsons-creek",
+    "title": "Wilson's Creek",
+    "place": "Wilson's Creek National Battlefield, Missouri",
+    "captured": "",
+    "splats": 480000,
+    "blurb": "Battlefield ground, scanned where the line once stood.",
+    "provenance": "provenance/wilsons-creek.html",
+    "subject": "place"
+  },
+  {
+    "stem": "redrock",
+    "title": "Red Rock",
+    "place": "",
+    "captured": "",
+    "splats": 480000,
+    "blurb": "The studio's flagship scan \u2014 the capture every pipeline number was measured against.",
+    "provenance": "provenance/redrock.html",
+    "subject": "place"
+  },
+  {
+    "stem": "saguaro",
+    "title": "Saguaro",
+    "place": "Tucson, Arizona",
+    "captured": "",
+    "splats": 480000,
+    "blurb": "A saguaro stand in the desert light, the studio's first big field scan.",
+    "provenance": "provenance/saguaro.html",
+    "subject": "place"
+  }
+]

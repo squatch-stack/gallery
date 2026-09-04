@@ -1,0 +1,49 @@
+{
+  "argv": [
+    "redrock",
+    "--app-export",
+    "--source",
+    "Studio scan held in the hdc-holo data set as a 3DGS PLY; capture app and date unrecorded; cleaned with tools/clean_export.py and packed to SOG/SPZ",
+    "--export",
+    "scenes/redrock.sog",
+    "--out",
+    "provenance/redrock.html",
+    "--source-commit",
+    "e9d35a857c86dd87acef738c2eca58a32930e974",
+    "--cleaning",
+    "--alpha-min 0.02 --crop-quantile 0.90 --crop-margin 1.4 --scale-ceiling 0.05 --target-count 480000",
+    "--cleaning-source",
+    "candidate",
+    "--note",
+    "Catalog date is the delivery date, not the capture date"
+  ],
+  "date": "2026-09-04T21:21:38+00:00",
+  "inputs": {
+    "app_export": true,
+    "cleaning": [
+      "--alpha-min 0.02 --crop-quantile 0.90 --crop-margin 1.4 --scale-ceiling 0.05 --target-count 480000"
+    ],
+    "cleaning_source": "candidate",
+    "export": [
+      "scenes/redrock.sog"
+    ],
+    "mapper": "incremental",
+    "masked": false,
+    "note": [
+      "Catalog date is the delivery date, not the capture date"
+    ],
+    "out": "provenance/redrock.html",
+    "place": "",
+    "source": "Studio scan held in the hdc-holo data set as a 3DGS PLY; capture app and date unrecorded; cleaned with tools/clean_export.py and packed to SOG/SPZ",
+    "source_commit": [
+      "e9d35a857c86dd87acef738c2eca58a32930e974"
+    ],
+    "sparse": "sparse",
+    "subject": "redrock",
+    "supervision": "masks",
+    "title": null,
+    "trained": null
+  },
+  "mode": "app-export",
+  "schema_version": 1
+}

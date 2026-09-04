@@ -1,0 +1,113 @@
+{
+  "focal_length_equivalent_mm": {
+    "value": 24,
+    "source": "operator default",
+    "rationale": "Brief camera specification; not stated in capture guide."
+  },
+  "equivalent_sensor_width_mm": {
+    "value": 36,
+    "source": "operator default",
+    "rationale": "Assume horizontal full-frame equivalence; actual phone calibration may differ."
+  },
+  "image_width_px": {
+    "value": 5712,
+    "source": "operator default",
+    "rationale": "Brief camera specification."
+  },
+  "image_height_px": {
+    "value": 4284,
+    "source": "operator default",
+    "rationale": "Brief camera specification; landscape orientation."
+  },
+  "overlap_target": {
+    "value": 0.55,
+    "source": "operator default",
+    "rationale": "Conservative margin above the guide requirement of more than half."
+  },
+  "guide_overlap_floor": {
+    "value": 0.5,
+    "source": "At the subject",
+    "rationale": "Overlap must be strictly greater than this fraction."
+  },
+  "max_step_deg": {
+    "value": 15,
+    "source": "At the subject",
+    "rationale": "Guide recommends frames every 10 to 15 degrees; tighter is allowed if needed."
+  },
+  "min_height_levels": {
+    "value": 2,
+    "source": "At the subject",
+    "rationale": "Two heights."
+  },
+  "radius_multipliers": {
+    "value": [
+      1,
+      1.25
+    ],
+    "source": "operator default",
+    "rationale": "Two radii per guide; outer-radius multiplier is an operator choice."
+  },
+  "metres_per_extra_level": {
+    "value": 6,
+    "source": "operator default",
+    "rationale": "Add a height level for each additional size band; coverage heuristic, not a solve guarantee."
+  },
+  "height_to_size_ratio": {
+    "value": 1,
+    "source": "operator default",
+    "rationale": "Assume height equals size when not measured."
+  },
+  "framing_margin": {
+    "value": 1.2,
+    "source": "operator default",
+    "rationale": "Increase estimated framing distance for margin."
+  },
+  "stations_per_minute": {
+    "value": 6,
+    "source": "operator default",
+    "rationale": "Includes pausing for one still per station; excludes setup, access and extra detail shots."
+  },
+  "photos_per_station": {
+    "value": 1,
+    "source": "operator default",
+    "rationale": "One still per planned station."
+  },
+  "field_frame_range": {
+    "value": [
+      60,
+      170
+    ],
+    "source": "Before you leave",
+    "rationale": "Observed planning range, not a cap."
+  },
+  "exposure_lock": {
+    "value": "Lock exposure and white balance within a pass when practical; keep lighting consistent.",
+    "source": "operator default",
+    "rationale": "Guide leaves Smart HDR on and permits exposure drift; does not require a lock."
+  },
+  "preserve_files": {
+    "value": "Keep original EXIF and uncropped full-resolution stills.",
+    "source": "operator default",
+    "rationale": "Requested file discipline; guide does not explicitly discuss EXIF or cropping."
+  },
+  "scale_reference": {
+    "value": "Photograph a measured scale reference without touching historic fabric.",
+    "source": "operator default",
+    "rationale": "Guide does not specify scale capture."
+  },
+  "provenance_evidence": {
+    "value": "Photograph identifying signage and a subject overview; record title and place, preserve dated originals.",
+    "source": "operator default",
+    "rationale": "Guide requires a generated provenance sheet but does not specify evidence photographs."
+  },
+  "symmetry_policy": {
+    "value": "For symmetric subjects, inspect registration; compare an incremental mapper solve if global fails.",
+    "source": "operator default",
+    "rationale": "Guide gives no symmetry rule; incremental is a fallback experiment, not its recommendation."
+  },
+  "interior_start": {
+    "value": "For interiors, start with a connected overview pass through the room and entrances before detail shots.",
+    "source": "operator default",
+    "rationale": "Guide has no interior start recipe; proposed field approach requires validation."
+  }
+}

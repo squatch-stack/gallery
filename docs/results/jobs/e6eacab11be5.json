@@ -1,0 +1,15 @@
+{
+ "recipe": "splat-brush",
+ "rc": 0,
+ "wall_seconds": 290.8,
+ "steps": 3000,
+ "max_splats": 1500000,
+ "max_res": 4608,
+ "seed": 42,
+ "images": 57,
+ "peak_rss_mb": 4947.1,
+ "seconds_per_1k_steps": 96.94,
+ "splats": 35547,
+ "ply_bytes": 8390642,
+ "job_id": "e6eacab11be5"
+}

@@ -1,0 +1,713 @@
+{
+  "schema_version": 1,
+  "results": [
+    {
+      "scene": "brookline-station",
+      "file": "scenes/brookline-station.sog",
+      "platform": "web-mobile",
+      "passed": true,
+      "count": 480000,
+      "size_bytes": 6302790,
+      "metrics": {
+        "nonfinite_count": 0,
+        "floater_fraction": 0.0,
+        "fog_fraction": 0.0,
+        "translucent_fraction": 4.166666666666667e-06,
+        "extent": [
+          4.572998046875001,
+          2.908203125,
+          5.14331066608429
+        ],
+        "center": [
+          -0.7909078303390975,
+          -0.22707607698604354,
+          0.9618048041875893
+        ],
+        "mad": 1.2874187872345173
+      },
+      "checks": [
+        {
+          "name": "format",
+          "status": "pass",
+          "detail": ".sog; header parsed; allowed for web-mobile: .glb, .ply, .sog, .spz"
+        },
+        {
+          "name": "count",
+          "status": "pass",
+          "detail": "480000 splats; budget 500000"
+        },
+        {
+          "name": "size",
+          "status": "pass",
+          "detail": "6302790 bytes; budget 20000000"
+        },
+        {
+          "name": "catalog",
+          "status": "pass",
+          "detail": "file 480000; catalog 480000; tolerance 1% of file count"
+        },
+        {
+          "name": "floater",
+          "status": "info",
+          "detail": "0.000000% far from centre; a place is its surroundings, so this is scenery, not floaters (catalog subject: place)"
+        },
+        {
+          "name": "fog",
+          "status": "pass",
+          "detail": "0.000000% < 1%"
+        },
+        {
+          "name": "translucent",
+          "status": "pass",
+          "detail": "0.000417% < 10%"
+        },
+        {
+          "name": "nonfinite",
+          "status": "pass",
+          "detail": "0 non-finite splats; required 0"
+        },
+        {
+          "name": "licence",
+          "status": "pass",
+          "detail": "LICENSE exists: True; README scan licence stated: True"
+        },
+        {
+          "name": "provenance",
+          "status": "pass",
+          "detail": "provenance/brookline-station.html; exists: True"
+        }
+      ]
+    },
+    {
+      "scene": "springhouse-outside",
+      "file": "scenes/springhouse-outside.glb",
+      "platform": "web-mobile",
+      "passed": false,
+      "count": 0,
+      "size_bytes": 26858880,
+      "metrics": null,
+      "checks": [
+        {
+          "name": "format",
+          "status": "pass",
+          "detail": ".glb; mesh; allowed for web-mobile: .glb, .ply, .sog, .spz"
+        },
+        {
+          "name": "count",
+          "status": "pass",
+          "detail": "0 splats; budget 500000"
+        },
+        {
+          "name": "size",
+          "status": "fail",
+          "detail": "26858880 bytes; budget 20000000"
+        },
+        {
+          "name": "catalog",
+          "status": "pass",
+          "detail": "file 0; catalog 0; tolerance 1% of file count"
+        },
+        {
+          "name": "cleanliness",
+          "status": "not_applicable",
+          "detail": "mesh; splat proxies do not apply"
+        },
+        {
+          "name": "licence",
+          "status": "pass",
+          "detail": "LICENSE exists: True; README scan licence stated: True"
+        },
+        {
+          "name": "provenance",
+          "status": "pass",
+          "detail": "provenance/springhouse-outside.html; exists: True"
+        }
+      ]
+    },
+    {
+      "scene": "brookline-station-2",
+      "file": "scenes/brookline-station-2.sog",
+      "platform": "web-mobile",
+      "passed": true,
+      "count": 436384,
+      "size_bytes": 5798118,
+      "metrics": {
+        "nonfinite_count": 0,
+        "floater_fraction": 0.0,
+        "fog_fraction": 0.0,
+        "translucent_fraction": 1.833247781770184e-05,
+        "extent": [
+          6.594482421874999,
+          6.260009765625,
+          4.476806759834288
+        ],
+        "center": [
+          -0.5777797234568937,
+          0.5465610866810487,
+          -0.09638622515178889
+        ],
+        "mad": 1.259027754389546
+      },
+      "checks": [
+        {
+          "name": "format",
+          "status": "pass",
+          "detail": ".sog; header parsed; allowed for web-mobile: .glb, .ply, .sog, .spz"
+        },
+        {
+          "name": "count",
+          "status": "pass",
+          "detail": "436384 splats; budget 500000"
+        },
+        {
+          "name": "size",
+          "status": "pass",
+          "detail": "5798118 bytes; budget 20000000"
+        },
+        {
+          "name": "catalog",
+          "status": "pass",
+          "detail": "file 436384; catalog 436384; tolerance 1% of file count"
+        },
+        {
+          "name": "floater",
+          "status": "pass",
+          "detail": "0.000000% < 2%"
+        },
+        {
+          "name": "fog",
+          "status": "pass",
+          "detail": "0.000000% < 1%"
+        },
+        {
+          "name": "translucent",
+          "status": "pass",
+          "detail": "0.001833% < 10%"
+        },
+        {
+          "name": "nonfinite",
+          "status": "pass",
+          "detail": "0 non-finite splats; required 0"
+        },
+        {
+          "name": "licence",
+          "status": "pass",
+          "detail": "LICENSE exists: True; README scan licence stated: True"
+        },
+        {
+          "name": "provenance",
+          "status": "pass",
+          "detail": "provenance/brookline-station-2.html; exists: True"
+        }
+      ]
+    },
+    {
+      "scene": "cannon",
+      "file": "scenes/cannon.sog",
+      "platform": "web-mobile",
+      "passed": true,
+      "count": 159755,
+      "size_bytes": 2248387,
+      "metrics": {
+        "nonfinite_count": 0,
+        "floater_fraction": 0.0,
+        "fog_fraction": 0.0038120872586147538,
+        "translucent_fraction": 0.0,
+        "extent": [
+          2.6807523667812347,
+          3.7380020618438725,
+          3.751674771308899
+        ],
+        "center": [
+          0.8250368064361154,
+          0.43846912030128105,
+          0.9017176248762987
+        ],
+        "mad": 1.3516100487628
+      },
+      "checks": [
+        {
+          "name": "format",
+          "status": "pass",
+          "detail": ".sog; header parsed; allowed for web-mobile: .glb, .ply, .sog, .spz"
+        },
+        {
+          "name": "count",
+          "status": "pass",
+          "detail": "159755 splats; budget 500000"
+        },
+        {
+          "name": "size",
+          "status": "pass",
+          "detail": "2248387 bytes; budget 20000000"
+        },
+        {
+          "name": "catalog",
+          "status": "pass",
+          "detail": "file 159755; catalog 159755; tolerance 1% of file count"
+        },
+        {
+          "name": "floater",
+          "status": "pass",
+          "detail": "0.000000% < 2%"
+        },
+        {
+          "name": "fog",
+          "status": "pass",
+          "detail": "0.381209% < 1%"
+        },
+        {
+          "name": "translucent",
+          "status": "pass",
+          "detail": "0.000000% < 10%"
+        },
+        {
+          "name": "nonfinite",
+          "status": "pass",
+          "detail": "0 non-finite splats; required 0"
+        },
+        {
+          "name": "licence",
+          "status": "pass",
+          "detail": "LICENSE exists: True; README scan licence stated: True"
+        },
+        {
+          "name": "provenance",
+          "status": "pass",
+          "detail": "provenance/cannon.html; exists: True"
+        }
+      ]
+    },
+    {
+      "scene": "cannon-mesh",
+      "file": "scenes/cannon-mesh.glb",
+      "platform": "web-mobile",
+      "passed": true,
+      "count": 0,
+      "size_bytes": 17549488,
+      "metrics": null,
+      "checks": [
+        {
+          "name": "format",
+          "status": "pass",
+          "detail": ".glb; mesh; allowed for web-mobile: .glb, .ply, .sog, .spz"
+        },
+        {
+          "name": "count",
+          "status": "pass",
+          "detail": "0 splats; budget 500000"
+        },
+        {
+          "name": "size",
+          "status": "pass",
+          "detail": "17549488 bytes; budget 20000000"
+        },
+        {
+          "name": "catalog",
+          "status": "pass",
+          "detail": "file 0; catalog 0; tolerance 1% of file count"
+        },
+        {
+          "name": "cleanliness",
+          "status": "not_applicable",
+          "detail": "mesh; splat proxies do not apply"
+        },
+        {
+          "name": "licence",
+          "status": "pass",
+          "detail": "LICENSE exists: True; README scan licence stated: True"
+        },
+        {
+          "name": "provenance",
+          "status": "pass",
+          "detail": "provenance/cannon-mesh.html; exists: True"
+        }
+      ]
+    },
+    {
+      "scene": "oak",
+      "file": "scenes/oak.sog",
+      "platform": "web-mobile",
+      "passed": true,
+      "count": 480000,
+      "size_bytes": 6760418,
+      "metrics": {
+        "nonfinite_count": 0,
+        "floater_fraction": 0.0,
+        "fog_fraction": 0.0,
+        "translucent_fraction": 0.0,
+        "extent": [
+          3.2385528087615967,
+          2.4152109622955322,
+          3.2385110855102512
+        ],
+        "center": [
+          0.24738254691033726,
+          1.1623366851765173,
+          8.137039396676192
+        ],
+        "mad": 0.8164403449346356
+      },
+      "checks": [
+        {
+          "name": "format",
+          "status": "pass",
+          "detail": ".sog; header parsed; allowed for web-mobile: .glb, .ply, .sog, .spz"
+        },
+        {
+          "name": "count",
+          "status": "pass",
+          "detail": "480000 splats; budget 500000"
+        },
+        {
+          "name": "size",
+          "status": "pass",
+          "detail": "6760418 bytes; budget 20000000"
+        },
+        {
+          "name": "catalog",
+          "status": "pass",
+          "detail": "file 480000; catalog 480000; tolerance 1% of file count"
+        },
+        {
+          "name": "floater",
+          "status": "pass",
+          "detail": "0.000000% < 2%"
+        },
+        {
+          "name": "fog",
+          "status": "pass",
+          "detail": "0.000000% < 1%"
+        },
+        {
+          "name": "translucent",
+          "status": "pass",
+          "detail": "0.000000% < 10%"
+        },
+        {
+          "name": "nonfinite",
+          "status": "pass",
+          "detail": "0 non-finite splats; required 0"
+        },
+        {
+          "name": "licence",
+          "status": "pass",
+          "detail": "LICENSE exists: True; README scan licence stated: True"
+        },
+        {
+          "name": "provenance",
+          "status": "pass",
+          "detail": "provenance/oak.html; exists: True"
+        }
+      ]
+    },
+    {
+      "scene": "research-library",
+      "file": "scenes/research-library.sog",
+      "platform": "web-mobile",
+      "passed": false,
+      "count": 631726,
+      "size_bytes": 8316921,
+      "metrics": {
+        "nonfinite_count": 0,
+        "floater_fraction": 0.34934291132547973,
+        "fog_fraction": 0.0,
+        "translucent_fraction": 6.33185906548092e-06,
+        "extent": [
+          40.043212890625,
+          30.229003906250007,
+          40.083007812499986
+        ],
+        "center": [
+          -0.17393924045876155,
+          0.5990857449361937,
+          -0.3353115840277785
+        ],
+        "mad": 1.0951292101858758
+      },
+      "checks": [
+        {
+          "name": "format",
+          "status": "pass",
+          "detail": ".sog; header parsed; allowed for web-mobile: .glb, .ply, .sog, .spz"
+        },
+        {
+          "name": "count",
+          "status": "fail",
+          "detail": "631726 splats; budget 500000"
+        },
+        {
+          "name": "size",
+          "status": "pass",
+          "detail": "8316921 bytes; budget 20000000"
+        },
+        {
+          "name": "catalog",
+          "status": "pass",
+          "detail": "file 631726; catalog 631726; tolerance 1% of file count"
+        },
+        {
+          "name": "floater",
+          "status": "info",
+          "detail": "34.934291% far from centre; a place is its surroundings, so this is scenery, not floaters (catalog subject: place)"
+        },
+        {
+          "name": "fog",
+          "status": "pass",
+          "detail": "0.000000% < 1%"
+        },
+        {
+          "name": "translucent",
+          "status": "pass",
+          "detail": "0.000633% < 10%"
+        },
+        {
+          "name": "nonfinite",
+          "status": "pass",
+          "detail": "0 non-finite splats; required 0"
+        },
+        {
+          "name": "licence",
+          "status": "pass",
+          "detail": "LICENSE exists: True; README scan licence stated: True"
+        },
+        {
+          "name": "provenance",
+          "status": "pass",
+          "detail": "provenance/research-library.html; exists: True"
+        }
+      ]
+    },
+    {
+      "scene": "wilsons-creek",
+      "file": "scenes/wilsons-creek.sog",
+      "platform": "web-mobile",
+      "passed": true,
+      "count": 480000,
+      "size_bytes": 6384325,
+      "metrics": {
+        "nonfinite_count": 0,
+        "floater_fraction": 0.42814375,
+        "fog_fraction": 0.0,
+        "translucent_fraction": 3.3333333333333335e-05,
+        "extent": [
+          125.63232421874999,
+          85.20996093749999,
+          125.62329101562497
+        ],
+        "center": [
+          1.229274904785471,
+          -0.25424616430724156,
+          0.43427007261170575
+        ],
+        "mad": 2.5416139917116727
+      },
+      "checks": [
+        {
+          "name": "format",
+          "status": "pass",
+          "detail": ".sog; header parsed; allowed for web-mobile: .glb, .ply, .sog, .spz"
+        },
+        {
+          "name": "count",
+          "status": "pass",
+          "detail": "480000 splats; budget 500000"
+        },
+        {
+          "name": "size",
+          "status": "pass",
+          "detail": "6384325 bytes; budget 20000000"
+        },
+        {
+          "name": "catalog",
+          "status": "pass",
+          "detail": "file 480000; catalog 480000; tolerance 1% of file count"
+        },
+        {
+          "name": "floater",
+          "status": "info",
+          "detail": "42.814375% far from centre; a place is its surroundings, so this is scenery, not floaters (catalog subject: place)"
+        },
+        {
+          "name": "fog",
+          "status": "pass",
+          "detail": "0.000000% < 1%"
+        },
+        {
+          "name": "translucent",
+          "status": "pass",
+          "detail": "0.003333% < 10%"
+        },
+        {
+          "name": "nonfinite",
+          "status": "pass",
+          "detail": "0 non-finite splats; required 0"
+        },
+        {
+          "name": "licence",
+          "status": "pass",
+          "detail": "LICENSE exists: True; README scan licence stated: True"
+        },
+        {
+          "name": "provenance",
+          "status": "pass",
+          "detail": "provenance/wilsons-creek.html; exists: True"
+        }
+      ]
+    },
+    {
+      "scene": "redrock",
+      "file": "scenes/redrock.sog",
+      "platform": "web-mobile",
+      "passed": true,
+      "count": 480000,
+      "size_bytes": 6324827,
+      "metrics": {
+        "nonfinite_count": 0,
+        "floater_fraction": 0.3260875,
+        "fog_fraction": 0.0,
+        "translucent_fraction": 1.4583333333333333e-05,
+        "extent": [
+          92.5595703125,
+          60.4755859375,
+          92.85693359375003
+        ],
+        "center": [
+          -0.3984745163991837,
+          -0.12966724969685017,
+          0.3778701550809848
+        ],
+        "mad": 1.5034450325779816
+      },
+      "checks": [
+        {
+          "name": "format",
+          "status": "pass",
+          "detail": ".sog; header parsed; allowed for web-mobile: .glb, .ply, .sog, .spz"
+        },
+        {
+          "name": "count",
+          "status": "pass",
+          "detail": "480000 splats; budget 500000"
+        },
+        {
+          "name": "size",
+          "status": "pass",
+          "detail": "6324827 bytes; budget 20000000"
+        },
+        {
+          "name": "catalog",
+          "status": "pass",
+          "detail": "file 480000; catalog 480000; tolerance 1% of file count"
+        },
+        {
+          "name": "floater",
+          "status": "info",
+          "detail": "32.608750% far from centre; a place is its surroundings, so this is scenery, not floaters (catalog subject: place)"
+        },
+        {
+          "name": "fog",
+          "status": "pass",
+          "detail": "0.000000% < 1%"
+        },
+        {
+          "name": "translucent",
+          "status": "pass",
+          "detail": "0.001458% < 10%"
+        },
+        {
+          "name": "nonfinite",
+          "status": "pass",
+          "detail": "0 non-finite splats; required 0"
+        },
+        {
+          "name": "licence",
+          "status": "pass",
+          "detail": "LICENSE exists: True; README scan licence stated: True"
+        },
+        {
+          "name": "provenance",
+          "status": "pass",
+          "detail": "provenance/redrock.html; exists: True"
+        }
+      ]
+    },
+    {
+      "scene": "saguaro",
+      "file": "scenes/saguaro.sog",
+      "platform": "web-mobile",
+      "passed": true,
+      "count": 480000,
+      "size_bytes": 5640538,
+      "metrics": {
+        "nonfinite_count": 0,
+        "floater_fraction": 0.27868125,
+        "fog_fraction": 0.0,
+        "translucent_fraction": 3.541666666666667e-05,
+        "extent": [
+          44.21459960937499,
+          20.897705078124993,
+          44.211669921875014
+        ],
+        "center": [
+          -0.5032173700231312,
+          1.1299450264862945,
+          1.7824077441266628
+        ],
+        "mad": 1.4715739633876392
+      },
+      "checks": [
+        {
+          "name": "format",
+          "status": "pass",
+          "detail": ".sog; header parsed; allowed for web-mobile: .glb, .ply, .sog, .spz"
+        },
+        {
+          "name": "count",
+          "status": "pass",
+          "detail": "480000 splats; budget 500000"
+        },
+        {
+          "name": "size",
+          "status": "pass",
+          "detail": "5640538 bytes; budget 20000000"
+        },
+        {
+          "name": "catalog",
+          "status": "pass",
+          "detail": "file 480000; catalog 480000; tolerance 1% of file count"
+        },
+        {
+          "name": "floater",
+          "status": "info",
+          "detail": "27.868125% far from centre; a place is its surroundings, so this is scenery, not floaters (catalog subject: place)"
+        },
+        {
+          "name": "fog",
+          "status": "pass",
+          "detail": "0.000000% < 1%"
+        },
+        {
+          "name": "translucent",
+          "status": "pass",
+          "detail": "0.003542% < 10%"
+        },
+        {
+          "name": "nonfinite",
+          "status": "pass",
+          "detail": "0 non-finite splats; required 0"
+        },
+        {
+          "name": "licence",
+          "status": "pass",
+          "detail": "LICENSE exists: True; README scan licence stated: True"
+        },
+        {
+          "name": "provenance",
+          "status": "pass",
+          "detail": "provenance/saguaro.html; exists: True"
+        }
+      ]
+    }
+  ]
+}

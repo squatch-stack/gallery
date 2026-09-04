@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Squatch Stack — Field Scans</title>
+<meta name="description" content="Gaussian-splat scans of real places, captured and processed by the studio's own pipeline. Drag to orbit; everything runs in your browser.">
+<style>
+  :root {
+    --ground: #0d0b09;
+    --panel: #17130e;
+    --line: #3a332a;
+    --ink: #e6ddcd;
+    --dim: #97907f;
+    --ember: #e58a5e;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--ground); color: var(--ink); }
+  body {
+    font: 16px/1.6 Georgia, "Times New Roman", serif;
+    padding: 3.5rem 1.25rem 4rem;
+  }
+  main { max-width: 62rem; margin: 0 auto; }
+  header { margin-bottom: 2.75rem; }
+  .mark {
+    font: 700 12px/1 ui-monospace, Menlo, monospace;
+    letter-spacing: 0.28em; text-transform: uppercase;
+    color: var(--ember);
+  }
+  h1 {
+    font-size: clamp(2.1rem, 6vw, 3.4rem);
+    font-weight: 400; letter-spacing: 0.01em;
+    margin: 0.5rem 0 0.75rem; text-wrap: balance;
+  }
+  header p { max-width: 40rem; color: var(--dim); margin: 0; }
+  .grid {
+    display: grid; gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+    margin-top: 2.5rem;
+  }
+  a.card {
+    display: flex; flex-direction: column; gap: 0.6rem;
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 10px; padding: 1.4rem 1.3rem 1.2rem;
+    color: inherit; text-decoration: none;
+    transition: border-color 0.25s, transform 0.25s;
+  }
+  a.card:hover, a.card:focus-visible {
+    border-color: var(--ember); transform: translateY(-2px);
+    outline: none;
+  }
+  .card h2 { font-size: 1.45rem; font-weight: 400; margin: 0; }
+  .card .meta {
+    font: 11px/1.6 ui-monospace, Menlo, monospace;
+    letter-spacing: 0.06em; color: var(--dim);
+  }
+  .card .meta b { color: var(--ember); font-weight: 600; }
+  .card p { margin: 0; color: var(--dim); font-size: 0.95rem; }
+  .card .checks {
+    font: 11px/1.6 ui-monospace, Menlo, monospace;
+    color: var(--dim); overflow-wrap: anywhere;
+  }
+  .card .go {
+    margin-top: auto; padding-top: 0.9rem;
+    font: 12px/1 ui-monospace, Menlo, monospace; color: var(--ember);
+  }
+  footer {
+    margin-top: 3.5rem; padding-top: 1.25rem;
+    border-top: 1px solid var(--line);
+    color: var(--dim); font-size: 0.85rem;
+  }
+  footer a { color: var(--ember); }
+  @media (prefers-reduced-motion: reduce) {
+    a.card { transition: none; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="mark">Squatch Stack</div>
+    <h1>Field Scans</h1>
+    <p>Gaussian-splat scans of real places — battlefield ground, desert
+    stands, red rock — captured on foot and processed end to end by the
+    studio's own pipeline. Everything renders live in your browser;
+    drag to orbit.</p>
+  </header>
+  <div class="grid" id="grid"></div>
+  <footer>
+    <p style="margin:0 0 0.75rem"><a href="hologram.html">Experiment:
+    the scan as a hologram &#8594;</a></p>
+    Captured, cleaned and packed by
+    <a href="https://github.com/squatch-stack">Squatch Stack</a> tooling —
+    including the <a href="https://github.com/squatch-stack/hdc-holo">holo</a>
+    exporters. Rendered with
+    <a href="https://sparkjs.dev">Spark</a> on three.js.
+  </footer>
+</main>
+<script>
+  const checks = fetch("checks.json").then(r => {
+    if (!r.ok) throw new Error("Checks unavailable");
+    return r.json();
+  }).then(data => {
+    if (data.schema_version !== 1 || !Array.isArray(data.results)) {
+      throw new Error("Unsupported checks snapshot");
+    }
+    return new Map(data.results.filter(r => r.platform === "web-mobile").map(r => [r.scene, r]));
+  }).catch(() => new Map());
+  fetch("scenes.json").then(r => r.json()).then(scenes => {
+    const grid = document.getElementById("grid");
+    for (const s of scenes) {
+      const a = document.createElement("a");
+      a.className = "card";
+      a.href = `viewer.html?scene=${encodeURIComponent(s.stem)}`;
+      const kind = s.mesh
+        ? "textured mesh" : `<b>${s.splats.toLocaleString()}</b> splats`;
+      const meta = [s.place, s.captured, kind].filter(Boolean).join(" · ");
+      a.innerHTML = `<h2></h2><div class="meta">${meta}</div><p></p>
+        <div class="checks" role="status">web-mobile: checking</div>
+        <div class="go">open scan &#8594;</div>`;
+      a.querySelector("h2").textContent = s.title;
+      a.querySelector("p").textContent = s.blurb;
+      grid.appendChild(a);
+      checks.then(results => {
+        const badge = a.querySelector(".checks");
+        const result = results.get(s.stem);
+        if (!result || !Array.isArray(result.checks) || !result.checks.length) {
+          badge.textContent = "web-mobile: checks unavailable";
+          return;
+        }
+        const failures = result.checks.filter(c => c.status === "fail").map(c => c.name);
+        const valid = result.checks.every(c => ["pass", "fail", "not_applicable"].includes(c.status));
+        badge.textContent = `web-mobile: ${failures.length ? failures.join(", ")
+          : valid && result.passed === true ? "passes" : "checks unavailable"}`;
+        badge.title = result.checks.map(c => `${c.name}: ${c.detail}`).join("\n");
+      });
+    }
+  });
+</script>
+</body>
+</html>

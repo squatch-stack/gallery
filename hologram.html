@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Squatch Stack — the scan as a hologram</title>
+<meta name="description" content="The same Wilson's Creek scan, encoded into fixed-size holographic hypervector bundles and read back — slices and X-rays decoded from the vectors, no rasterizer.">
+<style>
+  :root {
+    --ground: #0d0b09; --panel: #17130e; --line: #3a332a;
+    --ink: #e6ddcd; --dim: #97907f; --ember: #e58a5e;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--ground); color: var(--ink); }
+  body { font: 16px/1.65 Georgia, "Times New Roman", serif; padding: 3rem 1.25rem 4rem; }
+  main { max-width: 46rem; margin: 0 auto; }
+  .mark {
+    font: 700 12px/1 ui-monospace, Menlo, monospace;
+    letter-spacing: 0.28em; text-transform: uppercase; color: var(--ember);
+  }
+  h1 { font-size: clamp(1.9rem, 5vw, 2.8rem); font-weight: 400; margin: 0.5rem 0 1rem; text-wrap: balance; }
+  p { color: var(--dim); }
+  p.lede { color: var(--ink); }
+  figure { margin: 2rem 0; }
+  figure img {
+    width: 100%; border-radius: 8px; border: 1px solid var(--line);
+    background: #f9f9f7;
+  }
+  figcaption { font-size: 0.85rem; color: var(--dim); margin-top: 0.5rem; }
+  a { color: var(--ember); }
+  nav { margin-bottom: 2rem; font: 12px/1 ui-monospace, Menlo, monospace; }
+  nav a { text-decoration: none; border: 1px solid var(--line); border-radius: 6px; padding: 8px 12px; color: #cfc7b8; }
+  nav a:hover { border-color: var(--ember); color: var(--ember); }
+</style>
+</head>
+<body>
+<main>
+  <nav><a href="index.html">&#8592; all scans</a></nav>
+  <div class="mark">Squatch Stack · experiment</div>
+  <h1>The scan, as a hologram</h1>
+  <p class="lede">Every scan in this gallery is a cloud of hundreds of
+  thousands of Gaussians. This page shows the Brookline Station scan
+  after a different trick: the whole cloud encoded into a handful of
+  <em>fixed-size hypervector bundles</em> — a holographic
+  representation in the
+  <a href="https://github.com/squatch-stack/hdc-holo">holo</a> library's
+  sense, where every splat is superposed into the same vectors and read
+  back by algebra.</p>
+  <p>What makes it interesting is not fidelity — a splat file is far
+  smaller and exact. It's that the bundles can be <em>queried</em>:
+  slices and X-ray projections fall out of the vectors in closed form
+  (no rasterizer, no sorting), and the same algebra supports asking
+  <em>what is at</em> a location, merging two people's scans of one
+  place, and syncing scenes like documents. The renders below are read
+  straight out of the bundles, next to the exact ground truth they
+  approximate.</p>
+  <figure>
+    <img src="exhibit/real_brookline-station.png"
+         alt="Axis-aligned density slices of the Brookline Station scan: exact mixture ground truth above, the same slices decoded from holographic bundles below.">
+    <figcaption>Axis slices — exact mixture (top) against the same
+    slices decoded from the bundles (bottom).</figcaption>
+  </figure>
+  <figure>
+    <img src="exhibit/real_brookline-station_xray.png"
+         alt="Orthographic X-ray projections of the same scan, computed in closed form from the holographic bundles.">
+    <figcaption>X-ray views, straight from the bundles — projection-slice
+    theorem, no ray marching.</figcaption>
+  </figure>
+  <p>Method, measured error, and every number behind this live in the
+  library's own pages:
+  <a href="https://github.com/squatch-stack/hdc-holo/blob/main/docs/real-scenes.md">real-scenes.md</a>
+  and
+  <a href="https://github.com/squatch-stack/hdc-holo/blob/main/docs/render.md">render.md</a>.</p>
+</main>
+</body>
+</html>
