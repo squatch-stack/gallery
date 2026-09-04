@@ -30,10 +30,10 @@ import sys
 import tarfile
 import tempfile
 
-import pycolmap
-
 
 def pick_model(sparse, wanted):
+    import pycolmap
+
     models = {}
     for d in sorted(sparse.iterdir()):
         if (d / "cameras.bin").is_file():

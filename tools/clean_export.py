@@ -24,26 +24,14 @@ import argparse
 import os
 import sys
 
-import numpy as np
 
 sys.path.insert(0, os.path.expanduser("~/Documents/HDC-VSA-Gaussian-Splatting"))
-
-from holo.capture import (
-    SH_C0,
-    _to_y_up,
-    load_ply_sh,
-    load_scene_file,
-    load_spz_sh,
-    save_ply,
-    save_spz,
-    sh_flip_x180,
-    weighted_quantile,
-)
-from holo.sog import save_sog
 
 
 def parse_vector(value):
     """Parse a finite scene-space vector before loading a potentially large file."""
+    import numpy as np
+
     try:
         vector = np.array([float(v) for v in value.split(",")])
     except ValueError as exc:
@@ -61,6 +49,8 @@ def crop_mask(pos, alpha, center, quantile=0.90, margin=1.4, radius=0.0, shape="
     footprint. Explicit radius overrides quantiles AND margin for every shape.
     Zero half-extents constrain that coordinate to the centre plane exactly.
     """
+    import numpy as np
+
     basis = np.eye(3)
     if shape == "box":
         # Preserve the historical operations, including inclusive bounds and
@@ -112,6 +102,8 @@ def contribution_keep(scale, alpha, target_count):
     Stable sorting resolves equal scores in favor of earlier input splats.
     The denominator is the mass remaining after all preceding cleaning.
     """
+    import numpy as np
+
     keep = np.ones(len(alpha), dtype=bool)
     if len(alpha) <= target_count:
         return keep, 0.0
@@ -130,6 +122,10 @@ def load_gaussian_ply_any_order(path):
     parsers). Indexes fields by name; same conventions as holo's loader:
     SH_C0 color, sigmoid opacity, exp scales, y-up flip on the way in.
     Returns (pos, scale, rgba, quat, sh)."""
+    import numpy as np
+
+    from holo.capture import SH_C0, _to_y_up, sh_flip_x180
+
     with open(path, "rb") as f:
         assert f.readline().strip() == b"ply"
         props, n = [], 0
@@ -202,6 +198,10 @@ def main():
     ap.add_argument("--target-count", type=int,
                     help="positive splat budget after cleaning; keep highest alpha-weighted footprints")
     args = ap.parse_args()
+    import numpy as np
+
+    from holo.capture import load_ply_sh, load_scene_file, load_spz_sh, save_spz
+    from holo.sog import save_sog
     if args.target_count is not None and args.target_count <= 0:
         ap.error("--target-count must be positive")
     if args.up is not None and not np.any(args.up):
@@ -326,6 +326,16 @@ def main():
 
     for path in (archive_ply, out_spz, out_sog):
         print(f"  {path}  {os.path.getsize(path) / 1e6:.1f} MB")
+
+
+def weighted_quantile(*args, **kwargs):
+    from holo.capture import weighted_quantile as implementation
+    return implementation(*args, **kwargs)
+
+
+def save_ply(*args, **kwargs):
+    from holo.capture import save_ply as implementation
+    return implementation(*args, **kwargs)
 
 
 if __name__ == "__main__":

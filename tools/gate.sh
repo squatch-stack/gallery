@@ -1,17 +1,21 @@
 #!/bin/sh
 set -eu
+if [ "$#" -eq 1 ] && { [ "$1" = "--help" ] || [ "$1" = "-h" ]; }; then
+    echo "usage: tools/gate.sh [--quick] [--help]"
+    exit 0
+fi
 
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 PYTHON=${PYTHON:-python3}
 QUICK=false
 
 if [ "$#" -gt 1 ]; then
-    echo "usage: tools/gate.sh [--quick]" >&2
+    echo "usage: tools/gate.sh [--quick] [--help]" >&2
     exit 2
 fi
 if [ "$#" -eq 1 ]; then
     if [ "$1" != "--quick" ]; then
-        echo "usage: tools/gate.sh [--quick]" >&2
+        echo "usage: tools/gate.sh [--quick] [--help]" >&2
         exit 2
     fi
     QUICK=true

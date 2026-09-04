@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import argparse
 import re
 import subprocess
 import sys
@@ -62,7 +63,8 @@ def findings(root: Path = ROOT) -> list[tuple[Path, int, str]]:
     return problems
 
 
-def main() -> int:
+def main(argv=None) -> int:
+    argparse.ArgumentParser(description=__doc__).parse_args(argv)
     try:
         problems = findings()
     except (OSError, subprocess.CalledProcessError) as exc:

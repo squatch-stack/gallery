@@ -17,7 +17,6 @@ import sys
 import zipfile
 from pathlib import Path
 
-import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
 BUDGETS = {"web-mobile": (500_000, 20_000_000), "web-desktop": (1_500_000, 60_000_000), "fab": (None, None)}
@@ -45,6 +44,8 @@ TYPES = {
 
 def read_ply(path):
     """Read standard scalar 3DGS vertices, independent of property order."""
+    import numpy as np
+
     with path.open("rb") as f:
         if f.readline().strip() != b"ply":
             raise ValueError("invalid PLY magic")
@@ -96,6 +97,8 @@ def read_ply(path):
 
 
 def read_sog(path):
+    import numpy as np
+
     from PIL import Image
 
     with zipfile.ZipFile(path) as z:
@@ -128,6 +131,8 @@ def read_sog(path):
 
 
 def read_spz(path):
+    import numpy as np
+
     with path.open("rb") as f:
         compressed = f.read(2) == b"\x1f\x8b"
     with gzip.open(path, "rb") if compressed else path.open("rb") as f:
@@ -163,12 +168,16 @@ def read_spz(path):
 
 
 def weighted_median(values, weights):
+    import numpy as np
+
     order = np.argsort(values)
     cumulative = np.cumsum(weights[order])
     return float(values[order[np.searchsorted(cumulative, cumulative[-1] / 2)]])
 
 
 def cleanliness(arrays):
+    import numpy as np
+
     pos, scale, alpha, raw = arrays
     finite = np.isfinite(pos).all(1) & np.isfinite(scale).all(1) & np.isfinite(alpha) & np.isfinite(raw).all(1)
     metrics = {

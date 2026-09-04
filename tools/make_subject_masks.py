@@ -22,15 +22,10 @@ import argparse
 import pathlib
 import time
 
-import numpy as np
-import torch
-from PIL import Image, ImageFilter, ImageOps
 
 DINO = "IDEA-Research/grounding-dino-base"
 SAM2 = "facebook/sam2.1-hiera-large"
 SAM1 = "facebook/sam-vit-large"
-UNDO = {2: Image.FLIP_LEFT_RIGHT, 3: Image.ROTATE_180, 4: Image.FLIP_TOP_BOTTOM,
-        5: Image.TRANSPOSE, 6: Image.ROTATE_90, 7: Image.TRANSVERSE, 8: Image.ROTATE_270}
 
 
 def load_sam(device):
@@ -62,6 +57,12 @@ def main():
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--max-boxes", type=int, default=3)
     a = ap.parse_args()
+    import numpy as np
+    import torch
+    from PIL import Image, ImageFilter, ImageOps
+
+    UNDO = {2: Image.FLIP_LEFT_RIGHT, 3: Image.ROTATE_180, 4: Image.FLIP_TOP_BOTTOM,
+            5: Image.TRANSPOSE, 6: Image.ROTATE_90, 7: Image.TRANSVERSE, 8: Image.ROTATE_270}
 
     from transformers import GroundingDinoForObjectDetection, GroundingDinoProcessor
     device = "mps" if torch.backends.mps.is_available() else "cpu"

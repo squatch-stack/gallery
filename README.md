@@ -12,15 +12,17 @@ pending DNS).
 
 - `scenes/` — web-delivery splats: `.sog` (viewer) and `.spz` (interop)
 - `viewer.html` — Spark viewer; `?scene=<stem>` from `scenes.json`
-- `tools/clean_export.py` — opacity floor, mass-centered crop, fog cull,
+- `tools/clean_export.py` — opacity floor, alpha-weighted median crop centre, fog cull,
   and export, all through holo's own writers
 
 Raw captures are archived off-repo.
 
 Catalog cards show the saved web-mobile checks in `checks.json`. After changing
 a delivered file, catalog entry, or provenance page, run `./tools/refresh_checks.sh`.
-It uses `.venv-check/bin/python` when available, otherwise `python3`; set `PYTHON`
-to override (requires numpy and Pillow). Failed scene checks are saved too;
+It tries `.venv-check/bin/python`, then
+`~/Documents/HDC-VSA-Gaussian-Splatting/.venv/bin/python`, then
+`.venv-masks/bin/python`, then `python3`; set `PYTHON` to override
+(requires numpy and Pillow). Failed scene checks are saved too;
 an execution error leaves the previous snapshot intact. Run
 `python3 tools/check_deliverable.py --all` with the same dependencies for the table.
 

@@ -12,7 +12,6 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from PIL import Image
 
 VIDEO_SUFFIXES = {".mp4", ".mov", ".m4v"}
 IMAGE_SUFFIXES = {".jpg", ".jpeg", ".png", ".tif", ".tiff"}
@@ -104,6 +103,8 @@ def read_ffprobe(path: Path) -> dict[str, Any]:
 
 
 def inspect(path: Path) -> dict[str, Any]:
+    from PIL import Image
+
     if not path.is_file():
         raise ValueError(f"file does not exist: {path}")
     suffix = path.suffix.lower()

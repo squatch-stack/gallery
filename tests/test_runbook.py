@@ -44,11 +44,7 @@ def help_output(tool: str) -> str:
         text=True,
     )
     output = result.stdout + result.stderr
-    unavailable = re.search(r"(?:ModuleNotFoundError|ImportError): (.+)", output)
-    if unavailable:
-        pytest.skip(f"{tool} imports unavailable: {unavailable.group(1)}")
-    if result.returncode != 0:
-        pytest.skip(f"{tool} does not provide usable --help: {output.splitlines()[-1]}")
+    assert result.returncode == 0, f"{tool} --help failed: {output}"
     return output
 
 

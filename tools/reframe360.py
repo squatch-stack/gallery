@@ -13,9 +13,11 @@ import time
 from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
+from typing import TYPE_CHECKING
 
-import numpy as np
-from PIL import Image
+if TYPE_CHECKING:
+    import numpy as np
+
 
 try:
     import cv2
@@ -37,6 +39,8 @@ class View:
 
     @property
     def cam_from_rig(self) -> np.ndarray:
+        import numpy as np
+
         return np.asarray((self.right, self.down, self.forward), dtype=np.float64)
 
 
@@ -72,6 +76,8 @@ def make_views(faces: int, yaw_offsets: Sequence[float] | None = None) -> list[V
 
 def pinhole_rays(size: int, fov_degrees: float) -> np.ndarray:
     """Return normalized camera rays at pixel centers in x-right/y-down/z-forward coordinates."""
+    import numpy as np
+
     focal = focal_length(size, fov_degrees)
     coords = np.arange(size, dtype=np.float32) + 0.5
     x = (coords - size / 2.0) / focal
@@ -86,6 +92,8 @@ def rays_to_equirect_map(
     rays_camera: np.ndarray, view: View, source_shape: tuple[int, int]
 ) -> tuple[np.ndarray, np.ndarray]:
     """Map camera rays to floating-point equirectangular source pixel coordinates."""
+    import numpy as np
+
     # A row-vector camera ray is transformed by cam_from_rig to the rig frame.
     rays_rig = rays_camera @ view.cam_from_rig
     longitude = np.arctan2(rays_rig[..., 0], rays_rig[..., 2])
@@ -98,6 +106,8 @@ def rays_to_equirect_map(
 
 def _numpy_bilinear(source: np.ndarray, map_x: np.ndarray, map_y: np.ndarray) -> np.ndarray:
     """Bilinear sampler with horizontal wrap and vertical clamping."""
+    import numpy as np
+
     height, width = source.shape[:2]
     x0_raw = np.floor(map_x).astype(np.int64)
     y0 = np.floor(map_y).astype(np.int64)
@@ -115,6 +125,8 @@ def _numpy_bilinear(source: np.ndarray, map_x: np.ndarray, map_y: np.ndarray) ->
 
 
 def remap_equirect(source: np.ndarray, map_x: np.ndarray, map_y: np.ndarray) -> np.ndarray:
+    import numpy as np
+
     if cv2 is None:
         return _numpy_bilinear(source, map_x, map_y)
     # BORDER_WRAP also wraps y, so pad the poles and wrap only x explicitly.
@@ -146,6 +158,8 @@ def focal_length(size: int, fov_degrees: float) -> float:
 
 def rotation_matrix_to_quaternion(matrix: np.ndarray) -> list[float]:
     """Convert a proper rotation matrix to COLMAP's [w, x, y, z] order."""
+    import numpy as np
+
     trace = float(np.trace(matrix))
     if trace > 0.0:
         scale = math.sqrt(trace + 1.0) * 2.0
@@ -179,6 +193,9 @@ def rotation_matrix_to_quaternion(matrix: np.ndarray) -> list[float]:
 
 
 def _read_rgb(path: Path) -> np.ndarray:
+    import numpy as np
+    from PIL import Image
+
     with Image.open(path) as image:
         return np.asarray(image.convert("RGB"))
 
@@ -224,6 +241,9 @@ def drop_near_duplicates(
     frames: Sequence[tuple[Path, float | None]], threshold: float = 1.5
 ) -> list[tuple[Path, float | None]]:
     """Drop adjacent sampled frames with mean thumbnail RGB difference below threshold."""
+    import numpy as np
+    from PIL import Image
+
     kept: list[tuple[Path, float | None]] = []
     previous: np.ndarray | None = None
     for path, timestamp in frames:
@@ -240,6 +260,8 @@ def drop_near_duplicates(
 
 def add_nadir_alpha(image: np.ndarray) -> np.ndarray:
     """Mask a soft-edged circle around the optical axis of the down face."""
+    import numpy as np
+
     height, width = image.shape[:2]
     y, x = np.ogrid[:height, :width]
     radius = np.hypot(x - width / 2.0, y - height / 2.0)
@@ -304,6 +326,8 @@ def write_metadata(
 
 
 def process(args: argparse.Namespace) -> dict[str, object]:
+    from PIL import Image
+
     output = args.out.resolve()
     images_dir = output / "images"
     rig_images_dir = output / "colmap_images"

@@ -2,6 +2,14 @@
 # Regenerate the static web-mobile snapshot, even when scene checks fail.
 # Dependencies: numpy and Pillow. Override the interpreter with PYTHON.
 set -eu
+if [ "$#" -eq 1 ] && { [ "$1" = "--help" ] || [ "$1" = "-h" ]; }; then
+    echo "usage: tools/refresh_checks.sh [--help]"
+    exit 0
+fi
+if [ "$#" -ne 0 ]; then
+    echo "usage: tools/refresh_checks.sh [--help]" >&2
+    exit 2
+fi
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 if [ -z "${PYTHON:-}" ]; then
     if [ -x "$ROOT/.venv-check/bin/python" ]; then

@@ -39,7 +39,8 @@ and mean reprojection error. Useful reruns are `--features N`, `--image-size N`,
 `--guided`, `--sequential`, `--relaxed`, and `--remap`; `--remap` reuses the
 database and only remaps.
 
-This tool has no argparse refusal text and does not implement `--help`.
+Use `--help` for arguments and defaults; argparse refuses missing subjects,
+unknown options, and invalid integer values.
 Filesystem, image, pycolmap, or mapper exceptions are fatal. A fragmented solve
 is visible as multiple models or poor registration, not a nonzero refusal.
 Person: decide whether registration and coverage are adequate. Re-capture a
@@ -58,8 +59,9 @@ This reads the chosen COLMAP model and prints JSON containing `up`, `focus`, and
 `clean_export.py --center`. Portrait captures may need `--axis +y`, `--axis
 -x`, or `--axis +x`.
 
-There are no friendly refusals or working `--help`; missing or invalid models,
-an invalid axis, or a singular focus calculation raises an exception. Person:
+Use `--help` for arguments and defaults; argparse refuses missing subjects and
+invalid axes. Missing or invalid models or a singular focus calculation raises
+an exception. Person:
 preview the scene and choose the axis that makes it level rather than blindly
 selecting the smallest spread.
 
@@ -250,7 +252,7 @@ PYTHON=~/.venvs/photogram/bin/python tools/refresh_checks.sh
 This runs all web-mobile deliverable checks to a temporary JSON file and replaces
 `checks.json` only after the output is complete and matches the catalog. Checker
 exit 1 (valid failing checks) is saved; execution/invalid-output failures leave
-the previous snapshot intact. The script has no `--help` mode.
+the previous snapshot intact. `--help` prints usage without refreshing the snapshot.
 
 - [ ] Inspect inventory, freshness, provenance, and archives.
 
@@ -316,4 +318,4 @@ python3 tools/scan_paths.py
 
 It reads tracked text files and reports repository-relative line numbers for
 machine-specific home paths or private IPv4 addresses. Findings exit 1; git or
-I/O failures exit 2. It has no `--help` mode.
+I/O failures exit 2. `--help` prints usage without scanning.

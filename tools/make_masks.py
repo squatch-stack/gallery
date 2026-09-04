@@ -25,23 +25,12 @@ import argparse
 import pathlib
 import time
 
-import numpy as np
-import torch
-from PIL import Image, ImageFilter, ImageOps
-from transformers import AutoImageProcessor, Mask2FormerForUniversalSegmentation
 
 ADE = {"wall": 0, "building": 1, "sky": 2, "floor": 3, "tree": 4, "ceiling": 5, "road": 6,
        "grass": 9, "sidewalk": 11, "person": 12, "earth": 13, "mountain": 16, "plant": 17,
        "water": 21, "rock": 34, "field": 29, "sand": 46, "path": 52, "flower": 66, "palm": 72,
        "car": 20, "fence": 32}
 MODEL = "facebook/mask2former-swin-large-ade-semantic"
-
-
-# EXIF orientation -> the transpose that undoes exif_transpose(), so a mask made
-# on the upright image can be put back onto the raw pixel grid that COLMAP and
-# Brush read (neither applies EXIF orientation).
-UNDO = {2: Image.FLIP_LEFT_RIGHT, 3: Image.ROTATE_180, 4: Image.FLIP_TOP_BOTTOM,
-        5: Image.TRANSPOSE, 6: Image.ROTATE_90, 7: Image.TRANSVERSE, 8: Image.ROTATE_270}
 
 
 def registered_names(subject):
@@ -61,6 +50,16 @@ def main():
     ap.add_argument("--grow", type=int, default=6, help="pixels to grow the ignored region at full res")
     ap.add_argument("--limit", type=int, default=0)
     a = ap.parse_args()
+    import numpy as np
+    import torch
+    from PIL import Image, ImageFilter, ImageOps
+    from transformers import AutoImageProcessor, Mask2FormerForUniversalSegmentation
+
+    # EXIF orientation -> the transpose that undoes exif_transpose(), so a mask made
+    # on the upright image can be put back onto the raw pixel grid that COLMAP and
+    # Brush read (neither applies EXIF orientation).
+    UNDO = {2: Image.FLIP_LEFT_RIGHT, 3: Image.ROTATE_180, 4: Image.FLIP_TOP_BOTTOM,
+            5: Image.TRANSPOSE, 6: Image.ROTATE_90, 7: Image.TRANSVERSE, 8: Image.ROTATE_270}
 
     drop = {ADE[c] for c in a.drop.split(",") if c} - {ADE[c] for c in a.keep_classes.split(",") if c}
     device = "mps" if torch.backends.mps.is_available() else "cpu"

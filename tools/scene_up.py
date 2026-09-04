@@ -13,20 +13,36 @@ so the value here is the world-up estimate with y and z negated.
 Validated against the cannon, whose `up` in scenes.json was measured by
 hand: the tool reproduces it to three decimals.
 """
+import argparse
 import json
 import pathlib
 import sys
 
-import numpy as np
-import pycolmap
 
 AXES = {"-y": (0, -1, 0), "+y": (0, 1, 0), "-x": (-1, 0, 0), "+x": (1, 0, 0)}
 
 
-def main():
-    subject = pathlib.Path(sys.argv[1]).expanduser()
-    args = [x for x in sys.argv[1:] if not x.startswith("--") and x not in AXES]
-    sparse = subject / (args[1] if len(args) > 1 else "sparse")
+def parse_args(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("subject", help="subject directory containing the solve")
+    parser.add_argument("sparse", nargs="?", default="sparse", help="model directory (default: sparse)")
+    parser.add_argument("--axis", choices=AXES, default="-y", help="camera up axis (default: -y)")
+    # argparse treats -x/-y as options; preserve the documented '--axis -y' spelling.
+    argv = list(sys.argv[1:] if argv is None else argv)
+    for i in range(len(argv) - 1):
+        if argv[i] == "--axis" and argv[i + 1] in AXES:
+            argv[i:i + 2] = ["--axis=" + argv[i + 1]]
+            break
+    return parser.parse_args(argv)
+
+
+def main(argv=None):
+    args = parse_args(argv)
+    import numpy as np
+    import pycolmap
+
+    subject = pathlib.Path(args.subject).expanduser()
+    sparse = subject / args.sparse
     sub = sparse / "0" if (sparse / "0").is_dir() else sparse
     rec = pycolmap.Reconstruction(sub)
     Rs = [im.cam_from_world().rotation.matrix() for im in rec.images.values()]  # world -> camera
@@ -38,7 +54,7 @@ def main():
     # visually levelled up vector. The other three are printed so a scene that
     # renders tilted can be re-run with --axis; the lowest spread is NOT a
     # reliable pick (it chose -x for the cannon, which the gallery disproves).
-    axis_name = sys.argv[sys.argv.index("--axis") + 1] if "--axis" in sys.argv else "-y"
+    axis_name = args.axis
     ups = np.array([R.T @ np.array(AXES[axis_name], dtype=float) for R in Rs])
     up = ups.mean(axis=0)
     up /= np.linalg.norm(up)
