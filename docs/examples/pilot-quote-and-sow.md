@@ -69,9 +69,14 @@ Each **core package** contains:
   photographs and available camera/solve outputs in a private handoff archive.
   PLY splat properties are not a conventional surface mesh. Raw inputs unavailable
   from an app export must be declared before contracting, with a revised inventory.
-- A generated HTML provenance sheet, file inventory, SHA-256 hashes and saved
-  checker JSON. Record capture date, device, software/version, processing settings,
-  registered/input views and solve metrics where available. Mark unavailable
+- A generated HTML provenance page for every delivered scene, its generator-input
+  JSON sidecar from `tools/provenance.py`, file inventory, SHA-256 hashes and saved
+  checker JSON. Regenerate the page and sidecar on each replacement with
+  `tools/promote_scene.py --replace`; `tools/promote_scene.py --revert` restores
+  archived assets, catalog entry and available provenance page/sidecar and reruns
+  the deliverable checker. Verify restored evidence against the delivered version;
+  regenerate missing or stale provenance before handoff. Record capture date,
+  device, software/version, processing settings, registered/input views and solve metrics where available. Mark unavailable
   information as unknown; do not substitute defaults or historical catalog counts
   for measurements of the delivered files. Use organization attribution only.
 - A machine-readable JSON metadata sidecar: identifier, title, description,
@@ -102,7 +107,12 @@ Hosting: 0 month(s) from acceptance, then handoff or approved renewal.
 
 ## 3. Methods in plain language
 
-Confirm access and the subject list before fieldwork. Photograph each rigid
+Confirm access and the subject list before fieldwork. Generate a field plan with
+`tools/capture_plan.py --type TYPE --size METRES`, using the agreed subject type
+(object, building, interior or site), horizontal size and optional `--height`.
+Save the Markdown plan with `--out` or JSON with `--json`; review its labelled
+operator defaults, rings, overlap arithmetic and checklist against access and
+coverage requirements in `docs/capture.md`. Photograph each rigid
 subject from overlapping positions at two distances and heights where safe;
 keep the whole subject in view and do not change lens mid-orbit. Check image
 registration before leaving when practical. Record omissions caused by access,
@@ -110,13 +120,34 @@ weather, moving vegetation, reflective surfaces or insufficient coverage.
 
 Align the photographs to estimate camera positions, isolate the named subject,
 create the 3D representation, remove stray and oversized elements, and export
-web files. Review the actual exported files and regenerate provenance after
-changes. Repository methods are documented in `docs/capture.md`,
+web files. For subject isolation, `tools/clean_export.py --crop-shape` supports
+box, ellipsoid and cylinder boundaries. Reduce a scene to the web splat budget
+with `--target-count`, removing the least-contributing splats by opacity-weighted
+footprint (opacity times the product of the two largest scale axes), never by
+cropping an interior to make it fit. Confirm retained coverage and exported byte
+size separately; a splat count alone does not guarantee either. Review the actual
+exported files and regenerate provenance after changes. Repository methods are documented in `docs/capture.md`,
 `tools/clean_export.py` and `tools/provenance.py`; provenance pages demonstrate
-both raw-input and app-export evidence paths. Existing gallery scenes do not
-establish that a future capture will meet acceptance without review.
+both raw-input and app-export evidence paths. The resolution sweep and masking
+A/B in `docs/results.md` provide measured evidence of method, with their stated
+comparison limits; they do not establish visual quality or future performance.
+Existing gallery scenes do not establish that a future capture will meet
+acceptance without review.
 
 ## 4. Standards commitments and evidence
+
+Deliver an updated copy of the draft accessibility statement in
+`docs/accessibility.md`, generated with `tools/a11y_check.py --all --statement`
+and an output path. It is a measured self-assessment of static HTML/CSS in
+`viewer.html` and `index.html`, not an independent audit or complete WCAG 2.1 AA
+conformance assessment. It reports automated checks such as contrast, document
+language/title, accessible names, visible focus, reduced motion and viewport
+zoom, with known limitations: no screen-reader behavior, browser rendering, interactive focus
+order, pointer gestures, JavaScript failures, captions, cognitive accessibility
+or complete success-criterion testing; contrast covers only resolvable CSS pairs.
+The canvas description and provenance link do not provide a complete nonvisual
+equivalent of the scene. Supply this statement even when the accessibility pass
+is not selected; it does not replace the audit and remediation below.
 
 Accessibility pass: **NOT INCLUDED; NO CONFORMANCE CLAIM**. When included, the delivered viewer and
 related interpretive pages must meet WCAG 2.1 Level AA: all applicable Level A
@@ -161,11 +192,16 @@ For each delivered splat, run `python3 tools/check_deliverable.py SCENE --platfo
 web-mobile --json` with the scene catalog and evidence installed. Save the command,
 tool revision, date and JSON alongside hashes. The following are **local project
 policy**, implemented in `tools/check_deliverable.py`, not an external standard.
-All four cleanliness checks must pass with these exact names and thresholds:
+Record the agreed subject profile in the scene catalog as `object` or `place`;
+`--subject object` or `--subject place` overrides it and must be saved with the
+evidence. The checker defaults to object if no profile is recorded. These are
+checker profiles, distinct from the quote's descriptive subject types: a room or
+landscape keeps its surroundings as a place, while an isolated subject is an
+object. All applicable cleanliness checks must pass as follows:
 
 | Check name | Required threshold | Definition used by the checker |
 |---|---|---|
-| `floater` | fraction **< 0.02 (2%)** | Centers farther than 3 times the opacity-weighted median distance from the opacity-weighted center; distance uses maximum absolute coordinate deviation |
+| `floater` | Objects: fraction **< 0.02 (2%)**; places: reported as `info`, not enforced | Centers farther than 3 times the opacity-weighted median distance from the opacity-weighted center; distance uses maximum absolute coordinate deviation |
 | `fog` | fraction **< 0.01 (1%)** | Any scale component exceeds 0.05 times the largest center-position extent |
 | `translucent` | fraction **< 0.10 (10%)** | Opacity below 0.05 |
 | `nonfinite` | count **= 0** | Non-finite position, scale, opacity or decoded raw attributes |
@@ -175,17 +211,25 @@ The remaining checker results must also pass: `format` allows nonempty readable
 `size` at most **20,000,000 bytes**; `catalog` agrees within **1% of file count**;
 `licence` requires a LICENSE file and a stated scan license in README;
 `provenance` requires a catalog-linked existing sheet. Equality passes the count
-and size budgets but fails the three strict fraction thresholds. Unavailable or
-unreadable geometry fails closed. Test both SOG and SPZ; provide the SPZ decoder
+and size budgets but fails the strict fraction thresholds where applicable;
+the floater threshold binds objects only. Fog, translucency and non-finite
+checks bind both profiles. Unavailable or unreadable geometry fails closed. Test both SOG and SPZ; provide the SPZ decoder
 needed by the checker rather than assuming a parsed header verifies cleanliness.
 
-Mesh cleanliness is reported `not_applicable`; the checker uses zero as its mesh
+Mesh `cleanliness` is reported `not_applicable`; the checker uses zero as its mesh
 count and only rudimentary file/extension checks. Thus a mesh must additionally
 open in the agreed viewer and an independent importer, resolve all textures,
 and match the subject inventory. Archive OBJ, PLY variants and E57 need their own
 format-aware validation; do not misapply the splat checker to them. A desktop
 exception must be agreed in writing: its existing limits are **1,500,000 splats**
 and **60,000,000 bytes**, with other checks unchanged. No automatic exception.
+
+Quality assurance runs automatically on pull requests and pushes to main through
+`.github/workflows/gates.yml`: Ruff, tests, deliverable checks, static
+accessibility, results freshness and path hygiene. Deliverable checks are
+currently advisory in CI, so a green CI run does not establish acceptance.
+`tools/gate.sh` runs the complete local suite with deliverable failures blocking;
+its `--quick` mode runs only Ruff, path hygiene and tests.
 
 Applicant and vendor review coverage, recognizable rigid surfaces and intended
 interpretive views together; gaps must match the signed scope. Verify all file

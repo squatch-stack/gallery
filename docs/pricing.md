@@ -24,8 +24,13 @@ package or assertion that a whole site fits a pilot. Subject type is descriptive
 not a price multiplier: actual size, access and complexity determine feasibility.
 
 Production covers planning, processing, cleanup, export, documentation and the
-review allowance in the SOW. These are selling-price allowances, not measured
-internal labor costs. One capture day is initially eight hours; fractional days
+review allowance in the SOW. Each core package includes the generated provenance
+page and generator-input sidecar, refreshed on replacement, plus the measured
+accessibility self-assessment statement described in the SOW. The statement is
+included even without the paid accessibility pass; it is not an independent
+audit or a complete WCAG conformance assessment. The paid pass retains its
+audit, remediation and retest scope. These are selling-price allowances, not
+measured internal labor costs. One capture day is initially eight hours; fractional days
 are supported without minimum rounding. There is no automatic overtime charge.
 
 ## Editable rate keys
