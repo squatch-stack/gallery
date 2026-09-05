@@ -1,49 +1,47 @@
 {
   "argv": [
-    "oak",
-    "--app-export",
-    "--source",
-    "Capture bundle from the studio's own iPhone capture app (LiDAR-anchored, two orbits) on 2026-08-30, trained with Brush v0.3.0 on an M1 Max and cleaned with tools/clean_export.py; packed to SOG/SPZ",
+    "~/Documents/squatch-captures/photo-subjects/oak-tree",
+    "--title",
+    "The Oak",
+    "--place",
+    "Wilson's Creek, Missouri",
+    "--trained",
+    "<external>/metrics.json",
     "--export",
     "scenes/oak.sog",
     "--out",
     "provenance/oak.html",
-    "--source-commit",
-    "f9357c403c58b9ba6414c4700a1583bc6c5b47fe",
-    "--cleaning",
-    "--crop-quantile 0.60 --crop-margin 1.1 --alpha-min 0.05 --scale-ceiling 0.05 --target-count 480000",
-    "--cleaning-source",
-    "candidate",
-    "--note",
-    "Operator-supplied source; training step count and cleaning parameters for this delivery were not recorded"
+    "--masked",
+    "--supervision",
+    "alpha"
   ],
-  "date": "2026-09-04T21:21:40+00:00",
+  "date": "2026-09-05T01:46:15+00:00",
   "inputs": {
-    "app_export": true,
-    "cleaning": [
-      "--crop-quantile 0.60 --crop-margin 1.1 --alpha-min 0.05 --scale-ceiling 0.05 --target-count 480000"
-    ],
-    "cleaning_source": "candidate",
+    "app_export": false,
+    "cleaning": [],
+    "cleaning_source": "source-commit",
     "export": [
       "scenes/oak.sog"
     ],
     "mapper": "incremental",
-    "masked": false,
-    "note": [
-      "Operator-supplied source; training step count and cleaning parameters for this delivery were not recorded"
-    ],
+    "masked": true,
+    "note": [],
     "out": "provenance/oak.html",
-    "place": "",
-    "source": "Capture bundle from the studio's own iPhone capture app (LiDAR-anchored, two orbits) on 2026-08-30, trained with Brush v0.3.0 on an M1 Max and cleaned with tools/clean_export.py; packed to SOG/SPZ",
-    "source_commit": [
-      "f9357c403c58b9ba6414c4700a1583bc6c5b47fe"
-    ],
+    "place": "Wilson's Creek, Missouri",
+    "source": null,
+    "source_commit": [],
     "sparse": "sparse",
-    "subject": "oak",
-    "supervision": "masks",
-    "title": null,
-    "trained": null
+    "subject": "~/Documents/squatch-captures/photo-subjects/oak-tree",
+    "supervision": "alpha",
+    "title": "The Oak",
+    "trained": "<external>/metrics.json",
+    "up_source": "explicit",
+    "up": [
+      -0.9773,
+      -0.1339,
+      -0.1639
+    ]
   },
-  "mode": "app-export",
+  "mode": "solve",
   "schema_version": 1
 }

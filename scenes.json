@@ -36,7 +36,7 @@
     "title": "Cannon",
     "place": "Wilson's Creek, Missouri",
     "captured": "2026-08-30",
-    "splats": 164327,
+    "splats": 164605,
     "blurb": "Field artillery on the line. Sixty photographs, solved on the studio's Mac; the piece was segmented out of the grass in every view and the trainer was asked to render nothing outside it, so the grass never became needles. Trained on the studio's own GPU box.",
     "up": [
       -0.3973,
@@ -62,10 +62,15 @@
     "title": "The Oak",
     "place": "Wilson's Creek, Missouri",
     "captured": "2026-08-30",
-    "splats": 480000,
-    "blurb": "A lone oak by the road, orbited twice with the studio's own capture app \u2014 LiDAR pinned the trunk, the canopy carries soft.",
+    "splats": 1330707,
+    "blurb": "A lone oak by the road, retrained from sixty-nine photographs with the tree and its ground segmented out of the sky in every frame. The canopy stays soft: the leaves moved between exposures, and no amount of processing fixes wind.",
     "provenance": "provenance/oak.html",
-    "subject": "object"
+    "subject": "object",
+    "up": [
+      -0.9773,
+      -0.1339,
+      -0.1639
+    ]
   },
   {
     "stem": "research-library",

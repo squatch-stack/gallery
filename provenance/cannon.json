@@ -15,7 +15,7 @@
     "--supervision",
     "alpha"
   ],
-  "date": "2026-09-04T23:41:30+00:00",
+  "date": "2026-09-05T01:53:58+00:00",
   "inputs": {
     "app_export": false,
     "cleaning": [],
@@ -35,12 +35,12 @@
     "supervision": "alpha",
     "title": "Cannon",
     "trained": "<external>/metrics.json",
+    "up_source": "explicit",
     "up": [
       -0.3973,
       -0.5569,
       0.7294
-    ],
-    "up_source": "explicit"
+    ]
   },
   "mode": "solve",
   "schema_version": 1
