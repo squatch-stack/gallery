@@ -1,62 +1,71 @@
 [
-  {
-    "name": "blender",
-    "version": "5.2.1",
-    "url": "https://download.blender.org/release/Blender5.2/blender-5.2.1-macos-arm64.dmg",
-    "file": null,
-    "licence": "GPL-3.0-or-later",
-    "notes": [
-      "Supplied through the Homebrew cask, which pins this checksum. Artefact not fetched in this lane; size unknown."
-    ],
-    "sha256": "6409e21de80994db5f4c4a34486b6fd43cea21085b912f7491c53e923acb65a3",
-    "size_bytes": null,
-    "date_checked": "2026-09-04",
-    "verification": "unverified",
-    "verified_at": null
-  },
-  {
-    "name": "blender-mcp",
-    "version": "unpinned",
-    "url": "https://github.com/ahujasid/blender-mcp",
-    "file": null,
-    "licence": "MIT",
-    "notes": [
-      "Run through uvx; execute_blender_code runs arbitrary Python inside Blender. Optional Poly Haven / Sketchfab / Hyper3D integrations must stay disabled. Socket is 127.0.0.1:9876. Version, hash and size are unverified."
-    ],
-    "sha256": null,
-    "size_bytes": null,
-    "date_checked": "2026-09-04",
-    "verification": "unverified",
-    "verified_at": null
-  },
-  {
-    "name": "3dgs-render-blender-addon",
-    "version": "unpinned",
-    "url": "https://github.com/Kiri-Innovation/3dgs-render-blender-addon",
-    "file": null,
-    "licence": "UNKNOWN",
-    "notes": [
-      "Read the LICENSE file in the downloaded release before enabling; free and open source per the vendor announcement, but the SPDX identifier is not yet confirmed here. Version, hash and size are unverified."
-    ],
-    "sha256": null,
-    "size_bytes": null,
-    "date_checked": "2026-09-04",
-    "verification": "unverified",
-    "verified_at": null
-  },
-  {
-    "name": "blender-mcp-addon",
-    "version": "5866814479b4e2ca674d8d44969a9a2a78fdc8bb",
-    "url": null,
-    "file": "blender-mcp-addon-5866814.py",
-    "licence": "MIT",
-    "notes": [
-      "Blender add-on read line by line before install: one exec() at line 1377 in the documented execute_code tool; socket binds to localhost:9876; the Poly Haven, Sketchfab, Hyper3D and Poly Pizza integrations all default to False and are gated; register() makes no network call. Auto-start defaults to True, so the socket listens whenever Blender is open."
-    ],
-    "sha256": "f43469c8518c7021e0060e32cfe52e3beb126b0f62fbae7293106642a3ebda89",
-    "size_bytes": 175194,
-    "date_checked": "2026-09-04",
-    "verification": "hashed",
-    "verified_at": "2026-09-04"
-  }
+ {
+  "name": "blender",
+  "version": "5.2.1",
+  "url": "https://download.blender.org/release/Blender5.2/blender-5.2.1-macos-arm64.dmg",
+  "file": null,
+  "licence": "GPL-3.0-or-later",
+  "notes": [
+   "Supplied through the Homebrew cask, which pins this checksum. Artefact not fetched in this lane; size unknown."
+  ],
+  "sha256": "6409e21de80994db5f4c4a34486b6fd43cea21085b912f7491c53e923acb65a3",
+  "size_bytes": null,
+  "date_checked": "2026-09-04",
+  "verification": "unverified",
+  "verified_at": null
+ },
+ {
+  "name": "blender-mcp",
+  "version": "1.9.1",
+  "url": "https://github.com/ahujasid/blender-mcp",
+  "file": null,
+  "licence": "MIT",
+  "notes": [
+   "Server pinned at blender-mcp@1.9.1 via uvx; Blender addon blender_mcp 1.6, protocol 5 on both sides. Verified 2026-09-05.",
+   "TELEMETRY SHIPS ON. Uploads viewport screenshots, full scene snapshots (object names, types, transforms, materials) and the user's prompt up to 1000 chars to a third-party Supabase (yzasssndwqceclzilcdu.supabase.co; anon key hardcoded in config.py). That is what the user_prompt argument on every tool feeds. Disabled 2026-09-05 via the disable_telemetry tool; minimal anonymous counts continue. THE DEFAULT IS ON, so re-check get_addon_status after any addon update.",
+   "execute_blender_code runs arbitrary Python inside Blender with the user's permissions. Socket is 127.0.0.1:9876 and the addon auto-starts it on Blender launch.",
+   "Optional integrations: PolyHaven is ENABLED (calls api.polyhaven.com); Sketchfab, Hyper3D/Rodin, Poly Pizza and Hunyuan3D are disabled. Generation tools must never touch a deliverable.",
+   "Never call bpy.ops.wm.read_factory_settings() over the bridge: it resets addon state and kills the connection mid-call."
+  ],
+  "sha256": null,
+  "size_bytes": null,
+  "date_checked": "2026-09-05",
+  "verification": "unverified",
+  "verified_at": null
+ },
+ {
+  "name": "blender-mcp-addon",
+  "version": "5866814479b4e2ca674d8d44969a9a2a78fdc8bb",
+  "url": null,
+  "file": "blender-mcp-addon-5866814.py",
+  "licence": "MIT",
+  "notes": [
+   "Blender add-on read line by line before install: one exec() at line 1377 in the documented execute_code tool; socket binds to localhost:9876; the Poly Haven, Sketchfab, Hyper3D and Poly Pizza integrations all default to False and are gated; register() makes no network call. Auto-start defaults to True, so the socket listens whenever Blender is open."
+  ],
+  "sha256": "f43469c8518c7021e0060e32cfe52e3beb126b0f62fbae7293106642a3ebda89",
+  "size_bytes": 175194,
+  "date_checked": "2026-09-04",
+  "verification": "hashed",
+  "verified_at": "2026-09-04"
+ },
+ {
+  "name": "3dgs-render-blender-addon",
+  "version": "5.1.0",
+  "url": "https://github.com/Kiri-Innovation/3dgs-render-blender-addon/releases/download/v5.1.0/3dgs_render_by_kiri_engine_5.1.0.zip",
+  "file": null,
+  "licence": "GPL-2.0-or-later",
+  "notes": [
+   "Licence resolved from blender_manifest.toml in the source tree: SPDX GPL-2.0-or-later. Copyleft, so it constrains redistribution of anything derived, not internal rendering.",
+   "NOT INSTALLED as of 2026-09-05, pending the owner's decision, so no sha256: hashing it would mean downloading 771 MB first.",
+   "The 771 MB is bundled wheels. The git source tree is 154 files (132 .py, 4 .glsl) with no binaries, so most of the release artefact is not auditable from source.",
+   "The macOS arm64 wheel is open3d-0.19.0+03ed109, a custom build. PyPI publishes NO macOS arm64 wheel for open3d 0.19.0, and none anywhere with a + local version, so there is no upstream artefact to diff it against. open3d has long skipped Apple Silicon, so building one is necessary rather than suspicious, but it is an unverifiable binary either way.",
+   "Also bundles a web stack: flask, werkzeug, dash, plotly, jinja2, itsdangerous, blinker, click. A render add-on that ships an HTTP server is a wider surface than the job needs.",
+   "blender_version_min 5.1.0; Blender here is 5.2.1 with Python 3.13.13, matching the cp313 wheels."
+  ],
+  "sha256": null,
+  "size_bytes": 771139278,
+  "date_checked": "2026-09-05",
+  "verification": "unverified",
+  "verified_at": null
+ }
 ]
