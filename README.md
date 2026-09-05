@@ -72,3 +72,5 @@ its gate-only dependencies do not include `pycolmap` or `torch`.
 ## License
 
 Apache-2.0, the same terms as the studio's other public repos. Scans published here are CC BY 4.0 unless a scene says otherwise.
+
+CPU view-based pruning: `tools/prune_by_views.py` preserves archived PLY records; accept by held-out recall and visual review ([runbook](docs/runbook.md#7a-prune-by-views-cpu)).

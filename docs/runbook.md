@@ -172,6 +172,56 @@ This changes the payload from embedded RGBA images to names plus masks and adds
 supervision. The host must have the full-resolution photos in its configured
 photos directory.
 
+## 7a. Prune by views (CPU)
+
+Use the archived trained PLY and its matching COLMAP solve in the original file
+frame. NumPy and Pillow handle pruning on CPU; pycolmap loads the solve. Masks
+must correspond to registered raw image grids; uniform camera rescaling is
+supported and printed. No GPU is used.
+
+```sh
+~/.venvs/photogram/bin/python tools/prune_by_views.py ~/Documents/<job>/gpugate-<job>/point_cloud.ply --solve ~/Documents/<subject> --masks ~/Documents/<subject>/masks --views 24 --view-select spread --holdout 5 --out-ply out/<subject>-pruned.ply --keep-out out/<subject>-keep.npz --report out/<subject>-prune.json --angles-out out/<subject>-angles.txt
+```
+
+Held-out recall, not the splat count, is the acceptance signal. The operator
+still views the candidate, especially thin rims and far-side detail, before
+passing this PLY into cleaning. Cleanliness checks alone cannot detect
+amputation. The report measures held-out silhouette precision and recall using
+projected-centre occupancy on the mask-scale grid, before and after pruning;
+this is a coverage proxy, not a photometric render. A recall decrease requires
+review even when precision and floater/fog metrics improve. `--holdout 0`
+explicitly disables this evidence and reports unavailable metrics.
+
+The jury uses deterministic spread sampling about the solve's convergence
+point. Out-of-frame, occluded, and uncertain mask-edge splats abstain. Judged
+splats must meet both the inside count and the fraction of views that could
+judge them; insufficiently judged splats use the printed `--unjudged` policy
+(default keep). Depth buffers use opaque splats, with tolerance for depth noise,
+extent, and splat reach. Coarse buffers bias toward abstention and keeping.
+The optional post-vote 27-cell neighbourhood counts self; alpha weighting
+prevents transparent needles from providing strong mutual support.
+
+Defaults and their sources/rationales are in `tools/prune_defaults.json`;
+`--defaults PATH` merges an override file of the same shape. `inside_fraction`,
+`min_views`, and `outlier_min_neighbours` are provisional pending cannon/oak
+held-out recall tuning. The JSON report records `prune_by_views`, exact flags,
+resolved thresholds, input hashes, jury/holdout names, and per-stage removed
+mass with the preceding stage's remaining mass as denominator. Preserve this
+report as cleaning evidence for the candidate's provenance sidecar.
+
+The tool refuses mismatched frames or mask aspect ratios, missing masks,
+unsupported camera models, invalid thresholds, and removal of every splat
+before writing outputs. Fully white and near-empty masks are excluded with
+warnings. Only fixed-width binary PLY can produce a byte-exact PLY subset:
+all properties, including `f_rest_*`, are retained without frame conversion.
+SOG supports report/keep-mask output only: re-export from the archived PLY.
+Review angles use the viewer flip and scene-up alignment; distance is fixed by
+`--sheet-distance`, not inferred from the solve's camera range.
+
+Prior art: [Clean-GS, arXiv:2601.00913](https://arxiv.org/abs/2601.00913).
+This tool independently uses repository primitives and standard multi-view
+geometry. Its implementation does not use that project's CC BY-NC-SA code.
+
 ## 7. Clean and check a candidate
 
 - [ ] If cleaning outside the orchestrator, use the measured centre/up and an

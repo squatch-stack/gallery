@@ -42,40 +42,53 @@ TYPES = {
 }
 
 
+def ply_header(f):
+    """Parse scalar 3DGS metadata; leave the stream at the first vertex.
+
+    Return count, encoding, named scalar types, and the original header bytes.
+    """
+    magic = f.readline()
+    header = [magic]
+    if magic.strip() != b"ply":
+        raise ValueError("invalid PLY magic")
+    props, count, fmt, element = [], None, None, None
+    for _ in range(10000):
+        line = f.readline()
+        header.append(line)
+        if not line:
+            raise ValueError("truncated PLY header")
+        parts = line.decode("ascii").split()
+        if not parts or parts[0] in {"comment", "obj_info"}:
+            continue
+        if parts[0] == "end_header":
+            break
+        if parts[0] == "format":
+            fmt = parts[1]
+        elif parts[0] == "element":
+            element = parts[1]
+            if element == "vertex":
+                count = int(parts[2])
+            elif count is None and int(parts[2]):
+                raise ValueError("unsupported element before vertices")
+        elif parts[0] == "property" and element == "vertex":
+            if parts[1] not in TYPES or len(parts) != 3:
+                raise ValueError("unsupported vertex property")
+            props.append((parts[2], TYPES[parts[1]]))
+    else:
+        raise ValueError("oversized PLY header")
+    names = [p[0] for p in props]
+    if count is None or count <= 0 or not REQUIRED <= set(names) or len(set(names)) != len(names):
+        raise ValueError("PLY requires positive vertex count and standard 3DGS properties")
+    return count, fmt, props, b"".join(header)
+
+
 def read_ply(path):
     """Read standard scalar 3DGS vertices, independent of property order."""
     import numpy as np
 
     with path.open("rb") as f:
-        if f.readline().strip() != b"ply":
-            raise ValueError("invalid PLY magic")
-        props, count, fmt, element = [], None, None, None
-        for _ in range(10000):
-            line = f.readline()
-            if not line:
-                raise ValueError("truncated PLY header")
-            parts = line.decode("ascii").split()
-            if not parts or parts[0] in {"comment", "obj_info"}:
-                continue
-            if parts[0] == "end_header":
-                break
-            if parts[0] == "format":
-                fmt = parts[1]
-            elif parts[0] == "element":
-                element = parts[1]
-                if element == "vertex":
-                    count = int(parts[2])
-                elif count is None and int(parts[2]):
-                    raise ValueError("unsupported element before vertices")
-            elif parts[0] == "property" and element == "vertex":
-                if parts[1] not in TYPES or len(parts) != 3:
-                    raise ValueError("unsupported vertex property")
-                props.append((parts[2], TYPES[parts[1]]))
-        else:
-            raise ValueError("oversized PLY header")
+        count, fmt, props, _header = ply_header(f)
         names = [p[0] for p in props]
-        if count is None or count <= 0 or not REQUIRED <= set(names) or len(set(names)) != len(names):
-            raise ValueError("PLY requires positive vertex count and standard 3DGS properties")
         if fmt == "ascii":
             rows = [f.readline().split() for _ in range(count)]
             if any(len(row) != len(props) for row in rows):

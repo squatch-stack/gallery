@@ -202,6 +202,28 @@ def camera_candidates(subject):
     return axis_candidates(rotations, min_norm=1e-12)
 
 
+def camera_focus(rec):
+    """Return optical-axis least-squares convergence point and mean orbit radius."""
+    import numpy as np
+
+    A = np.zeros((3, 3))
+    b = np.zeros(3)
+    centers = []
+    for im in rec.images.values():
+        pose = im.cam_from_world()
+        R = pose.rotation.matrix()
+        c = -R.T @ pose.translation
+        d = R.T @ np.array([0.0, 0.0, 1.0])
+        d /= np.linalg.norm(d)
+        P = np.eye(3) - np.outer(d, d)
+        A += P
+        b += P @ c
+        centers.append(c)
+    focus = np.linalg.solve(A, b)
+    orbit = float(np.mean([np.linalg.norm(c - focus) for c in centers]))
+    return focus, orbit
+
+
 def camera_estimate(args):
     import numpy as np
     import pycolmap
@@ -229,21 +251,7 @@ def camera_estimate(args):
     # mean camera distance to it is the orbit radius, both in the solve's own
     # (arbitrary) units - a far better crop centre than the splat mass, which
     # for a building on a lawn sits in the lawn.
-    A = np.zeros((3, 3))
-    b = np.zeros(3)
-    centers = []
-    for im in rec.images.values():
-        pose = im.cam_from_world()
-        R = pose.rotation.matrix()
-        c = -R.T @ pose.translation
-        d = R.T @ np.array([0.0, 0.0, 1.0])
-        d /= np.linalg.norm(d)
-        P = np.eye(3) - np.outer(d, d)
-        A += P
-        b += P @ c
-        centers.append(c)
-    focus = np.linalg.solve(A, b)
-    orbit = float(np.mean([np.linalg.norm(c - focus) for c in centers]))
+    focus, orbit = camera_focus(rec)
     alt = axis_candidates(Rs)
     viewer = np.array([up[0], -up[1], -up[2]])
     return {"subject": subject.name, "views": len(Rs), "camera_up_axis": axis_name,

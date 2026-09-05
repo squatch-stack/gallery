@@ -96,6 +96,14 @@ def crop_mask(pos, alpha, center, quantile=0.90, margin=1.4, radius=0.0, shape="
     return inside, center - world_half, center + world_half, half, basis
 
 
+def footprint_score(scale, alpha):
+    """Alpha-weighted projected area proxy: the two largest axes span the disc."""
+    import numpy as np
+
+    axes = np.sort(scale, axis=1)
+    return alpha.astype(np.float64) * axes[:, -1] * axes[:, -2]
+
+
 def contribution_keep(scale, alpha, target_count):
     """Return an input-order mask and the fraction of footprint mass removed.
 
@@ -107,8 +115,7 @@ def contribution_keep(scale, alpha, target_count):
     keep = np.ones(len(alpha), dtype=bool)
     if len(alpha) <= target_count:
         return keep, 0.0
-    axes = np.sort(scale, axis=1)
-    score = alpha.astype(np.float64) * axes[:, -1] * axes[:, -2]
+    score = footprint_score(scale, alpha)
     order = np.argsort(-score, kind="stable")
     keep[order[target_count:]] = False
     total = score.sum(dtype=np.float64)

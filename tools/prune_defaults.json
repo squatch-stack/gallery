@@ -1,0 +1,112 @@
+{
+  "views": {
+    "value": 24,
+    "source": "LANE-B25 approved design",
+    "rationale": "Jury covers varied viewing directions."
+  },
+  "holdout": {
+    "value": 5,
+    "source": "operator default",
+    "rationale": "Reserve independent views to measure subject loss."
+  },
+  "alpha_min": {
+    "value": 0.02,
+    "source": "operator default",
+    "rationale": "Opacity floor removes negligible light."
+  },
+  "mask_scale": {
+    "value": 4,
+    "source": "LANE-B25 approved design",
+    "rationale": "Measured cannon projected radius is about 2.7 pixels."
+  },
+  "mask_dilate": {
+    "value": 1,
+    "source": "operator default",
+    "rationale": "Uncertain silhouette shell abstains."
+  },
+  "depth_alpha_min": {
+    "value": 0.5,
+    "source": "LANE-B25 approved design",
+    "rationale": "Opaque gate matches clean_export dense center."
+  },
+  "depth_scale": {
+    "value": 4,
+    "source": "operator default",
+    "rationale": "Coarse cells bias toward abstention and keeping."
+  },
+  "depth_rel": {
+    "value": 0.01,
+    "source": "operator default",
+    "rationale": "Proportional depth noise tolerance."
+  },
+  "depth_abs": {
+    "value": 0.002,
+    "source": "operator default",
+    "rationale": "Absolute floor relative to robust extent."
+  },
+  "depth_extent": {
+    "value": 3.0,
+    "source": "operator default",
+    "rationale": "Three scale axes of reach behind the surface."
+  },
+  "depth_fill": {
+    "value": 1,
+    "source": "operator default",
+    "rationale": "One 3x3 minimum pass closes thin-surface holes."
+  },
+  "min_views": {
+    "value": 2,
+    "source": "operator default",
+    "rationale": "Provisional: tune against held-out recall on cannon and oak."
+  },
+  "min_inside": {
+    "value": 1,
+    "source": "operator default",
+    "rationale": "Require at least one inside judgement."
+  },
+  "inside_fraction": {
+    "value": 0.6,
+    "source": "operator default",
+    "rationale": "Provisional: tune against held-out recall on cannon and oak."
+  },
+  "outlier_cell_fraction": {
+    "value": 0.01,
+    "source": "operator default",
+    "rationale": "Uniform-grid cell relative to robust extent."
+  },
+  "outlier_min_neighbours": {
+    "value": 3.0,
+    "source": "operator default",
+    "rationale": "Provisional: tune against held-out recall on cannon and oak; support includes self."
+  },
+  "frame_check_min": {
+    "value": 0.5,
+    "source": "operator default",
+    "rationale": "Refuse likely mismatched solve/cloud coordinates."
+  },
+  "sheet_distance": {
+    "value": 2.5,
+    "source": "operator default",
+    "rationale": "Fixed normalized review distance, independent of solve camera distance."
+  },
+  "near_fraction": {
+    "value": 1e-06,
+    "source": "operator default",
+    "rationale": "Positive-depth floor relative to robust extent."
+  },
+  "grid_tolerance": {
+    "value": 0.001,
+    "source": "LANE-B25 approved design",
+    "rationale": "Maximum difference in horizontal and vertical grid scale."
+  },
+  "min_coverage": {
+    "value": 0.01,
+    "source": "operator default",
+    "rationale": "Same near-empty mask exclusion as make_scene_payload."
+  },
+  "max_coverage": {
+    "value": 0.995,
+    "source": "operator default",
+    "rationale": "Same fully opaque mask exclusion as make_scene_payload."
+  }
+}
