@@ -123,8 +123,18 @@ def test_oblique_up_and_sign_and_magnitude():
 
 
 def test_cylinder_fallback_and_weighted_local_extents():
-    pos = np.array([[2, 0.2, 3], [-2, -0.2, -3], [100, 100, 100]])
-    alpha = np.array([1, 1, 0.001])
+    # The point of this fixture is that a 0.1%-weight outlier 50x further out
+    # than the subject must not drag the crop with it. Two subject points are
+    # too few to test that: holo's weighted quantile pins each sample to its
+    # own cumulative midpoint, so with three samples one sample IS the grid and
+    # a q0.9 target lands between the second point and the outlier, returning
+    # ~61 rather than 2. From about thirty points on, the midpoint and
+    # inclusive grids agree exactly, and on the real captures the whole change
+    # is worth at most 76 splats in 753,314. So mirror the subject enough times
+    # to measure the outlier rejection this test is named for.
+    subject = np.array([[2, 0.2, 3], [-2, -0.2, -3]])
+    pos = np.vstack([np.tile(subject, (20, 1)), [[100, 100, 100]]])
+    alpha = np.concatenate([np.ones(len(pos) - 1), [0.001]])
     _, _, _, half, basis = clean.crop_mask(pos, alpha, np.zeros(3), quantile=0.9, margin=1,
                                          shape="cylinder")
     np.testing.assert_array_equal(basis[:, 2], [0, 1, 0])
