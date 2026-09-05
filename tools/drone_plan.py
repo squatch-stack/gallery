@@ -268,9 +268,23 @@ def make_plan(args):
     # The subject's own height is the scale, not the coverage envelope: a
     # cannon inside a 30 m radius is still a 3 m cannon.
     subject_gsd = args.subject_height / v['subject_pixels_across']
-    target = args.gsd if args.gsd is not None else min(subject_gsd, v['gsd_m'])
+    if args.gsd is not None:
+        target = args.gsd
+    elif args.altitude is not None:
+        # A stated altitude IS the decision, so it sets the ground sample rather
+        # than being judged against one derived from the subject. Without this
+        # the subject-derived ceiling refuses the flight before the operator's
+        # altitude is ever read, and the refusal above offers --altitude as a
+        # way to overrule a ceiling it could not actually reach.
+        target = gsd(args.altitude, c)
+    else:
+        target = min(subject_gsd, v['gsd_m'])
     limit(target, 'max_gsd_m', v)
-    ceiling_gsd = altitude_for_gsd(target, c)
+    # gsd() and altitude_for_gsd() are exact inverses in arithmetic but not in
+    # floating point, and a ceiling half an ulp under the operator's own
+    # altitude would refuse the flight for a rounding error.
+    ceiling_gsd = args.altitude if (args.altitude is not None and args.gsd is None) \
+        else altitude_for_gsd(target, c)
     ceiling = min(ceiling_gsd, v['max_altitude_agl_m'])
     floor = args.subject_height + v['min_obstacle_clearance_m']
     if floor > ceiling:
@@ -314,6 +328,7 @@ def make_plan(args):
     extension = photo_spacing / 2 + v['turn_radius_m']
     passes = []
     ring = None
+    geometry_notes = []
 
     def add_pass(name, purpose, points, height, gimbal, heading):
         if height < floor or height > ceiling:
@@ -331,7 +346,11 @@ def make_plan(args):
             plat, plon = enu_to_wgs84(lat, lon, e, n)
             validate_coords(plat, plon)
             waypoints.append(dict(lat=round(plat, 7), lon=round(plon, 7),
-                                  execute_height_m=round(execute, 2), speed_ms=round(local_timing['speed_ms'], 2),
+                                  # Floor, not round: a height rounded up by half a
+                                  # centimetre would sit above the very ceiling this
+                                  # function just checked it against.
+                                  execute_height_m=math.floor(execute * 100) / 100,
+                                  speed_ms=round(local_timing['speed_ms'], 2),
                                   heading_mode=v['heading_mode'],
                                   heading_deg=round((math.degrees(math.atan2(-e, -n)) if heading is None
                                                      else heading) % 360, 1),
@@ -368,7 +387,18 @@ def make_plan(args):
         points = [(radius * math.sin(math.tau * i / ring['stations']),
                    radius * math.cos(math.tau * i / ring['stations']), 0) for i in range(ring['stations'] + 1)]
         add_pass('orbit', 'convergent subject ring', points, altitude, orbit_pitch, None)
-        h = v['nadir_grid_altitude_m']
+        # nadir_grid_altitude_m is pinned at the legal ceiling, which is the
+        # wrong companion to an orbit flown at a subject-derived altitude: it
+        # refused every orbit whose subject was shorter than about 50 m, i.e.
+        # every subject this studio scans, and where it did fit it shot the
+        # roof at a coarser ground sample than the ring beside it. Fly the roof
+        # pass inside the same window as the ring, keeping the configured
+        # height only when it is already in range.
+        h = min(max(v['nadir_grid_altitude_m'], floor), ceiling)
+        if h != v['nadir_grid_altitude_m']:
+            geometry_notes.append(f'Nadir grid flown at {h:.1f} m, not the configured '
+                                  f'{v["nadir_grid_altitude_m"]} m, to stay within the '
+                                  f'{floor:.1f}-{ceiling:.1f} m window this subject allows.')
         scale = h / altitude
         add_pass('nadir-grid', 'roof coverage', grid_points(width, depth, args.heading,
                                                          line_spacing * scale, photo_spacing * scale,
@@ -421,7 +451,8 @@ def make_plan(args):
                 f'Takeoff offset {args.takeoff_offset:g} m; default 0 assumes level home and subject ground.',
                 'GNSS only, no RTK.', 'The tool never talks to the aircraft.',
                 'Schema evidence does not certify flight compatibility; ground-check the actual controller.',
-                'Absence of a prohibited-place substring match is not permission.']
+                'Absence of a prohibited-place substring match is not permission.',
+                *geometry_notes]
     if args.photo_mode == 'interval':
         warnings.append('Operator starts the timed interval by hand; turn frames are redundant.')
     else:

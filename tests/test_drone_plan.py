@@ -108,6 +108,42 @@ def test_small_subject_refusal_points_to_capture(height, tmp_path, capsys):
     assert not list(tmp_path.iterdir())
 
 
+@pytest.mark.parametrize('height', [3, 6, 10])
+def test_stated_altitude_clears_the_refusal_it_is_offered_for(height):
+    # The refusal above offers --altitude as a way past the subject-derived
+    # ceiling, so it has to actually work: the subject sets the ground sample
+    # only when the operator has not stated an altitude.
+    floor = height + planner.load_defaults()['min_obstacle_clearance_m']['value']
+    # A small radius keeps the flight inside one battery, so the only thing
+    # under test is the altitude window.
+    site = ['--subject-height', str(height), '--radius', '12']
+    p = default_plan([*site, '--altitude', str(floor + 2)])
+    assert p['altitude']['agl_m'] == pytest.approx(floor + 2)
+    assert p['altitude']['binding_constraint'] == 'operator_altitude'
+    assert p['altitude']['gsd_m'] == pytest.approx(planner.gsd(floor + 2))
+    # It is a genuine overrule: the same subject without it is refused.
+    with pytest.raises(planner.Refusal, match='exceeds ceiling='):
+        default_plan(site)
+
+
+@pytest.mark.parametrize('height', [20, 30, 40])
+def test_orbit_roof_pass_stays_inside_the_subject_window(height):
+    # nadir_grid_altitude_m is pinned at the legal ceiling, which refused every
+    # orbit whose subject was shorter than about 50 m.
+    p = default_plan(['--subject-height', str(height), '--radius', '40', '--mode', 'orbit'])
+    floor, ceiling = p['altitude']['floor_m'], p['altitude']['ceiling_m']
+    roof = [w for w in p['waypoints'] if w['pass_name'] == 'nadir-grid']
+    assert roof, 'orbit mode must still fly a roof pass'
+    # takeoff_offset defaults to 0, so execute height above takeoff is AGL.
+    assert p['inputs']['takeoff_offset'] == 0
+    for w in roof:
+        assert floor <= w['execute_height_m'] <= ceiling
+    configured = planner.load_defaults()['nadir_grid_altitude_m']['value']
+    if configured > ceiling:
+        assert any('Nadir grid flown at' in x for x in p['warnings']), \
+            'a clamped roof pass must say so on the operator card'
+
+
 @pytest.mark.parametrize('radius', [5, 30, 90])
 @pytest.mark.parametrize('height', [1, 20, 50])
 @pytest.mark.parametrize('heading', [0, 37, 90, 173])
