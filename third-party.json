@@ -55,14 +55,13 @@
   "file": null,
   "licence": "GPL-2.0-or-later",
   "notes": [
-   "Licence resolved from blender_manifest.toml in the source tree: SPDX GPL-2.0-or-later. Copyleft, so it constrains redistribution of anything derived, not internal rendering.",
-   "NOT INSTALLED as of 2026-09-05, pending the owner's decision, so no sha256: hashing it would mean downloading 771 MB first.",
-   "The 771 MB is bundled wheels. The git source tree is 154 files (132 .py, 4 .glsl) with no binaries, so most of the release artefact is not auditable from source.",
-   "The macOS arm64 wheel is open3d-0.19.0+03ed109, a custom build. PyPI publishes NO macOS arm64 wheel for open3d 0.19.0, and none anywhere with a + local version, so there is no upstream artefact to diff it against. open3d has long skipped Apple Silicon, so building one is necessary rather than suspicious, but it is an unverifiable binary either way.",
-   "Also bundles a web stack: flask, werkzeug, dash, plotly, jinja2, itsdangerous, blinker, click. A render add-on that ships an HTTP server is a wider surface than the job needs.",
-   "blender_version_min 5.1.0; Blender here is 5.2.1 with Python 3.13.13, matching the cp313 wheels."
+   "Downloaded and hashed 2026-09-05; size matches the release metadata exactly.",
+   "LICENCE DISCREPANCY IN THE VENDOR'S RELEASE. The repository LICENSE on main is GPL-2.0 and blender_manifest.toml declares SPDX GPL-2.0-or-later, but the LICENSE file inside the shipped zip is Apache-2.0, and it is the only licence file in the archive. Two sources against one, so GPL-2.0-or-later is taken as authoritative. Internal rendering is unaffected either way; anything redistributed should not rely on the Apache text in the zip.",
+   "Composition verified from the archive: 132 Python files totalling 1.4 MB, matching the git source tree exactly, plus 385 MB of wheels. The Python is auditable; the wheels are not.",
+   "macOS arm64 wheel is open3d-0.19.0+03ed109, a custom build with no PyPI equivalent to diff against. Also bundles flask, werkzeug, dash, plotly, jinja2 - an HTTP server inside a render add-on.",
+   "Installed 2026-09-05 on the owner's explicit instruction."
   ],
-  "sha256": null,
+  "sha256": "3965ef73904f15a56ea4cee65de64209faaacf7a018c1a70f7d6a4ed925f96ae",
   "size_bytes": 771139278,
   "date_checked": "2026-09-05",
   "verification": "unverified",

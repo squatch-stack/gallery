@@ -78,3 +78,58 @@ def test_parse_args_requires_mesh_and_out():
     assert (a.mesh, a.out, a.mode, a.engine) == ('x.glb', 'o', 'both', 'CYCLES')
     with pytest.raises(SystemExit):
         tool.parse_args(['--mesh', 'x.glb'])
+
+
+@pytest.mark.parametrize('text,expected', [
+    ('z', (0, 0, 1)), ('Z', (0, 0, 1)),
+    ('0,0,1', (0, 0, 1)), ('0,0,-2', (0, 0, -1)), ('0,3,0', (0, 1, 0)),
+])
+def test_parse_up_normalises(text, expected):
+    assert tool.parse_up(text) == pytest.approx(expected, abs=1e-12)
+
+
+@pytest.mark.parametrize('bad', ['', '1,2', 'a,1,2', '0,0,0', 'nan,0,1', '1,2,3,4'])
+def test_parse_up_refuses_nonsense(bad):
+    if bad == '':
+        assert tool.parse_up(bad) == (0.0, 0.0, 1.0)  # empty means the default
+        return
+    with pytest.raises(SystemExit):
+        tool.parse_up(bad)
+
+
+def test_parse_up_auto_needs_an_estimate():
+    assert tool.parse_up('auto', (0, 1, 0)) == (0, 1, 0)
+    with pytest.raises(SystemExit):
+        tool.parse_up('auto')
+
+
+@pytest.mark.parametrize('up', [
+    (0, 0, 1), (0, 0, -1), (0, 1, 0), (1, 0, 0),
+    (-0.3973, -0.5569, 0.7294), (0.0514, -0.2445, 0.9683), (1, 1, 1),
+])
+def test_rotation_takes_up_onto_z_and_stays_a_rotation(up):
+    n = math.sqrt(sum(c * c for c in up))
+    unit = tuple(c / n for c in up)
+    R = tool.rotation_bringing_up_to_z(unit)
+    # It must map up onto +Z, not -Z: the sign error here rendered elevations
+    # upside down while still looking like a plausible picture.
+    image = [sum(R[i][j] * unit[j] for j in range(3)) for i in range(3)]
+    assert image == pytest.approx((0, 0, 1), abs=1e-9)
+    # Proper rotation: orthonormal with determinant +1, so nothing is mirrored.
+    for i in range(3):
+        for j in range(3):
+            dot = sum(R[i][k] * R[j][k] for k in range(3))
+            assert dot == pytest.approx(1.0 if i == j else 0.0, abs=1e-9)
+    det = (R[0][0] * (R[1][1] * R[2][2] - R[1][2] * R[2][1])
+           - R[0][1] * (R[1][0] * R[2][2] - R[1][2] * R[2][0])
+           + R[0][2] * (R[1][0] * R[2][1] - R[1][1] * R[2][0]))
+    assert det == pytest.approx(1.0, abs=1e-9)
+
+
+def test_heading_shifts_every_elevation_together():
+    a = tool.parse_args(['--mesh', 'm.glb', '--out', 'o'])
+    b = tool.parse_args(['--mesh', 'm.glb', '--out', 'o', '--heading', '90'])
+    assert (a.heading, b.heading) == (0.0, 90.0)
+    # front at heading 90 is the same camera as right at heading 0
+    assert tool.orbit_position((0, 0, 0), 5, 0 + 90, 0) == pytest.approx(
+        tool.orbit_position((0, 0, 0), 5, 90 + 0, 0))

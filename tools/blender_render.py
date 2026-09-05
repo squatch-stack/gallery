@@ -40,6 +40,16 @@ def parse_args(argv=None):
                    help='CYCLES (default), BLENDER_EEVEE for speed, BLENDER_WORKBENCH for flat')
     p.add_argument('--margin', type=float, default=1.10, help='framing slack around the subject')
     p.add_argument('--film-transparent', action='store_true', help='alpha background instead of world grey')
+    p.add_argument('--heading', type=float, default=0.0,
+                   help='degrees added to every azimuth, so "front" can be aimed at the '
+                        "subject's actual front. A photogrammetry mesh has no canonical "
+                        'front and no estimator can invent one; this is the operator saying '
+                        'which way the building faces.')
+    p.add_argument('--up', default='z',
+                   help="which way is up in the mesh's own frame: 'z' (default, correct for "
+                        "RealityKit/posekit output), 'auto' to estimate it, or 'x,y,z'. "
+                        "Photogrammetry meshes are arbitrarily oriented and an elevation "
+                        "rendered against the wrong up is a picture of the roof.")
     return p.parse_args(argv if argv is not None else _blender_argv())
 
 
@@ -60,6 +70,49 @@ def orbit_position(centre, radius, azimuth_deg, elevation_deg):
     return (centre[0] + radius * math.cos(el) * math.sin(az),
             centre[1] - radius * math.cos(el) * math.cos(az),
             centre[2] + radius * math.sin(el))
+
+
+def parse_up(text, estimate=None):
+    """Resolve --up to a unit vector in the mesh's own frame.
+
+    A gallery mesh carries no orientation of its own: cannon-mesh.glb happens
+    to land Z-up because RealityKit writes it that way, while a Scaniverse
+    export does not, and rendering an elevation against the wrong up produced a
+    photograph of the springhouse's roof labelled "front".
+    """
+    text = (text or 'z').strip().lower()
+    if text == 'z':
+        return (0.0, 0.0, 1.0)
+    if text == 'auto':
+        if estimate is None:
+            raise SystemExit("--up auto needs vertices to estimate from")
+        return estimate
+    parts = text.split(',')
+    if len(parts) != 3:
+        raise SystemExit(f"--up {text}: expected 'z', 'auto', or three comma-separated numbers")
+    try:
+        v = [float(x) for x in parts]
+    except ValueError as exc:
+        raise SystemExit(f"--up {text}: {exc}") from exc
+    n = math.sqrt(sum(x * x for x in v))
+    if not n or not all(math.isfinite(x) for x in v):
+        raise SystemExit(f"--up {text}: must be a finite non-zero vector")
+    return tuple(x / n for x in v)
+
+
+def rotation_bringing_up_to_z(up):
+    """Rotation matrix (list of 3 rows) taking `up` onto +Z, as Blender wants."""
+    ux, uy, uz = up
+    if uz > 1 - 1e-12:
+        return [[1., 0., 0.], [0., 1., 0.], [0., 0., 1.]]
+    if uz < -1 + 1e-12:
+        return [[1., 0., 0.], [0., -1., 0.], [0., 0., -1.]]
+    vx, vy, vz = uy, -ux, 0.0          # up x z, in that order: we rotate up ONTO z
+    c = uz                              # up . z
+    k = [[0., -vz, vy], [vz, 0., -vx], [-vy, vx, 0.]]
+    kk = [[sum(k[i][m] * k[m][j] for m in range(3)) for j in range(3)] for i in range(3)]
+    f = 1.0 / (1.0 + c)
+    return [[(1.0 if i == j else 0.0) + k[i][j] + kk[i][j] * f for j in range(3)] for i in range(3)]
 
 
 def frame_radius(size, margin, fov_rad):
@@ -111,6 +164,28 @@ def main():
     if not meshes:
         raise SystemExit(f'no mesh objects imported from {args.mesh}')
 
+    estimate = None
+    if args.up.strip().lower() == 'auto':
+        # The thinnest principal axis of the vertex cloud. A building or an
+        # object standing on ground varies least vertically, so the smallest
+        # eigenvector is the ground normal. Reported, never silent.
+        import numpy as np
+        pts = np.array([list(o.matrix_world @ v.co) for o in meshes for v in o.data.vertices],
+                       dtype=float)
+        centred = pts - pts.mean(0)
+        _, _, vt = np.linalg.svd(centred[::max(1, len(centred) // 50000)], full_matrices=False)
+        estimate = tuple(float(x) for x in vt[2])
+        print(f'--up auto estimated {tuple(round(x, 4) for x in estimate)} '
+              f'from {len(pts):,} vertices')
+
+    up = parse_up(args.up, estimate)
+    if up != (0.0, 0.0, 1.0):
+        rot = mathutils.Matrix([mathutils.Vector(r) for r in rotation_bringing_up_to_z(up)]).to_4x4()
+        for o in meshes:
+            o.matrix_world = rot @ o.matrix_world
+        bpy.context.view_layer.update()
+        print(f'rotated the subject so {tuple(round(x, 4) for x in up)} points up')
+
     corners = [o.matrix_world @ mathutils.Vector(c) for o in meshes for c in o.bound_box]
     lo = mathutils.Vector((min(p.x for p in corners), min(p.y for p in corners), min(p.z for p in corners)))
     hi = mathutils.Vector((max(p.x for p in corners), max(p.y for p in corners), max(p.z for p in corners)))
@@ -159,7 +234,8 @@ def main():
     if args.mode in ('elevation', 'both'):
         # Orthographic: the drawing a client measures off, with no perspective.
         cam_data.type = 'ORTHO'
-        for name, az in (('front', 0), ('right', 90), ('back', 180), ('left', 270)):
+        for name, offset in (('front', 0), ('right', 90), ('back', 180), ('left', 270)):
+            az = offset + args.heading
             scale, rx, ry = elevation_frame(size, az, args.margin, args.resolution)
             cam_data.ortho_scale = scale
             scene.render.resolution_x, scene.render.resolution_y = rx, ry
@@ -170,7 +246,9 @@ def main():
 
     if args.mode in ('turntable', 'both'):
         for i in range(args.frames):
-            cam.location = orbit_position(centre, radius, 360.0 * i / args.frames, args.elevation_deg)
+            cam.location = orbit_position(centre, radius,
+                                          args.heading + 360.0 * i / args.frames,
+                                          args.elevation_deg)
             shoot(f'{args.out}-turntable-{i:03d}.png')
 
 
