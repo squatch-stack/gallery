@@ -193,6 +193,46 @@ def test_holdout_and_full_prune(sphere):
     assert after['precision'] > before['precision']
     assert after['recall'] == before['recall']
     assert after['recall'] > .9
+    # A clean prune removes only grass and spokes, so the subject's own
+    # silhouette must survive intact on the jury's views.
+    cov = result['coverage']
+    assert cov['after_d0']['coverage'] == pytest.approx(cov['before_d0']['coverage'])
+    assert cov['after_d1']['coverage'] == pytest.approx(cov['before_d1']['coverage'])
+
+
+def test_coverage_sees_an_amputation_the_isolation_metrics_reward(sphere):
+    """Deleting a cap of the subject improves the radius spread and empties cells.
+
+    The isolation statistics get better as the subject is deleted, so they
+    cannot accept a prune on their own; coverage moves the other way and needs
+    no held-out views. Measured on the GPU host's cannon at 71% removal, the
+    99th-percentile radius improved 10.8x while coverage fell 0.876 to 0.646.
+    """
+    p, _, _, views, n = sphere
+    subject = p[:n]
+    cfg = tool.settings()
+    extent = float(np.diff(np.percentile(subject, [5, 95], axis=0), axis=0).max())
+    # Removes 40% of the shell: enough that a one-cell dilation cannot paper
+    # over the empty cells, which is the point of checking the dilated reading.
+    amputated = subject[subject[:, 1] < .2 * subject[:, 1].max()]
+    assert 0 < len(amputated) < n, 'the fixture must actually lose a cap'
+
+    centre = subject.mean(0)
+
+    def radius_q99(points):
+        return float(np.percentile(np.linalg.norm(points - centre, axis=1), 99))
+
+    # The metric that cannot see it: every point on a shell is the same distance
+    # out, so removing a cap leaves the radius statistic identical. On a real
+    # cloud it does better than identical -- it improves -- which is worse.
+    assert radius_q99(amputated) == pytest.approx(radius_q99(subject), rel=1e-3)
+    # The metric that is not: in-mask cells the cap used to fill are now empty.
+    whole = tool.mask_coverage(subject, views, cfg, extent)['coverage']
+    cut = tool.mask_coverage(amputated, views, cfg, extent)['coverage']
+    assert cut < whole
+    # And the reading survives dilation, so it is not a centres-vs-footprints artefact.
+    assert (tool.mask_coverage(amputated, views, cfg, extent, 1)['coverage']
+            < tool.mask_coverage(subject, views, cfg, extent, 1)['coverage'])
 
 
 @pytest.fixture

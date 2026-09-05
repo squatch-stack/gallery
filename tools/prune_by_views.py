@@ -3,7 +3,8 @@
 
 Prior art: Clean-GS, arXiv:2601.00913 (https://arxiv.org/abs/2601.00913).
 Independent implementation from repository primitives and standard geometry;
-no Clean-GS code was consulted. Held-out recall is the acceptance signal.
+no Clean-GS code was consulted. In-mask coverage and held-out recall are the
+acceptance signals; the splat count and the isolation statistics are not.
 Coarse depth cells bias toward abstention and keeping uncertain splats.
 Review angles flip file (x, -y, -z), then align scene up to +Y; their d is
 --sheet-distance, not derived from the camera's distance.
@@ -325,6 +326,49 @@ def holdout_metrics(pos, views, cfg, extent):
             'method': 'projected-centre cell occupancy; micro average; no photometric rendering'}
 
 
+def mask_coverage(pos, views, cfg, extent, dilate=0):
+    """Fraction of in-mask cells still holding a splat centre, on the jury's own views.
+
+    The isolation statistics cannot be an acceptance signal for a pruner: they
+    improve monotonically as the subject is deleted, so amputation is the
+    cheapest way to make them look good. Measured on the GPU host's cannon at
+    71% removal, the 99th-percentile radius improved by a factor of 10.8 while
+    coverage fell 0.876 to 0.646 and the rule deleted half the splats its own
+    jury called subject.
+
+    Coverage moves the other way, and unlike held-out recall it costs no jury
+    views: it is a grid statistic rather than a splat-set one, so removing a
+    wheel's rim empties in-mask cells even in the views that voted to keep the
+    rest of the wheel. `dilate` grows occupancy by one cell, which checks the
+    reading is not an artefact of scoring centres instead of footprints.
+    """
+    import numpy as np
+
+    covered = target_total = 0
+    rows = []
+    for view in views:
+        xy, _, valid = project(view.R, view.t, view.camera, pos, cfg.near_fraction * extent)
+        mask = view_mask(view)
+        xy *= mask_grid(mask, view.camera, cfg.grid_tolerance)
+        target = mask_states(mask, cfg.mask_scale, 0) == 1
+        occupied = np.zeros_like(target)
+        px, py = np.floor(xy[valid] / cfg.mask_scale).astype('int64').T
+        occupied[py, px] = True
+        for _ in range(dilate):
+            grown = occupied.copy()
+            for axis in (0, 1):
+                for shift in (-1, 1):
+                    grown |= np.roll(occupied, shift, axis=axis)
+            occupied = grown
+        hit, need = int((occupied & target).sum()), int(target.sum())
+        covered, target_total = covered + hit, target_total + need
+        rows.append({'name': view.name, 'covered': hit, 'in_mask': need,
+                     'coverage': hit / need if need else None})
+    return {'coverage': covered / target_total if target_total else None,
+            'dilate': dilate, 'views': rows,
+            'method': 'in-mask cell occupancy by projected centres on the jury views; micro average'}
+
+
 def prune(pos, scale, alpha, jury, holdout, cfg):
     import numpy as np
 
@@ -354,7 +398,10 @@ def prune(pos, scale, alpha, jury, holdout, cfg):
                   'unjudged': int((V < cfg.min_views).sum()), 'unjudged_policy': cfg.unjudged,
                   'judged_views_max': int(V.max()), 'inside_views_max': int(inside_count.max()),
                   'holdout': {'before': holdout_metrics(pos[baseline], holdout, cfg, extent),
-                              'after': holdout_metrics(pos[keep], holdout, cfg, extent)}}
+                              'after': holdout_metrics(pos[keep], holdout, cfg, extent)},
+                  'coverage': {f'{when}_d{d}': mask_coverage(pos[which], jury, cfg, extent, d)
+                               for when, which in (('before', baseline), ('after', keep))
+                               for d in (0, 1)}}
 
 
 def review_angles(views, focus, up, distance):
@@ -592,7 +639,11 @@ def main(argv=None):
               f"unjudged {result['unjudged']:,} ({args.unjudged})", file=stream)
         before, after = result['holdout']['before'], result['holdout']['after']
         print(f"holdout precision {before['precision']} -> {after['precision']}; "
-              f"recall {before['recall']} -> {after['recall']}; held-out recall is the acceptance signal; "
+              f"recall {before['recall']} -> {after['recall']}", file=stream)
+        cov = result['coverage']
+        print(f"in-mask coverage {cov['before_d0']['coverage']:.4f} -> {cov['after_d0']['coverage']:.4f} "
+              f"(dilated {cov['before_d1']['coverage']:.4f} -> {cov['after_d1']['coverage']:.4f}); "
+              'coverage and held-out recall are the acceptance signals, not the count; '
               'view the candidate', file=stream)
         if angles:
             print(f'angles {args.angles_out}: {angles}', file=stream)

@@ -183,14 +183,36 @@ supported and printed. No GPU is used.
 ~/.venvs/photogram/bin/python tools/prune_by_views.py ~/Documents/<job>/gpugate-<job>/point_cloud.ply --solve ~/Documents/<subject> --masks ~/Documents/<subject>/masks --views 24 --view-select spread --holdout 5 --out-ply out/<subject>-pruned.ply --keep-out out/<subject>-keep.npz --report out/<subject>-prune.json --angles-out out/<subject>-angles.txt
 ```
 
-Held-out recall, not the splat count, is the acceptance signal. The operator
-still views the candidate, especially thin rims and far-side detail, before
-passing this PLY into cleaning. Cleanliness checks alone cannot detect
-amputation. The report measures held-out silhouette precision and recall using
-projected-centre occupancy on the mask-scale grid, before and after pruning;
-this is a coverage proxy, not a photometric render. A recall decrease requires
-review even when precision and floater/fog metrics improve. `--holdout 0`
-explicitly disables this evidence and reports unavailable metrics.
+In-mask coverage and held-out recall, not the splat count, are the acceptance
+signals. The operator still views the candidate, especially thin rims and
+far-side detail, before passing this PLY into cleaning. Cleanliness checks alone
+cannot detect amputation. The report measures held-out silhouette precision and
+recall using projected-centre occupancy on the mask-scale grid, before and after
+pruning; this is a coverage proxy, not a photometric render. A recall decrease
+requires review even when precision and floater/fog metrics improve.
+`--holdout 0` explicitly disables this evidence and reports unavailable metrics.
+
+Coverage is the second signal and it costs no held-out views, because it is a
+grid statistic rather than a splat-set one: deleting a wheel's rim empties
+in-mask cells even in the views that voted to keep the rest of the wheel. It is
+reported before and after, undilated and grown by one cell, the second being a
+check that the reading is not an artefact of scoring centres instead of
+footprints. Read it as a ratio rather than an absolute, since centre-only
+occupancy never fills every cell.
+
+The reason for a second signal is that the isolation statistics move the wrong
+way. On the GPU host's cannon a view vote at 71% removal improved the
+99th-percentile radius by a factor of 10.8 while deleting half the splats its
+own jury called subject, and coverage fell from 0.876 to 0.646. A radius or
+floater statistic is a fine floater detector on an unpruned cloud and is not an
+acceptance metric for a pruner, because deleting subject is the cheapest way to
+improve it.
+
+Measured here on the unmasked cannon at the shipped defaults: 1,500,000 to
+384,231 splats, held-out recall 0.376 to 0.204, coverage 0.4303 to 0.2128 and
+0.8139 to 0.5590 dilated. That prune removes the background convincingly and
+takes half the silhouette with it. It is the example of why the count is not the
+signal, not a recommended setting.
 
 The jury uses deterministic spread sampling about the solve's convergence
 point. Out-of-frame, occluded, and uncertain mask-edge splats abstain. Judged
