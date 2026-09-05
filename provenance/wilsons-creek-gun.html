@@ -1,0 +1,76 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1"><title>Provenance: The Gun on the Line</title>
+<style>body{margin:0;background:#0d0b09;color:#e8e2d6;font:15px/1.6 ui-monospace,Menlo,monospace}
+main{max-width:44rem;margin:0 auto;padding:2rem 1.25rem 4rem}h1{font-size:1.6rem;margin:0 0 1rem;color:#fff}
+h2{font-size:1rem;letter-spacing:.06em;text-transform:uppercase;color:#e58a5e;margin:2rem 0 .5rem}
+p{margin:.4rem 0}ul{padding-left:1.2rem;margin:.4rem 0}li{margin:.25rem 0}
+code{background:#1a1612;padding:1px 5px;border-radius:3px}
+code{overflow-wrap:anywhere}
+blockquote{margin:0;padding-left:1rem;border-left:2px solid #3a332a;white-space:pre-wrap}
+a{color:#e58a5e}b{color:#fff}nav{font-size:13px;margin-bottom:1.5rem}</style></head>
+<body><main><nav><a href="../index.html">&#8592; all scans</a></nav><h1>Provenance: The Gun on the Line</h1>
+<h2>Catalog record</h2>
+<p>Source: working-tree scenes.json; repository base identified below. These are catalog claims.</p>
+<p><b>Scene:</b> wilsons-creek-gun</p>
+<p><b>Place:</b> Wilson's Creek National Battlefield, Missouri</p>
+<p><b>Captured:</b> 2026-08-30</p>
+<p><b>Description:</b> The field gun standing where the line once stood, lifted out of the wider battlefield scan and cropped to itself. The same phone capture that produced the Wilson's Creek scene, read as an object rather than as ground: the piece, its carriage and the grass it sits on, and nothing else.</p>
+<p><b>Catalog splats:</b> 460,973</p>
+<h2>Capture and export</h2>
+<p><b>Operator source summary:</b> Phone capture exported as a 3DGS PLY and held in the studio's hdc-holo data set (782,931 splats); capture date unrecorded, catalog date is the delivery date. Cropped to the subject with tools/clean_export.py.</p>
+<p>The summary is supplied with --source and attributed to the quoted history below; it is not a measurement from raw capture files.</p>
+<h2>Recorded cleaning</h2>
+<p>Candidate cleaning command/flags recorded at promotion:</p>
+<blockquote>--center 0.8494,0.1580,-0.6501 --crop-radius 2.5 --crop-shape ellipsoid --alpha-min 0.10 --scale-ceiling 0.008</blockquote>
+<h2>Delivered files</h2>
+<ul>
+<li><code>scenes/wilsons-creek-gun.sog</code>: SOG, 6,152,323 bytes (6.152 MB); sha256 <code>747ba86d2e54265b486edd82375bf502e940cab76c7cd5fd2d080bcbc6b0fee2</code></li>
+</ul>
+<h2>Source commit messages</h2>
+<p>Verbatim repository messages; historical claims may describe earlier versions of a scene.</p>
+<p><b>Source commit:</b> d6a25b16819436268965533450876c1dd872b43b</p>
+<blockquote>The best gun in the collection, found by cropping to it instead of near it</blockquote>
+<blockquote>&nbsp;</blockquote>
+<blockquote>A Scaniverse export of the field gun outside the Hulston Research</blockquote>
+<blockquote>Library, shot on an overcast day. Every other gun here was scanned in</blockquote>
+<blockquote>direct sun and is lit hard on one side and lost on the other; this one</blockquote>
+<blockquote>reads from every angle, which is the owner&#x27;s observation and it is</blockquote>
+<blockquote>correct.</blockquote>
+<blockquote>&nbsp;</blockquote>
+<blockquote>I had already looked at this file and reported it as not worth using.</blockquote>
+<blockquote>That judgement was wrong and the reason is worth writing down. I cropped</blockquote>
+<blockquote>by quantile about the whole scene&#x27;s weighted centroid, which put a 37 m</blockquote>
+<blockquote>box around a 3 m gun, kept trees and lawn, and produced something dark</blockquote>
+<blockquote>and sparse that was fairly judged bad. The cloud was never the problem.</blockquote>
+<blockquote>The crop was six times too wide.</blockquote>
+<blockquote>&nbsp;</blockquote>
+<blockquote>Cropping to the subject instead settles it in one measurement: 61% of</blockquote>
+<blockquote>the alpha mass lies within 2 m of the centre and the curve is flat after</blockquote>
+<blockquote>that, so there is a dense compact object sitting exactly there. An</blockquote>
+<blockquote>ellipsoid of radius 2.5 m keeps 344,729 splats and 4.6 MB, and the</blockquote>
+<blockquote>extent comes out 4.97 m against the battlefield gun&#x27;s 3.96 m -- the same</blockquote>
+<blockquote>object at the same size.</blockquote>
+<blockquote>&nbsp;</blockquote>
+<blockquote>The remaining floaters were a handful of very large splats, and the</blockquote>
+<blockquote>scale ceiling did not touch them at first because it is RELATIVE to the</blockquote>
+<blockquote>crop radius: --scale-ceiling 0.03 at radius 2.5 means 15 cm, well above</blockquote>
+<blockquote>the 21 cm blobs. At 0.008, i.e. 4 cm against a 99.9th percentile of 4.1</blockquote>
+<blockquote>cm, they go and nothing else does.</blockquote>
+<blockquote>&nbsp;</blockquote>
+<blockquote>It ships as its own scene rather than replacing research-library, which</blockquote>
+<blockquote>is deliberately the grounds -- &quot;tree line, lawn, and the light coming</blockquote>
+<blockquote>through&quot; -- and would have been destroyed by a crop to the gun.</blockquote>
+<blockquote>&nbsp;</blockquote>
+<blockquote>Passes every web-mobile check: 344,729 splats, 4.6 MB, floater 0.005%,</blockquote>
+<blockquote>fog and translucency zero. The up vector is measured from the grass</blockquote>
+<blockquote>sheet, not guessed; promotion refused to infer it at 0.31 inliers</blockquote>
+<blockquote>against a 0.35 floor, which was the right call.</blockquote>
+<blockquote>&nbsp;</blockquote>
+<blockquote>Co-Authored-By: Claude Opus 5 &lt;noreply@anthropic.com&gt;</blockquote>
+<h2>Processing</h2>
+<ul>
+<li>Repository HEAD: d6a25b16819436268965533450876c1dd872b43b.</li>
+<li>Sheet generated from the current working-tree catalog and delivered files; HEAD identifies the repository base, not an assertion that this sheet is committed.</li>
+<li>Generated: 2026-09-05T17:22:39+00:00.</li>
+<li>License: CC BY 4.0 unless the commissioning agreement states otherwise.</li>
+</ul></main></body></html>

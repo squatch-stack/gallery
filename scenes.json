@@ -125,5 +125,33 @@
       0.0309
     ],
     "provenance": "provenance/research-library-cannon.html"
+  },
+  {
+    "stem": "wilsons-creek-gun",
+    "title": "The Gun on the Line",
+    "place": "Wilson's Creek National Battlefield, Missouri",
+    "captured": "2026-08-30",
+    "splats": 460973,
+    "blurb": "The field gun standing where the line once stood, lifted out of the wider battlefield scan and cropped to itself. The same phone capture that produced the Wilson's Creek scene, read as an object rather than as ground: the piece, its carriage and the grass it sits on, and nothing else.",
+    "up": [
+      0.0392,
+      0.9986,
+      0.0367
+    ],
+    "provenance": "provenance/wilsons-creek-gun.html"
+  },
+  {
+    "stem": "redrock-cairn",
+    "title": "The Cairn at Red Rock",
+    "place": "Red Rock, Arizona",
+    "captured": "2026-08-30",
+    "splats": 422702,
+    "blurb": "A dry-stacked stone cairn on a red rock ledge, cropped out of the studio's flagship desert capture. Every course of stone is legible; the wider scene it came from stays in the gallery unchanged, because that one is the reference every pipeline number was measured against.",
+    "up": [
+      -0.3122,
+      0.9291,
+      0.1982
+    ],
+    "provenance": "provenance/redrock-cairn.html"
   }
 ]

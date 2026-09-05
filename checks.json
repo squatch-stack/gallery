@@ -817,6 +817,164 @@
           "detail": "provenance/research-library-cannon.html; exists: True"
         }
       ]
+    },
+    {
+      "scene": "wilsons-creek-gun",
+      "file": "scenes/wilsons-creek-gun.sog",
+      "platform": "web-mobile",
+      "passed": true,
+      "count": 460973,
+      "triangles": null,
+      "texture_bytes": null,
+      "size_bytes": 6152323,
+      "metrics": {
+        "nonfinite_count": 0,
+        "floater_fraction": 0.0,
+        "fog_fraction": 0.0,
+        "translucent_fraction": 0.0,
+        "extent": [
+          4.98486328125,
+          3.185302734375,
+          4.98828125
+        ],
+        "center": [
+          0.5678931307293561,
+          -0.11507916559785339,
+          0.7460081667089319
+        ],
+        "mad": 1.3484355343249925
+      },
+      "checks": [
+        {
+          "name": "format",
+          "status": "pass",
+          "detail": ".sog; header parsed; allowed for web-mobile: .glb, .ply, .sog, .spz"
+        },
+        {
+          "name": "count",
+          "status": "pass",
+          "detail": "460973 splats; budget 500000"
+        },
+        {
+          "name": "size",
+          "status": "pass",
+          "detail": "6152323 bytes; budget 20000000"
+        },
+        {
+          "name": "catalog",
+          "status": "pass",
+          "detail": "file 460973; catalog 460973; tolerance 1% of file count"
+        },
+        {
+          "name": "floater",
+          "status": "pass",
+          "detail": "0.000000% < 2%"
+        },
+        {
+          "name": "fog",
+          "status": "pass",
+          "detail": "0.000000% < 1%"
+        },
+        {
+          "name": "translucent",
+          "status": "pass",
+          "detail": "0.000000% < 10%"
+        },
+        {
+          "name": "nonfinite",
+          "status": "pass",
+          "detail": "0 non-finite splats; required 0"
+        },
+        {
+          "name": "licence",
+          "status": "pass",
+          "detail": "LICENSE exists: True; README scan licence stated: True"
+        },
+        {
+          "name": "provenance",
+          "status": "pass",
+          "detail": "provenance/wilsons-creek-gun.html; exists: True"
+        }
+      ]
+    },
+    {
+      "scene": "redrock-cairn",
+      "file": "scenes/redrock-cairn.sog",
+      "platform": "web-mobile",
+      "passed": true,
+      "count": 422702,
+      "triangles": null,
+      "texture_bytes": null,
+      "size_bytes": 5643619,
+      "metrics": {
+        "nonfinite_count": 0,
+        "floater_fraction": 0.00033829979512753664,
+        "fog_fraction": 0.0,
+        "translucent_fraction": 0.0,
+        "extent": [
+          4.771728515625,
+          3.48632824420929,
+          4.800537109375
+        ],
+        "center": [
+          -0.4719505697916534,
+          0.1513230007328609,
+          0.15106721623072472
+        ],
+        "mad": 0.8515716928637267
+      },
+      "checks": [
+        {
+          "name": "format",
+          "status": "pass",
+          "detail": ".sog; header parsed; allowed for web-mobile: .glb, .ply, .sog, .spz"
+        },
+        {
+          "name": "count",
+          "status": "pass",
+          "detail": "422702 splats; budget 500000"
+        },
+        {
+          "name": "size",
+          "status": "pass",
+          "detail": "5643619 bytes; budget 20000000"
+        },
+        {
+          "name": "catalog",
+          "status": "pass",
+          "detail": "file 422702; catalog 422702; tolerance 1% of file count"
+        },
+        {
+          "name": "floater",
+          "status": "pass",
+          "detail": "0.033830% < 2%"
+        },
+        {
+          "name": "fog",
+          "status": "pass",
+          "detail": "0.000000% < 1%"
+        },
+        {
+          "name": "translucent",
+          "status": "pass",
+          "detail": "0.000000% < 10%"
+        },
+        {
+          "name": "nonfinite",
+          "status": "pass",
+          "detail": "0 non-finite splats; required 0"
+        },
+        {
+          "name": "licence",
+          "status": "pass",
+          "detail": "LICENSE exists: True; README scan licence stated: True"
+        },
+        {
+          "name": "provenance",
+          "status": "pass",
+          "detail": "provenance/redrock-cairn.html; exists: True"
+        }
+      ]
     }
   ]
 }
