@@ -45,6 +45,19 @@
     color: inherit; text-decoration: none;
     transition: border-color 0.25s, transform 0.25s;
   }
+  /* The turntable sits above the title. The poster is always in the markup so
+     the card has something to show before the video loads, when it fails, and
+     when the reader has asked for less motion. */
+  .card .turntable {
+    position: relative; margin: -0.4rem -0.3rem 0.2rem;
+    border-radius: 7px; overflow: hidden; background: #000;
+    aspect-ratio: 1 / 1;
+  }
+  .card .turntable img, .card .turntable video {
+    display: block; width: 100%; height: 100%; object-fit: cover;
+  }
+  .card .turntable video { position: absolute; inset: 0; opacity: 0; transition: opacity 0.4s; }
+  .card .turntable video.ready { opacity: 1; }
   a.card:hover, a.card:focus-visible {
     border-color: var(--ember); transform: translateY(-2px);
     outline: none;
@@ -72,6 +85,9 @@
   footer a { color: var(--ember); }
   @media (prefers-reduced-motion: reduce) {
     a.card { transition: none; }
+    /* Never fade a moving image in for a reader who asked for stillness; the
+       script also declines to play it, so the poster is what they get. */
+    .card .turntable video { transition: none; }
   }
 </style>
 </head>
@@ -115,9 +131,42 @@
       const kind = s.mesh
         ? "textured mesh" : `<b>${s.splats.toLocaleString()}</b> splats`;
       const meta = [s.place, s.captured, kind].filter(Boolean).join(" · ");
-      a.innerHTML = `<h2></h2><div class="meta">${meta}</div><p></p>
+      const still = `turntables/${encodeURIComponent(s.stem)}.jpg`;
+      const motion = `turntables/${encodeURIComponent(s.stem)}.mp4`;
+      // aria-hidden and empty alt: the heading and blurb already name the scan,
+      // so announcing the preview again would only repeat it to a screen reader.
+      const preview = s.turntable === false ? "" : `<div class="turntable" aria-hidden="true">
+          <img src="${still}" alt="" loading="lazy" decoding="async">
+          <video muted loop playsinline preload="none" tabindex="-1"></video>
+        </div>`;
+      a.innerHTML = `${preview}<h2></h2><div class="meta">${meta}</div><p></p>
         <div class="checks" role="status">web-mobile: checking</div>
         <div class="go">open scan &#8594;</div>`;
+      const video = a.querySelector("video");
+      if (video) {
+        const still_only = window.matchMedia("(prefers-reduced-motion: reduce)");
+        const start = () => {
+          if (still_only.matches) { video.removeAttribute("src"); video.load(); return; }
+          if (video.src) return;
+          video.src = motion;
+          video.play().then(() => video.classList.add("ready")).catch(() => {});
+        };
+        // Only fetch a turntable once its card is actually near the viewport:
+        // thirteen of them at once is bytes nobody asked for.
+        if ("IntersectionObserver" in window) {
+          const io = new IntersectionObserver((entries) => {
+            for (const e of entries) if (e.isIntersecting) { start(); io.unobserve(e.target); }
+          }, { rootMargin: "200px" });
+          io.observe(a);
+        } else {
+          start();
+        }
+        still_only.addEventListener("change", () => {
+          if (still_only.matches) { video.pause(); video.classList.remove("ready"); }
+          else { start(); }
+        });
+        video.addEventListener("error", () => video.classList.remove("ready"));
+      }
       a.querySelector("h2").textContent = s.title;
       a.querySelector("p").textContent = s.blurb;
       grid.appendChild(a);
