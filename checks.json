@@ -738,6 +738,85 @@
           "detail": "provenance/saguaro.html; exists: True"
         }
       ]
+    },
+    {
+      "scene": "research-library-cannon",
+      "file": "scenes/research-library-cannon.sog",
+      "platform": "web-mobile",
+      "passed": true,
+      "count": 344729,
+      "triangles": null,
+      "texture_bytes": null,
+      "size_bytes": 4610996,
+      "metrics": {
+        "nonfinite_count": 0,
+        "floater_fraction": 4.641326955376542e-05,
+        "fog_fraction": 0.0,
+        "translucent_fraction": 0.0,
+        "extent": [
+          4.961425781249998,
+          1.6240234076976776,
+          4.97265625
+        ],
+        "center": [
+          0.3568493361957005,
+          0.9277455490912845,
+          0.3133601083048335
+        ],
+        "mad": 0.8640336314755706
+      },
+      "checks": [
+        {
+          "name": "format",
+          "status": "pass",
+          "detail": ".sog; header parsed; allowed for web-mobile: .glb, .ply, .sog, .spz"
+        },
+        {
+          "name": "count",
+          "status": "pass",
+          "detail": "344729 splats; budget 500000"
+        },
+        {
+          "name": "size",
+          "status": "pass",
+          "detail": "4610996 bytes; budget 20000000"
+        },
+        {
+          "name": "catalog",
+          "status": "pass",
+          "detail": "file 344729; catalog 344729; tolerance 1% of file count"
+        },
+        {
+          "name": "floater",
+          "status": "pass",
+          "detail": "0.004641% < 2%"
+        },
+        {
+          "name": "fog",
+          "status": "pass",
+          "detail": "0.000000% < 1%"
+        },
+        {
+          "name": "translucent",
+          "status": "pass",
+          "detail": "0.000000% < 10%"
+        },
+        {
+          "name": "nonfinite",
+          "status": "pass",
+          "detail": "0 non-finite splats; required 0"
+        },
+        {
+          "name": "licence",
+          "status": "pass",
+          "detail": "LICENSE exists: True; README scan licence stated: True"
+        },
+        {
+          "name": "provenance",
+          "status": "pass",
+          "detail": "provenance/research-library-cannon.html; exists: True"
+        }
+      ]
     }
   ]
 }

@@ -1,0 +1,71 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1"><title>Provenance: Field Gun at the Research Library</title>
+<style>body{margin:0;background:#0d0b09;color:#e8e2d6;font:15px/1.6 ui-monospace,Menlo,monospace}
+main{max-width:44rem;margin:0 auto;padding:2rem 1.25rem 4rem}h1{font-size:1.6rem;margin:0 0 1rem;color:#fff}
+h2{font-size:1rem;letter-spacing:.06em;text-transform:uppercase;color:#e58a5e;margin:2rem 0 .5rem}
+p{margin:.4rem 0}ul{padding-left:1.2rem;margin:.4rem 0}li{margin:.25rem 0}
+code{background:#1a1612;padding:1px 5px;border-radius:3px}
+code{overflow-wrap:anywhere}
+blockquote{margin:0;padding-left:1rem;border-left:2px solid #3a332a;white-space:pre-wrap}
+a{color:#e58a5e}b{color:#fff}nav{font-size:13px;margin-bottom:1.5rem}</style></head>
+<body><main><nav><a href="../index.html">&#8592; all scans</a></nav><h1>Provenance: Field Gun at the Research Library</h1>
+<h2>Catalog record</h2>
+<p>Source: working-tree scenes.json; repository base identified below. These are catalog claims.</p>
+<p><b>Scene:</b> research-library-cannon</p>
+<p><b>Place:</b> Wilson's Creek National Battlefield, Missouri</p>
+<p><b>Captured:</b> 2026-08-30</p>
+<p><b>Description:</b> A field gun on the lawn outside the Hulston Civil War Research Library, captured on an overcast day so the light falls evenly all the way round it. Every other gun in this collection was scanned in direct sun, lit hard on one side and lost in shadow on the other; this one reads from every angle. Scanned on the phone, cropped to the piece and its patch of grass.</p>
+<p><b>Catalog splats:</b> 344,729</p>
+<h2>Capture and export</h2>
+<p><b>Operator source summary:</b> Phone scan exported from Scaniverse as a 3DGS PLY (556,786 splats, even overcast light); capture date unrecorded, catalog date is the delivery date. Cleaned with tools/clean_export.py and packed to SOG/SPZ.</p>
+<p>The summary is supplied with --source and attributed to the quoted history below; it is not a measurement from raw capture files.</p>
+<h2>Recorded cleaning</h2>
+<p>Candidate cleaning command/flags recorded at promotion:</p>
+<blockquote>--center 0.5076,-0.7419,-0.2142 --crop-radius 2.5 --crop-shape ellipsoid --alpha-min 0.10 --scale-ceiling 0.008</blockquote>
+<h2>Delivered files</h2>
+<ul>
+<li><code>scenes/research-library-cannon.sog</code>: SOG, 4,610,996 bytes (4.611 MB); sha256 <code>1e6f074f7b201c24aa16e3ec9efb0195804ce9e43bac959ee08dbe0da2d4ffd1</code></li>
+</ul>
+<h2>Source commit messages</h2>
+<p>Verbatim repository messages; historical claims may describe earlier versions of a scene.</p>
+<p><b>Source commit:</b> 694d19c19561225eb99eed8e5ed2fcbfa06fcdd8</p>
+<blockquote>--up and --heading, and the rotation that got them backwards</blockquote>
+<blockquote>&nbsp;</blockquote>
+<blockquote>A gallery mesh carries no orientation of its own. cannon-mesh.glb lands</blockquote>
+<blockquote>Z-up because RealityKit writes it that way; a Scaniverse export need</blockquote>
+<blockquote>not, and an elevation rendered against the wrong up is a picture of the</blockquote>
+<blockquote>roof labelled &quot;front&quot;.</blockquote>
+<blockquote>&nbsp;</blockquote>
+<blockquote>--up takes &#x27;z&#x27; (the default), &#x27;auto&#x27;, or an explicit vector. &#x27;auto&#x27;</blockquote>
+<blockquote>estimates the ground normal as the thinnest principal axis of the vertex</blockquote>
+<blockquote>cloud and always prints what it found, because an estimator that is</blockquote>
+<blockquote>silent about its guess is worse than no estimator. --heading rotates</blockquote>
+<blockquote>every azimuth together, so an operator can name which way a building</blockquote>
+<blockquote>faces; no estimator can invent a canonical front for a photogrammetry</blockquote>
+<blockquote>mesh.</blockquote>
+<blockquote>&nbsp;</blockquote>
+<blockquote>The rotation was wrong on the first pass and would have shipped</blockquote>
+<blockquote>plausible-looking pictures. I built it from up x z with the operands</blockquote>
+<blockquote>reversed, so it took the up vector onto MINUS Z: a proper rotation,</blockquote>
+<blockquote>determinant +1, orthonormal, and upside down. The test now asserts the</blockquote>
+<blockquote>image is +Z rather than merely that the matrix is a rotation, across</blockquote>
+<blockquote>seven up vectors including the cannon&#x27;s real one.</blockquote>
+<blockquote>&nbsp;</blockquote>
+<blockquote>On the springhouse this changed nothing, and that is worth recording</blockquote>
+<blockquote>because I had already claimed otherwise. I read its first elevation as</blockquote>
+<blockquote>a roof seen from above and it was not: the springhouse is a</blockquote>
+<blockquote>barrel-vaulted structure built into a hillside, its front IS the arched</blockquote>
+<blockquote>facade, and azimuth 0 was pointing at it correctly the whole time. An</blockquote>
+<blockquote>eight-azimuth contact sheet settled it. The tool gained two real options</blockquote>
+<blockquote>and the mesh needed neither.</blockquote>
+<blockquote>&nbsp;</blockquote>
+<blockquote>Twenty new tests, none needing Blender.</blockquote>
+<blockquote>&nbsp;</blockquote>
+<blockquote>Co-Authored-By: Claude Opus 5 &lt;noreply@anthropic.com&gt;</blockquote>
+<h2>Processing</h2>
+<ul>
+<li>Repository HEAD: 694d19c19561225eb99eed8e5ed2fcbfa06fcdd8.</li>
+<li>Sheet generated from the current working-tree catalog and delivered files; HEAD identifies the repository base, not an assertion that this sheet is committed.</li>
+<li>Generated: 2026-09-05T16:12:24+00:00.</li>
+<li>License: CC BY 4.0 unless the commissioning agreement states otherwise.</li>
+</ul></main></body></html>

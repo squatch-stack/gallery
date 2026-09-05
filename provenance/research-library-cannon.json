@@ -1,0 +1,51 @@
+{
+  "argv": [
+    "research-library-cannon",
+    "--app-export",
+    "--source",
+    "Phone scan exported from Scaniverse as a 3DGS PLY (556,786 splats, even overcast light); capture date unrecorded, catalog date is the delivery date. Cleaned with tools/clean_export.py and packed to SOG/SPZ.",
+    "--export",
+    "scenes/research-library-cannon.sog",
+    "--out",
+    "provenance/research-library-cannon.html",
+    "--source-commit",
+    "694d19c19561225eb99eed8e5ed2fcbfa06fcdd8",
+    "--cleaning",
+    "--center 0.5076,-0.7419,-0.2142 --crop-radius 2.5 --crop-shape ellipsoid --alpha-min 0.10 --scale-ceiling 0.008",
+    "--cleaning-source",
+    "candidate"
+  ],
+  "date": "2026-09-05T16:12:24+00:00",
+  "inputs": {
+    "app_export": true,
+    "cleaning": [
+      "--center 0.5076,-0.7419,-0.2142 --crop-radius 2.5 --crop-shape ellipsoid --alpha-min 0.10 --scale-ceiling 0.008"
+    ],
+    "cleaning_source": "candidate",
+    "export": [
+      "scenes/research-library-cannon.sog"
+    ],
+    "mapper": "incremental",
+    "masked": false,
+    "note": [],
+    "out": "provenance/research-library-cannon.html",
+    "place": "",
+    "source": "Phone scan exported from Scaniverse as a 3DGS PLY (556,786 splats, even overcast light); capture date unrecorded, catalog date is the delivery date. Cleaned with tools/clean_export.py and packed to SOG/SPZ.",
+    "source_commit": [
+      "694d19c19561225eb99eed8e5ed2fcbfa06fcdd8"
+    ],
+    "sparse": "sparse",
+    "subject": "research-library-cannon",
+    "supervision": "masks",
+    "title": null,
+    "trained": null,
+    "up_source": "explicit",
+    "up": [
+      -0.0332,
+      0.999,
+      0.0309
+    ]
+  },
+  "mode": "app-export",
+  "schema_version": 1
+}
