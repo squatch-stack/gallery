@@ -124,5 +124,6 @@ Times vary by a third between identical runs on a shared card; quote them as
 ranges.
 
 ## Subject capture plans
+For permitted aerial subjects, see [DJI Air 3S mission plans](drone.md).
 Run `python3 tools/capture_plan.py --type object --size 2` for rings, overlap arithmetic and a checklist.
 Use `--height`, `--out plan.md` or `--json`; review the labelled operator defaults before capture.

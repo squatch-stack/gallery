@@ -25,6 +25,29 @@ or arguments; do not treat a generated plan as permission for access or drones.
   heights, keep the whole rigid subject in most frames, do not change lens or
   zoom, and check the solve before leaving the site.
 
+### Aerial subjects (DJI Air 3S)
+
+Use the [drone mission guide](drone.md) for permitted aerial subjects. The
+planner is offline and has no terrain model; it does not authorize a flight.
+
+```sh
+python3 tools/drone_plan.py --subject "<subject>" --place "<place>" --authorization "<recorded permission>" --lat 37 --lon -93 --radius 40 --subject-height 20 --out out/mission
+python3 tools/drone_plan.py --from-export export.kmz --write-skeleton
+python3 tools/drone_plan.py --diff export.kmz --against out/mission.kmz
+```
+
+The first command writes JSON and the operator card, but refuses KMZ until a
+controller-export skeleton exists. Read the card, record the DJI Fly version
+and aircraft when extracting the skeleton, and validate import on the ground.
+`--unverified-schema` permits a stamped synthetic schema for inspection only.
+`--mode orbit` adds a convergent ring and nadir grid; default `double-grid`
+adds orthogonal nadir grids and four oblique sides. Review timed interval,
+speed, shutter, RTH height and takeoff offset. Interval mode requires starting
+the timer by hand. Place screening has no override. Refusals also cover unsafe
+geometry, clearance/GSD, overlap/blur, home distance and battery duration.
+`--allow-multi-battery` splits at pass boundaries; `--force` replaces outputs.
+Frame counts include turns; use stage 6 to measure the 256 MiB payload limit.
+
 ## 2. Solve the photographs
 
 - [ ] Put stills in `~/Documents/<subject>/images/`, then run the global mapper.

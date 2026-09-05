@@ -1,0 +1,545 @@
+{
+  "source": {
+    "dji_fly_version": "UNVERIFIED",
+    "aircraft": "Air 3S / RC 2; synthetic"
+  },
+  "schema_verified": false,
+  "namespaces": {
+    "": "http://www.opengis.net/kml/2.2",
+    "wpml": "http://www.dji.com/wpmz/1.0.6"
+  },
+  "documents": {
+    "wpmz/template.kml": {
+      "tag": "{http://www.opengis.net/kml/2.2}kml",
+      "attrs": {},
+      "text": "",
+      "children": [
+        {
+          "tag": "{http://www.opengis.net/kml/2.2}Document",
+          "attrs": {},
+          "text": "",
+          "children": [
+            {
+              "tag": "{http://www.dji.com/wpmz/1.0.6}createTime",
+              "attrs": {},
+              "text": "{created}",
+              "children": []
+            },
+            {
+              "tag": "{http://www.dji.com/wpmz/1.0.6}missionConfig",
+              "attrs": {},
+              "text": "",
+              "children": [
+                {
+                  "tag": "{http://www.dji.com/wpmz/1.0.6}flyToWaylineMode",
+                  "attrs": {},
+                  "text": "safely",
+                  "children": []
+                },
+                {
+                  "tag": "{http://www.dji.com/wpmz/1.0.6}finishAction",
+                  "attrs": {},
+                  "text": "goHome",
+                  "children": []
+                },
+                {
+                  "tag": "{http://www.dji.com/wpmz/1.0.6}exitOnRCLost",
+                  "attrs": {},
+                  "text": "executeLostAction",
+                  "children": []
+                },
+                {
+                  "tag": "{http://www.dji.com/wpmz/1.0.6}executeRCLostAction",
+                  "attrs": {},
+                  "text": "goBack",
+                  "children": []
+                },
+                {
+                  "tag": "{http://www.dji.com/wpmz/1.0.6}globalRTHHeight",
+                  "attrs": {},
+                  "text": "{rth}",
+                  "children": []
+                },
+                {
+                  "tag": "{http://www.dji.com/wpmz/1.0.6}droneInfo",
+                  "attrs": {},
+                  "text": "",
+                  "children": [
+                    {
+                      "tag": "{http://www.dji.com/wpmz/1.0.6}droneEnumValue",
+                      "attrs": {},
+                      "text": "0",
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "tag": "{http://www.dji.com/wpmz/1.0.6}payloadInfo",
+                  "attrs": {},
+                  "text": "",
+                  "children": [
+                    {
+                      "tag": "{http://www.dji.com/wpmz/1.0.6}payloadEnumValue",
+                      "attrs": {},
+                      "text": "0",
+                      "children": []
+                    },
+                    {
+                      "tag": "{http://www.dji.com/wpmz/1.0.6}payloadPositionIndex",
+                      "attrs": {},
+                      "text": "0",
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "tag": "{http://www.opengis.net/kml/2.2}Folder",
+              "attrs": {},
+              "text": "",
+              "children": [
+                {
+                  "tag": "{http://www.dji.com/wpmz/1.0.6}templateId",
+                  "attrs": {},
+                  "text": "0",
+                  "children": []
+                },
+                {
+                  "tag": "{http://www.dji.com/wpmz/1.0.6}executeHeightMode",
+                  "attrs": {},
+                  "text": "relativeToStartPoint",
+                  "children": []
+                },
+                {
+                  "tag": "{http://www.opengis.net/kml/2.2}Placemark",
+                  "attrs": {},
+                  "text": "",
+                  "children": [
+                    {
+                      "tag": "{http://www.opengis.net/kml/2.2}Point",
+                      "attrs": {},
+                      "text": "",
+                      "children": [
+                        {
+                          "tag": "{http://www.opengis.net/kml/2.2}coordinates",
+                          "attrs": {},
+                          "text": "{coordinates}",
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "tag": "{http://www.dji.com/wpmz/1.0.6}index",
+                      "attrs": {},
+                      "text": "{index}",
+                      "children": []
+                    },
+                    {
+                      "tag": "{http://www.dji.com/wpmz/1.0.6}executeHeight",
+                      "attrs": {},
+                      "text": "{height}",
+                      "children": []
+                    },
+                    {
+                      "tag": "{http://www.dji.com/wpmz/1.0.6}waypointSpeed",
+                      "attrs": {},
+                      "text": "{speed}",
+                      "children": []
+                    },
+                    {
+                      "tag": "{http://www.dji.com/wpmz/1.0.6}gimbalPitchAngle",
+                      "attrs": {},
+                      "text": "{pitch}",
+                      "children": []
+                    },
+                    {
+                      "tag": "{http://www.dji.com/wpmz/1.0.6}waypointHeadingParam",
+                      "attrs": {},
+                      "text": "",
+                      "children": [
+                        {
+                          "tag": "{http://www.dji.com/wpmz/1.0.6}waypointHeadingMode",
+                          "attrs": {},
+                          "text": "fixed",
+                          "children": []
+                        },
+                        {
+                          "tag": "{http://www.dji.com/wpmz/1.0.6}waypointHeadingAngle",
+                          "attrs": {},
+                          "text": "{heading}",
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "tag": "{http://www.dji.com/wpmz/1.0.6}waypointTurnParam",
+                      "attrs": {},
+                      "text": "",
+                      "children": [
+                        {
+                          "tag": "{http://www.dji.com/wpmz/1.0.6}waypointTurnMode",
+                          "attrs": {},
+                          "text": "toPointAndStopWithDiscontinuityCurvature",
+                          "children": []
+                        },
+                        {
+                          "tag": "{http://www.dji.com/wpmz/1.0.6}waypointTurnDampingDist",
+                          "attrs": {},
+                          "text": "{damping}",
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "tag": "{http://www.dji.com/wpmz/1.0.6}actionGroup",
+                      "attrs": {},
+                      "text": "",
+                      "children": [
+                        {
+                          "tag": "{http://www.dji.com/wpmz/1.0.6}actionGroupId",
+                          "attrs": {},
+                          "text": "{index}",
+                          "children": []
+                        },
+                        {
+                          "tag": "{http://www.dji.com/wpmz/1.0.6}actionGroupStartIndex",
+                          "attrs": {},
+                          "text": "{index}",
+                          "children": []
+                        },
+                        {
+                          "tag": "{http://www.dji.com/wpmz/1.0.6}actionGroupEndIndex",
+                          "attrs": {},
+                          "text": "{index}",
+                          "children": []
+                        },
+                        {
+                          "tag": "{http://www.dji.com/wpmz/1.0.6}actionGroupMode",
+                          "attrs": {},
+                          "text": "sequence",
+                          "children": []
+                        },
+                        {
+                          "tag": "{http://www.dji.com/wpmz/1.0.6}actionTrigger",
+                          "attrs": {},
+                          "text": "",
+                          "children": [
+                            {
+                              "tag": "{http://www.dji.com/wpmz/1.0.6}actionTriggerType",
+                              "attrs": {},
+                              "text": "reachPoint",
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "tag": "{http://www.dji.com/wpmz/1.0.6}action",
+                          "attrs": {},
+                          "text": "",
+                          "children": [
+                            {
+                              "tag": "{http://www.dji.com/wpmz/1.0.6}actionId",
+                              "attrs": {},
+                              "text": "{index}",
+                              "children": []
+                            },
+                            {
+                              "tag": "{http://www.dji.com/wpmz/1.0.6}actionActuatorFunc",
+                              "attrs": {},
+                              "text": "takePhoto",
+                              "children": []
+                            },
+                            {
+                              "tag": "{http://www.dji.com/wpmz/1.0.6}actionActuatorFuncParam",
+                              "attrs": {},
+                              "text": "",
+                              "children": [
+                                {
+                                  "tag": "{http://www.dji.com/wpmz/1.0.6}payloadPositionIndex",
+                                  "attrs": {},
+                                  "text": "0",
+                                  "children": []
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "wpmz/waylines.wpml": {
+      "tag": "{http://www.opengis.net/kml/2.2}kml",
+      "attrs": {},
+      "text": "",
+      "children": [
+        {
+          "tag": "{http://www.opengis.net/kml/2.2}Document",
+          "attrs": {},
+          "text": "",
+          "children": [
+            {
+              "tag": "{http://www.dji.com/wpmz/1.0.6}createTime",
+              "attrs": {},
+              "text": "{created}",
+              "children": []
+            },
+            {
+              "tag": "{http://www.dji.com/wpmz/1.0.6}missionConfig",
+              "attrs": {},
+              "text": "",
+              "children": [
+                {
+                  "tag": "{http://www.dji.com/wpmz/1.0.6}flyToWaylineMode",
+                  "attrs": {},
+                  "text": "safely",
+                  "children": []
+                },
+                {
+                  "tag": "{http://www.dji.com/wpmz/1.0.6}finishAction",
+                  "attrs": {},
+                  "text": "goHome",
+                  "children": []
+                },
+                {
+                  "tag": "{http://www.dji.com/wpmz/1.0.6}exitOnRCLost",
+                  "attrs": {},
+                  "text": "executeLostAction",
+                  "children": []
+                },
+                {
+                  "tag": "{http://www.dji.com/wpmz/1.0.6}executeRCLostAction",
+                  "attrs": {},
+                  "text": "goBack",
+                  "children": []
+                },
+                {
+                  "tag": "{http://www.dji.com/wpmz/1.0.6}globalRTHHeight",
+                  "attrs": {},
+                  "text": "{rth}",
+                  "children": []
+                },
+                {
+                  "tag": "{http://www.dji.com/wpmz/1.0.6}droneInfo",
+                  "attrs": {},
+                  "text": "",
+                  "children": [
+                    {
+                      "tag": "{http://www.dji.com/wpmz/1.0.6}droneEnumValue",
+                      "attrs": {},
+                      "text": "0",
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "tag": "{http://www.dji.com/wpmz/1.0.6}payloadInfo",
+                  "attrs": {},
+                  "text": "",
+                  "children": [
+                    {
+                      "tag": "{http://www.dji.com/wpmz/1.0.6}payloadEnumValue",
+                      "attrs": {},
+                      "text": "0",
+                      "children": []
+                    },
+                    {
+                      "tag": "{http://www.dji.com/wpmz/1.0.6}payloadPositionIndex",
+                      "attrs": {},
+                      "text": "0",
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "tag": "{http://www.opengis.net/kml/2.2}Folder",
+              "attrs": {},
+              "text": "",
+              "children": [
+                {
+                  "tag": "{http://www.dji.com/wpmz/1.0.6}templateId",
+                  "attrs": {},
+                  "text": "0",
+                  "children": []
+                },
+                {
+                  "tag": "{http://www.dji.com/wpmz/1.0.6}executeHeightMode",
+                  "attrs": {},
+                  "text": "relativeToStartPoint",
+                  "children": []
+                },
+                {
+                  "tag": "{http://www.opengis.net/kml/2.2}Placemark",
+                  "attrs": {},
+                  "text": "",
+                  "children": [
+                    {
+                      "tag": "{http://www.opengis.net/kml/2.2}Point",
+                      "attrs": {},
+                      "text": "",
+                      "children": [
+                        {
+                          "tag": "{http://www.opengis.net/kml/2.2}coordinates",
+                          "attrs": {},
+                          "text": "{coordinates}",
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "tag": "{http://www.dji.com/wpmz/1.0.6}index",
+                      "attrs": {},
+                      "text": "{index}",
+                      "children": []
+                    },
+                    {
+                      "tag": "{http://www.dji.com/wpmz/1.0.6}executeHeight",
+                      "attrs": {},
+                      "text": "{height}",
+                      "children": []
+                    },
+                    {
+                      "tag": "{http://www.dji.com/wpmz/1.0.6}waypointSpeed",
+                      "attrs": {},
+                      "text": "{speed}",
+                      "children": []
+                    },
+                    {
+                      "tag": "{http://www.dji.com/wpmz/1.0.6}gimbalPitchAngle",
+                      "attrs": {},
+                      "text": "{pitch}",
+                      "children": []
+                    },
+                    {
+                      "tag": "{http://www.dji.com/wpmz/1.0.6}waypointHeadingParam",
+                      "attrs": {},
+                      "text": "",
+                      "children": [
+                        {
+                          "tag": "{http://www.dji.com/wpmz/1.0.6}waypointHeadingMode",
+                          "attrs": {},
+                          "text": "fixed",
+                          "children": []
+                        },
+                        {
+                          "tag": "{http://www.dji.com/wpmz/1.0.6}waypointHeadingAngle",
+                          "attrs": {},
+                          "text": "{heading}",
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "tag": "{http://www.dji.com/wpmz/1.0.6}waypointTurnParam",
+                      "attrs": {},
+                      "text": "",
+                      "children": [
+                        {
+                          "tag": "{http://www.dji.com/wpmz/1.0.6}waypointTurnMode",
+                          "attrs": {},
+                          "text": "toPointAndStopWithDiscontinuityCurvature",
+                          "children": []
+                        },
+                        {
+                          "tag": "{http://www.dji.com/wpmz/1.0.6}waypointTurnDampingDist",
+                          "attrs": {},
+                          "text": "{damping}",
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "tag": "{http://www.dji.com/wpmz/1.0.6}actionGroup",
+                      "attrs": {},
+                      "text": "",
+                      "children": [
+                        {
+                          "tag": "{http://www.dji.com/wpmz/1.0.6}actionGroupId",
+                          "attrs": {},
+                          "text": "{index}",
+                          "children": []
+                        },
+                        {
+                          "tag": "{http://www.dji.com/wpmz/1.0.6}actionGroupStartIndex",
+                          "attrs": {},
+                          "text": "{index}",
+                          "children": []
+                        },
+                        {
+                          "tag": "{http://www.dji.com/wpmz/1.0.6}actionGroupEndIndex",
+                          "attrs": {},
+                          "text": "{index}",
+                          "children": []
+                        },
+                        {
+                          "tag": "{http://www.dji.com/wpmz/1.0.6}actionGroupMode",
+                          "attrs": {},
+                          "text": "sequence",
+                          "children": []
+                        },
+                        {
+                          "tag": "{http://www.dji.com/wpmz/1.0.6}actionTrigger",
+                          "attrs": {},
+                          "text": "",
+                          "children": [
+                            {
+                              "tag": "{http://www.dji.com/wpmz/1.0.6}actionTriggerType",
+                              "attrs": {},
+                              "text": "reachPoint",
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "tag": "{http://www.dji.com/wpmz/1.0.6}action",
+                          "attrs": {},
+                          "text": "",
+                          "children": [
+                            {
+                              "tag": "{http://www.dji.com/wpmz/1.0.6}actionId",
+                              "attrs": {},
+                              "text": "{index}",
+                              "children": []
+                            },
+                            {
+                              "tag": "{http://www.dji.com/wpmz/1.0.6}actionActuatorFunc",
+                              "attrs": {},
+                              "text": "takePhoto",
+                              "children": []
+                            },
+                            {
+                              "tag": "{http://www.dji.com/wpmz/1.0.6}actionActuatorFuncParam",
+                              "attrs": {},
+                              "text": "",
+                              "children": [
+                                {
+                                  "tag": "{http://www.dji.com/wpmz/1.0.6}payloadPositionIndex",
+                                  "attrs": {},
+                                  "text": "0",
+                                  "children": []
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

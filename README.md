@@ -11,6 +11,7 @@ Live: https://squatch-stack.github.io/gallery/ (custom domain squatch.cc
 pending DNS).
 
 - `scenes/` — web-delivery splats: `.sog` (viewer) and `.spz` (interop)
+- [DJI Air 3S mission planner](docs/drone.md) — offline geometry, operator cards and schema-gated KMZ export.
 - `viewer.html` — Spark viewer; `?scene=<stem>` from `scenes.json`
 - `tools/clean_export.py` — opacity floor, alpha-weighted median crop centre, fog cull,
   and export, all through holo's own writers

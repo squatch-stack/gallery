@@ -1,0 +1,213 @@
+{
+  "focal_length_equivalent_mm": {
+    "value": 24,
+    "source": "Unverified against a DJI Fly export",
+    "rationale": "Provisional planning assumption; verify on the actual aircraft and site."
+  },
+  "equivalent_sensor_width_mm": {
+    "value": 36,
+    "source": "Unverified against a DJI Fly export",
+    "rationale": "Provisional planning assumption; verify on the actual aircraft and site."
+  },
+  "resolutions": {
+    "value": {
+      "50mp": [
+        8192,
+        6144
+      ],
+      "12mp": [
+        4096,
+        3072
+      ]
+    },
+    "source": "Unverified against a DJI Fly export",
+    "rationale": "Provisional planning assumption; verify on the actual aircraft and site."
+  },
+  "resolution": {
+    "value": "50mp",
+    "source": "Unverified against a DJI Fly export",
+    "rationale": "Provisional planning assumption; verify on the actual aircraft and site."
+  },
+  "gsd_m": {
+    "value": 0.05,
+    "source": "Unverified against a DJI Fly export",
+    "rationale": "Provisional planning assumption; verify on the actual aircraft and site."
+  },
+  "max_gsd_m": {
+    "value": 0.05,
+    "source": "Unverified against a DJI Fly export",
+    "rationale": "Provisional planning assumption; verify on the actual aircraft and site."
+  },
+  "max_altitude_agl_m": {
+    "value": 120,
+    "source": "Unverified against a DJI Fly export",
+    "rationale": "Provisional planning assumption; verify on the actual aircraft and site."
+  },
+  "min_obstacle_clearance_m": {
+    "value": 20,
+    "source": "Unverified against a DJI Fly export",
+    "rationale": "Provisional planning assumption; verify on the actual aircraft and site."
+  },
+  "max_subject_span_m": {
+    "value": 2000,
+    "source": "Unverified against a DJI Fly export",
+    "rationale": "Provisional planning assumption; verify on the actual aircraft and site."
+  },
+  "side_overlap": {
+    "value": 0.7,
+    "source": "Unverified against a DJI Fly export",
+    "rationale": "Provisional planning assumption; verify on the actual aircraft and site."
+  },
+  "forward_overlap": {
+    "value": 0.8,
+    "source": "Unverified against a DJI Fly export",
+    "rationale": "Provisional planning assumption; verify on the actual aircraft and site."
+  },
+  "min_forward_overlap": {
+    "value": 0.75,
+    "source": "Unverified against a DJI Fly export",
+    "rationale": "Provisional planning assumption; verify on the actual aircraft and site."
+  },
+  "intervals_s": {
+    "value": [
+      2,
+      3,
+      5,
+      7,
+      10,
+      15,
+      20,
+      30,
+      60
+    ],
+    "source": "Unverified against a DJI Fly export",
+    "rationale": "Provisional planning assumption; verify on the actual aircraft and site."
+  },
+  "shutter_seconds": {
+    "value": 0.0025,
+    "source": "Unverified against a DJI Fly export",
+    "rationale": "Provisional planning assumption; verify on the actual aircraft and site."
+  },
+  "min_mission_speed_ms": {
+    "value": 1,
+    "source": "Unverified against a DJI Fly export",
+    "rationale": "Provisional planning assumption; verify on the actual aircraft and site."
+  },
+  "max_mission_speed_ms": {
+    "value": 10,
+    "source": "Unverified against a DJI Fly export",
+    "rationale": "Provisional planning assumption; verify on the actual aircraft and site."
+  },
+  "max_motion_blur_px": {
+    "value": 1,
+    "source": "Unverified against a DJI Fly export",
+    "rationale": "Provisional planning assumption; verify on the actual aircraft and site."
+  },
+  "oblique_pitch_below_horizon_deg": {
+    "value": 67.5,
+    "source": "Unverified against a DJI Fly export",
+    "rationale": "Provisional planning assumption; verify on the actual aircraft and site."
+  },
+  "gimbal_pitch_sign": {
+    "value": -1,
+    "source": "Unverified against a DJI Fly export",
+    "rationale": "Provisional planning assumption; verify on the actual aircraft and site."
+  },
+  "turn_radius_m": {
+    "value": 5,
+    "source": "Unverified against a DJI Fly export",
+    "rationale": "Provisional planning assumption; verify on the actual aircraft and site."
+  },
+  "turn_mode": {
+    "value": "toPointAndStopWithDiscontinuityCurvature",
+    "source": "Unverified against a DJI Fly export",
+    "rationale": "Provisional planning assumption; verify on the actual aircraft and site."
+  },
+  "heading_mode": {
+    "value": "fixed",
+    "source": "Unverified against a DJI Fly export",
+    "rationale": "Provisional planning assumption; verify on the actual aircraft and site."
+  },
+  "hover_seconds": {
+    "value": 0,
+    "source": "Unverified against a DJI Fly export",
+    "rationale": "Provisional planning assumption; verify on the actual aircraft and site."
+  },
+  "turn_seconds": {
+    "value": 2,
+    "source": "Unverified against a DJI Fly export",
+    "rationale": "Provisional planning assumption; verify on the actual aircraft and site."
+  },
+  "climb_speed_ms": {
+    "value": 3,
+    "source": "Unverified against a DJI Fly export",
+    "rationale": "Provisional planning assumption; verify on the actual aircraft and site."
+  },
+  "transit_seconds": {
+    "value": 30,
+    "source": "Unverified against a DJI Fly export",
+    "rationale": "Provisional planning assumption; verify on the actual aircraft and site."
+  },
+  "rth_seconds": {
+    "value": 60,
+    "source": "Unverified against a DJI Fly export",
+    "rationale": "Provisional planning assumption; verify on the actual aircraft and site."
+  },
+  "usable_battery_minutes": {
+    "value": 25,
+    "source": "Unverified against a DJI Fly export",
+    "rationale": "Provisional planning assumption; verify on the actual aircraft and site."
+  },
+  "max_distance_from_home_m": {
+    "value": 1000,
+    "source": "Unverified against a DJI Fly export",
+    "rationale": "Provisional planning assumption; verify on the actual aircraft and site."
+  },
+  "rth_altitude_m": {
+    "value": 120,
+    "source": "Unverified against a DJI Fly export",
+    "rationale": "Provisional planning assumption; verify on the actual aircraft and site."
+  },
+  "takeoff_offset_m": {
+    "value": 0,
+    "source": "Unverified against a DJI Fly export",
+    "rationale": "Provisional planning assumption; verify on the actual aircraft and site."
+  },
+  "nadir_grid_altitude_m": {
+    "value": 120,
+    "source": "Unverified against a DJI Fly export",
+    "rationale": "Provisional planning assumption; verify on the actual aircraft and site."
+  },
+  "orbit_max_step_deg": {
+    "value": 15,
+    "source": "Unverified against a DJI Fly export",
+    "rationale": "Provisional planning assumption; verify on the actual aircraft and site."
+  },
+  "orbit_clearance_m": {
+    "value": 20,
+    "source": "Unverified against a DJI Fly export",
+    "rationale": "Provisional planning assumption; verify on the actual aircraft and site."
+  },
+  "prohibited_place_terms": {
+    "value": [
+      "National Park",
+      "National Battlefield",
+      "National Historic Site",
+      "National Monument",
+      "National Seashore",
+      "National Recreation Area"
+    ],
+    "source": "Permission screening",
+    "rationale": "Screen operator text using docs/capture.md > Before you leave."
+  },
+  "camera_settings": {
+    "value": "Wide camera, no zoom; landscape stills; manual 1/400 s or faster; ISO 100; fixed white balance; lock exposure within each pass; retain full-resolution originals and EXIF.",
+    "source": "Unverified against a DJI Fly export",
+    "rationale": "Provisional planning assumption; verify on the actual aircraft and site."
+  },
+  "subject_pixels_across": {
+    "value": 2000,
+    "source": "Unverified against a DJI Fly export",
+    "rationale": "Without an explicit --gsd, altitude is chosen so the subject's HEIGHT spans at least this many pixels in one nadir frame, so a small subject is flown close rather than at the legal ceiling. When that puts the aircraft below min_obstacle_clearance_m the tool refuses and points at capture_plan.py, which is the honest answer for a subject too small to fly. Provisional: verify against a real reconstruction before it becomes policy."
+  }
+}
