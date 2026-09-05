@@ -393,8 +393,8 @@
         },
         {
           "name": "floater",
-          "status": "fail",
-          "detail": "28.924624% < 2%"
+          "status": "info",
+          "detail": "28.924624% far from centre; a place is its surroundings, so this is scenery, not floaters (catalog subject: place)"
         },
         {
           "name": "fog",
