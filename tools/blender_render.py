@@ -10,6 +10,11 @@ Headless on purpose. The Blender MCP bridge is for looking at a scene
 interactively; a deliverable render has to be reproducible from a file, and a
 bridge session is not. Nothing here imports bpy at module scope, so the
 argument parser and the framing maths stay testable without Blender.
+
+A headless Blender loads the enabled add-ons too, so it briefly starts a second
+blender-mcp server. When the GUI Blender already holds 127.0.0.1:9876 that bind
+fails, harmlessly and noisily, and the GUI's own bridge is unaffected. Nothing
+to fix here; it is just why a render log mentions a server it never needed.
 """
 from __future__ import annotations
 
@@ -27,7 +32,12 @@ def parse_args(argv=None):
     p.add_argument('--elevation-deg', type=float, default=12.0, help='camera pitch above horizon')
     p.add_argument('--samples', type=int, default=64, help='Cycles samples')
     p.add_argument('--resolution', type=int, default=1080)
-    p.add_argument('--engine', choices=('CYCLES', 'BLENDER_EEVEE_NEXT'), default='CYCLES')
+    # Engine identifiers move between Blender releases: 4.2 called EEVEE
+    # 'BLENDER_EEVEE_NEXT', 5.x calls it 'BLENDER_EEVEE' again. Take any string
+    # and validate against the running Blender's own enum, so a rename is a
+    # clear message rather than a TypeError forty lines in.
+    p.add_argument('--engine', default='CYCLES',
+                   help='CYCLES (default), BLENDER_EEVEE for speed, BLENDER_WORKBENCH for flat')
     p.add_argument('--margin', type=float, default=1.10, help='framing slack around the subject')
     p.add_argument('--film-transparent', action='store_true', help='alpha background instead of world grey')
     return p.parse_args(argv if argv is not None else _blender_argv())
@@ -108,7 +118,13 @@ def main():
     print(f'subject size {tuple(round(v, 3) for v in size)} centred {tuple(round(v, 3) for v in centre)}')
 
     scene = bpy.context.scene
-    scene.render.engine = args.engine
+    # Set it and report what happened, rather than pre-checking against
+    # RenderSettings' enum: that enum is populated lazily, so reading it early
+    # can omit CYCLES and reject a perfectly valid default.
+    try:
+        scene.render.engine = args.engine
+    except TypeError as exc:
+        raise SystemExit(f'--engine {args.engine} rejected by this Blender: {exc}') from exc
     if args.engine == 'CYCLES':
         scene.cycles.samples = args.samples
     scene.render.resolution_x = scene.render.resolution_y = args.resolution
