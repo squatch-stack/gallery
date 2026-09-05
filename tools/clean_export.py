@@ -187,8 +187,9 @@ def main():
                          "(metres for COLMAP scenes); overrides quantile and margin for every shape")
     ap.add_argument("--max-aspect", type=float, default=0.0,
                     help="drop splats whose aspect ratio (see --aspect-measure) exceeds this; "
-                         "167 = a healthy gsplat scene's p90, ~3rd percentile of a Brush scene "
-                         "(needles: elongated gaussians fitting wind-moved vegetation); 0 = off")
+                         "167 = a healthy gsplat scene's p90, but the 23rd-27th percentile of a "
+                         "Brush scene (measured on the cannon's three arms), so it discards three "
+                         "quarters of a Brush cloud; 0 = off")
     ap.add_argument("--aspect-measure", choices=["minmax", "second"], default="minmax",
                     help="minmax = longest/shortest axis (a healthy gsplat scene keeps p90 near 170); "
                          "second = longest/second-longest (a line, not a disc)")
