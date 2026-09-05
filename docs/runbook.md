@@ -265,6 +265,25 @@ Choose a mesh for rigid surfaces such as trunks, stone, and architecture;
 foliage is a poor fit. Use the inspected subject masks from stage 4. This is
 an alternative reconstruction path to the splat training and cleaning stages.
 
+**Measured on the oak, 2026-09-04, so "foliage is a poor fit" is evidence and
+not advice.** Apple's photogrammetry at full detail with ground-patch masks
+over 169 photographs registered **84**, against COLMAP's 145 on the same
+photographs, and produced 55,836 vertices and 99,999 triangles. The trunk came
+out solid, with bark relief and root flare, standing on fragments of ground.
+The canopy did not come out at all: no branches, no leaves, nothing above the
+first fork. Moving leaves give a photogrammetry solver nothing stable to match,
+so it discards those frames and meshes what stayed still.
+
+Read that as a rule for choosing the deliverable. A tree ships as a splat,
+where the canopy is at least soft rather than absent. Stone, timber, metal and
+architecture ship as a mesh, which is also what a client can measure and drop
+into their own software.
+
+The same run also showed why a mesh needs its textures resized before delivery:
+a 10.8 MB OBJ arrived with a 72.2 MB colour map, a 47.7 MB normal map, a
+35.2 MB roughness map and a 137.5 MB displacement map, and the first conversion
+produced a **66.3 MB** GLB for a 100,000-triangle mesh against a 20 MB budget.
+
 - [ ] In the sibling posekit repository, reconstruct at full detail with masks,
   then convert the OBJ to a textured GLB. These are external-tool examples
   (quoted as text so this repository's CLI tests do not validate posekit flags).

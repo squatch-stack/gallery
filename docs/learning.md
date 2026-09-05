@@ -108,6 +108,12 @@ render an elevation and a twelve-second turntable. Compare your elevation
 against a photograph of the same subject. This is the deliverable the statement
 of work promises.
 
+**What to expect from a mesh, before you spend an afternoon on one.** Measured
+on the oak: the trunk meshed solidly, with bark and root flare, and the canopy
+did not appear at all. Moving leaves give the solver nothing to match, so it
+discarded half the photographs. A tree ships as a splat; stone, timber, metal
+and architecture ship as a mesh.
+
 ---
 
 ## 5. Plan a capture, then make one
