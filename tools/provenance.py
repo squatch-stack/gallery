@@ -232,7 +232,7 @@ def app_export(a, repo, argv=None):
     ]
     a.out.parent.mkdir(parents=True, exist_ok=True)
     md = "\n".join(lines)
-    a.out.write_text(render_html(title, md) if a.out.suffix.lower() == ".html" else md)
+    a.out.write_text(render_html(title, md, a.out) if a.out.suffix.lower() == ".html" else md)
     print("wrote", a.out)
     write_sidecar(a, "app-export", argv=argv, generated=generated)
 
@@ -410,7 +410,7 @@ def main(argv=None):
     a.out.parent.mkdir(parents=True, exist_ok=True)
     md = "\n".join(lines)
     if a.out.suffix.lower() == ".html":
-        a.out.write_text(render_html(title, md))
+        a.out.write_text(render_html(title, md, a.out))
     else:
         a.out.write_text(md)
     print("wrote", a.out)
@@ -418,7 +418,43 @@ def main(argv=None):
     print("\n".join(lines[:12]))
 
 
-def render_html(title, md):
+def turntable_figure(out):
+    """A rotation of the scan this sheet documents, if one has been captured.
+
+    On a provenance sheet the turntable is evidence rather than decoration: it
+    is what the reader is being told the provenance of. So it gets a caption
+    and controls, unlike the silent decorative preview on the index cards, and
+    the poster is a real still rather than a placeholder.
+    """
+    stem = out.stem
+    root = out.parent.parent
+    video, poster = root / "turntables" / f"{stem}.mp4", root / "turntables" / f"{stem}.jpg"
+    if not (video.is_file() and poster.is_file()):
+        return ""
+    src, still = f"../turntables/{stem}.mp4", f"../turntables/{stem}.jpg"
+    label = html.escape(f"Turntable of {stem}: the scan rotating once about its vertical axis")
+    return f"""<figure class="turntable">
+<video muted loop playsinline controls preload="none" poster="{still}"
+       aria-label="{label}"></video>
+<figcaption>A single rotation of the delivered scan. Captured from the same
+viewer this sheet links to, at the resolution shipped; nothing is retouched.</figcaption>
+</figure>
+<script>
+(function () {{
+  var v = document.querySelector('.turntable video');
+  if (!v) return;
+  var still = window.matchMedia('(prefers-reduced-motion: reduce)');
+  // The poster stays until the reader asks, if they have asked for less motion.
+  function start() {{ if (!still.matches && !v.src) {{ v.src = {src!r}; v.play().catch(function () {{}}); }} }}
+  function stop() {{ v.pause(); }}
+  still.addEventListener('change', function () {{ still.matches ? stop() : start(); }});
+  v.addEventListener('play', function () {{ if (!v.src) v.src = {src!r}; }});
+  start();
+}})();
+</script>"""
+
+
+def render_html(title, md, out_path=None):
     """A dependency-free rendering of the sheet: headings, bold, code, bullets.
     Served as a static page beside the scan it documents."""
     out, in_list = [], False
@@ -457,6 +493,13 @@ def render_html(title, md):
     if in_list:
         out.append("</ul>")
     body = "\n".join(out)
+    figure = turntable_figure(out_path) if out_path is not None else ""
+    # After the h1 so the sheet still opens with what it is documenting.
+    if figure and "</h1>" in body:
+        head, rest = body.split("</h1>", 1)
+        body = head + "</h1>" + figure + rest
+    else:
+        body = figure + body
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1"><title>Provenance: {html.escape(title)}</title>
 <style>body{{margin:0;background:#0d0b09;color:#e8e2d6;font:15px/1.6 ui-monospace,Menlo,monospace}}
@@ -466,7 +509,10 @@ p{{margin:.4rem 0}}ul{{padding-left:1.2rem;margin:.4rem 0}}li{{margin:.25rem 0}}
 code{{background:#1a1612;padding:1px 5px;border-radius:3px}}
 code{{overflow-wrap:anywhere}}
 blockquote{{margin:0;padding-left:1rem;border-left:2px solid #3a332a;white-space:pre-wrap}}
-a{{color:#e58a5e}}b{{color:#fff}}nav{{font-size:13px;margin-bottom:1.5rem}}</style></head>
+a{{color:#e58a5e}}b{{color:#fff}}nav{{font-size:13px;margin-bottom:1.5rem}}
+figure.turntable{{margin:1.5rem 0 2rem}}
+figure.turntable video{{width:100%;max-width:26rem;display:block;border-radius:8px;background:#000}}
+figure.turntable figcaption{{color:#97907f;font-size:13px;margin-top:.5rem;max-width:26rem}}</style></head>
 <body><main><nav><a href="../index.html">&#8592; all scans</a></nav>{body}</main></body></html>
 """
 

@@ -8,7 +8,25 @@ code{background:#1a1612;padding:1px 5px;border-radius:3px}
 code{overflow-wrap:anywhere}
 blockquote{margin:0;padding-left:1rem;border-left:2px solid #3a332a;white-space:pre-wrap}
 a{color:#e58a5e}b{color:#fff}nav{font-size:13px;margin-bottom:1.5rem}</style></head>
-<body><main><nav><a href="../index.html">&#8592; all scans</a></nav><h1>Provenance: Saguaro</h1>
+<body><main><nav><a href="../index.html">&#8592; all scans</a></nav><h1>Provenance: Saguaro</h1><figure class="turntable">
+<video muted loop playsinline controls preload="none" poster="../turntables/saguaro.jpg"
+       aria-label="Turntable of saguaro: the scan rotating once about its vertical axis"></video>
+<figcaption>A single rotation of the delivered scan. Captured from the same
+viewer this sheet links to, at the resolution shipped; nothing is retouched.</figcaption>
+</figure>
+<script>
+(function () {
+  var v = document.querySelector('.turntable video');
+  if (!v) return;
+  var still = window.matchMedia('(prefers-reduced-motion: reduce)');
+  // The poster stays until the reader asks, if they have asked for less motion.
+  function start() { if (!still.matches && !v.src) { v.src = '../turntables/saguaro.mp4'; v.play().catch(function () {}); } }
+  function stop() { v.pause(); }
+  still.addEventListener('change', function () { still.matches ? stop() : start(); });
+  v.addEventListener('play', function () { if (!v.src) v.src = '../turntables/saguaro.mp4'; });
+  start();
+})();
+</script>
 <h2>Catalog record</h2>
 <p>Source: working-tree scenes.json; repository base identified below. These are catalog claims.</p>
 <p><b>Scene:</b> saguaro</p>
