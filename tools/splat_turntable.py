@@ -74,7 +74,9 @@ def main(argv=None):
     p.add_argument('--out', required=True, help='output prefix')
     p.add_argument('--base', default='http://localhost:8875')
     p.add_argument('--mode', choices=('turntable', 'elevation', 'both'), default='both')
-    p.add_argument('--frames', type=int, default=24)
+    p.add_argument('--frames', type=int, default=36,
+                   help='angles captured. Smoothness comes from this and never from\n'
+                        'frame interpolation, which shreds a rotating subject')
     p.add_argument('--elevation-deg', type=float, default=12.0)
     p.add_argument('--distance', type=float, default=2.2)
     p.add_argument('--heading', type=float, default=0.0)
@@ -120,22 +122,26 @@ def main(argv=None):
                          f'{"..." if len(empty) > 4 else ""}); raise --wait-ms')
 
 
-def encode(scene, frames_glob, out_dir, seconds, frames, width=480, crf=28):
-    """One mp4 plus a poster still, at a duration that is actually the one asked for.
+def encode(scene, frames_glob, out_dir, seconds, frames, width=480, crf=26):
+    """One mp4 plus a poster still, from the real frames and nothing else.
 
-    minterpolate alone is not deterministic here: fed the same 16 frames it
-    returned clips of 2.27, 2.53 and 3.53 seconds depending on how well it could
-    estimate motion, so the cards span at three different speeds. Pinning the
-    output with a trailing `fps` filter and `-r` makes the length exact, and the
-    duration is verified rather than assumed.
+    Do NOT interpolate. An earlier version ran minterpolate to smooth sixteen
+    captures up to thirty frames a second, and it destroyed them: optical flow
+    is a 2D estimate, a turntable is a 3D rotation that disoccludes new surface
+    every frame, and the estimator tore each subject into sliding slabs and
+    blocks. It also made the clip length non-deterministic, returning 2.27,
+    2.53 and 3.53 seconds from equal frame counts.
+
+    Smoothness comes from capturing more angles instead, which costs browser
+    time and nothing else. The duration is still verified rather than assumed.
     """
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     video, poster = out_dir / f'{scene}.mp4', out_dir / f'{scene}.jpg'
     rate = frames / seconds
-    chain = (f'scale={width}:-2,minterpolate=fps=30:mi_mode=mci:mc_mode=aobmc:vsbmc=1,fps=30')
     subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-framerate', f'{rate:g}',
-                    '-pattern_type', 'glob', '-i', frames_glob, '-vf', chain, '-r', '30',
+                    '-pattern_type', 'glob', '-i', frames_glob,
+                    '-vf', f'scale={width}:-2', '-r', f'{rate:g}',
                     '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', str(crf),
                     '-movflags', '+faststart', str(video)], check=True)
     subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-i',

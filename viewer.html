@@ -251,15 +251,29 @@ target.y *= -1; target.z *= -1;   // same space as the flipped mesh
 target.applyQuaternion(qAlign);   // and gravity-aligned with it
 
 const controls = new OrbitControls(camera, renderer.domElement);
-if (entry && entry.start === "interior") {
-  // The capture was made from INSIDE the subject (a room scanned from
-  // within), so an orbiting exterior view shows only the shell. Stand
-  // where the operator stood — the scan's center of mass — and look
-  // at a wall; orbiting then turns in place, which is how the space
-  // was actually seen.
-  camera.position.copy(target);
-  controls.target.set(target.x + span * 0.35, target.y,
-                      target.z + span * 0.1);
+// A scene may state its own opening camera, in the same az/el/d grammar the
+// ?az=&el=&d= parameters use, so a framing found by looking can be kept
+// instead of rediscovered. Explicit URL parameters still win over it.
+const opening = entry && entry.view && ["az", "el", "d"].every(
+  k => Number.isFinite(Number(entry.view[k]))) ? entry.view : null;
+if (opening) {
+  const az = (Number(opening.az) % 360) * Math.PI / 180;
+  const el = Number(opening.el) * Math.PI / 180;
+  const radius = span * Number(opening.d);
+  camera.position.set(
+    target.x + radius * Math.cos(el) * Math.sin(az),
+    target.y + radius * Math.sin(el),
+    target.z + radius * Math.cos(el) * Math.cos(az));
+  controls.target.copy(target);
+  controls.minDistance = 0;
+} else if (entry && entry.start === "interior") {
+  // The capture was made from INSIDE the subject, so an orbiting exterior view
+  // shows only the shell. Standing exactly at the centre of mass put the camera
+  // inside the stonework of the springhouse and opened on a brown blur, so back
+  // off a short way along the view axis and look at the centre: the room reads,
+  // and orbiting still turns within the walls rather than around them.
+  camera.position.set(target.x, target.y, target.z + span * 0.35);
+  controls.target.copy(target);
   controls.minDistance = 0.02;
 } else {
   camera.position.set(target.x + span, target.y + span * 0.45,
