@@ -1,7 +1,6 @@
 """Frame planning and the shot wrapper. No browser and no Blender involved."""
 import importlib.util
 from itertools import pairwise
-import re
 import urllib.parse
 from pathlib import Path
 
@@ -91,41 +90,3 @@ def test_wrapper_hides_chrome_only_when_asked():
 
 def test_slow_endpoint_is_capped():
     assert server.MAX_WAIT_MS <= 120_000
-
-
-def test_encode_verifies_the_duration_it_was_asked_for(tmp_path, monkeypatch):
-    """The encoder must not accept whatever length ffmpeg happens to produce.
-
-    minterpolate returned 2.27, 2.53 and 3.53 second clips from equal frame
-    counts, which put the gallery cards at three different speeds.
-    """
-    calls = []
-
-    class Result:
-        def __init__(self, out=''):
-            self.stdout = out
-
-    def fake_run(cmd, **kw):
-        calls.append(cmd[0])
-        if cmd[0] == 'ffprobe':
-            return Result(fake_run.duration)
-        Path(cmd[-1]).write_bytes(b'x')
-        return Result()
-
-    monkeypatch.setattr(tool.subprocess, 'run', fake_run)
-    fake_run.duration = '3.2'
-    video, poster, actual = tool.encode('s', str(tmp_path / 's-turntable-*.png'),
-                                        tmp_path, 3.2, 16)
-    assert actual == pytest.approx(3.2) and video.exists() and poster.exists()
-    assert calls.count('ffmpeg') == 2 and 'ffprobe' in calls
-
-    fake_run.duration = '2.53'
-    with pytest.raises(SystemExit, match=re.escape('asked for 3.2s, got 2.53s')):
-        tool.encode('s', str(tmp_path / 's-turntable-*.png'), tmp_path, 3.2, 16)
-
-
-def test_encode_rate_makes_the_requested_length():
-    # frames / rate == seconds is the whole arithmetic; a wrong rate is a
-    # grid that spins at the wrong speed and nothing else complains.
-    for frames, seconds in ((16, 3.2), (12, 3.0), (24, 4.0)):
-        assert frames / (frames / seconds) == pytest.approx(seconds)

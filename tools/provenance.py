@@ -419,39 +419,22 @@ def main(argv=None):
 
 
 def turntable_figure(out):
-    """A rotation of the scan this sheet documents, if one has been captured.
+    """A still of the scan this sheet documents, if one has been captured.
 
-    On a provenance sheet the turntable is evidence rather than decoration: it
-    is what the reader is being told the provenance of. So it gets a caption
-    and controls, unlike the silent decorative preview on the index cards, and
-    the poster is a real still rather than a placeholder.
+    It was a rotating video until 2026-09-06 and is deliberately not any more:
+    the motion added nothing to a document that is read, and the frames it was
+    built from are the honest artefact anyway.
     """
     stem = out.stem
-    root = out.parent.parent
-    video, poster = root / "turntables" / f"{stem}.mp4", root / "turntables" / f"{stem}.jpg"
-    if not (video.is_file() and poster.is_file()):
+    still = out.parent.parent / "turntables" / f"{stem}.jpg"
+    if not still.is_file():
         return ""
-    src, still = f"../turntables/{stem}.mp4", f"../turntables/{stem}.jpg"
-    label = html.escape(f"Turntable of {stem}: the scan rotating once about its vertical axis")
+    alt = html.escape(f"The {stem} scan as delivered, rendered from the gallery viewer")
     return f"""<figure class="turntable">
-<video muted loop playsinline controls preload="none" poster="{still}"
-       aria-label="{label}"></video>
-<figcaption>A single rotation of the delivered scan. Captured from the same
-viewer this sheet links to, at the resolution shipped; nothing is retouched.</figcaption>
-</figure>
-<script>
-(function () {{
-  var v = document.querySelector('.turntable video');
-  if (!v) return;
-  var still = window.matchMedia('(prefers-reduced-motion: reduce)');
-  // The poster stays until the reader asks, if they have asked for less motion.
-  function start() {{ if (!still.matches && !v.src) {{ v.src = {src!r}; v.play().catch(function () {{}}); }} }}
-  function stop() {{ v.pause(); }}
-  still.addEventListener('change', function () {{ still.matches ? stop() : start(); }});
-  v.addEventListener('play', function () {{ if (!v.src) v.src = {src!r}; }});
-  start();
-}})();
-</script>"""
+<img src="../turntables/{stem}.jpg" alt="{alt}">
+<figcaption>The delivered scan, rendered from the same viewer this sheet links
+to, at the resolution shipped; nothing is retouched.</figcaption>
+</figure>"""
 
 
 def render_html(title, md, out_path=None):
@@ -511,7 +494,7 @@ code{{overflow-wrap:anywhere}}
 blockquote{{margin:0;padding-left:1rem;border-left:2px solid #3a332a;white-space:pre-wrap}}
 a{{color:#e58a5e}}b{{color:#fff}}nav{{font-size:13px;margin-bottom:1.5rem}}
 figure.turntable{{margin:1.5rem 0 2rem}}
-figure.turntable video{{width:100%;max-width:26rem;display:block;border-radius:8px;background:#000}}
+figure.turntable img{{width:100%;max-width:26rem;display:block;border-radius:8px;background:#000}}
 figure.turntable figcaption{{color:#97907f;font-size:13px;margin-top:.5rem;max-width:26rem}}</style></head>
 <body><main><nav><a href="../index.html">&#8592; all scans</a></nav>{body}</main></body></html>
 """

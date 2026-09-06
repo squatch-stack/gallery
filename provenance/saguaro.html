@@ -12,24 +12,10 @@ figure.turntable{margin:1.5rem 0 2rem}
 figure.turntable video{width:100%;max-width:26rem;display:block;border-radius:8px;background:#000}
 figure.turntable figcaption{color:#97907f;font-size:13px;margin-top:.5rem;max-width:26rem}</style></head>
 <body><main><nav><a href="../index.html">&#8592; all scans</a></nav><h1>Provenance: Saguaro</h1><figure class="turntable">
-<video muted loop playsinline controls preload="none" poster="../turntables/saguaro.jpg"
-       aria-label="Turntable of saguaro: the scan rotating once about its vertical axis"></video>
-<figcaption>A single rotation of the delivered scan. Captured from the same
-viewer this sheet links to, at the resolution shipped; nothing is retouched.</figcaption>
+<img src="../turntables/saguaro.jpg" alt="The saguaro scan as delivered, rendered from the gallery viewer">
+<figcaption>The delivered scan, rendered from the same viewer this sheet links
+to, at the resolution shipped; nothing is retouched.</figcaption>
 </figure>
-<script>
-(function () {
-  var v = document.querySelector('.turntable video');
-  if (!v) return;
-  var still = window.matchMedia('(prefers-reduced-motion: reduce)');
-  // The poster stays until the reader asks, if they have asked for less motion.
-  function start() { if (!still.matches && !v.src) { v.src = '../turntables/saguaro.mp4'; v.play().catch(function () {}); } }
-  function stop() { v.pause(); }
-  still.addEventListener('change', function () { still.matches ? stop() : start(); });
-  v.addEventListener('play', function () { if (!v.src) v.src = '../turntables/saguaro.mp4'; });
-  start();
-})();
-</script>
 <h2>Catalog record</h2>
 <p>Source: working-tree scenes.json; repository base identified below. These are catalog claims.</p>
 <p><b>Scene:</b> saguaro</p>

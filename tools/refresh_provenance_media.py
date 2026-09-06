@@ -26,8 +26,10 @@ from pathlib import Path
 # Deliberately does NOT consume the newline after </script>: that newline
 # belongs to the content the figure was spliced in front of, and eating it made
 # the refresher rewrite every page on every run.
+# Matches both shapes: the current still-only figure, and the video figure
+# with its trailing script that this replaced, so old sheets are cleaned up.
 FIGURE = re.compile(
-    r'<figure class="turntable">.*?</figure>\s*<script>.*?</script>',
+    r'<figure class="turntable">.*?</figure>(?:\s*<script>.*?</script>)?',
     re.DOTALL,
 )
 
