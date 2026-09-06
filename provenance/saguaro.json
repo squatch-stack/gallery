@@ -3,25 +3,23 @@
     "saguaro",
     "--app-export",
     "--source",
-    "Studio scan held in the hdc-holo data set as a 3DGS PLY; capture app and date unrecorded; cleaned with tools/clean_export.py and packed to SOG/SPZ",
+    "Studio scan held in the hdc-holo data set as a 3DGS PLY (689,925 splats); capture app and date unrecorded, catalog date is the delivery date. Cleaned with tools/clean_export.py.",
     "--export",
     "scenes/saguaro.sog",
     "--out",
     "provenance/saguaro.html",
     "--source-commit",
-    "e9d35a857c86dd87acef738c2eca58a32930e974",
+    "ddf96a93c7547da6dd7124c0cfa6fcae7b798ec2",
     "--cleaning",
-    "--alpha-min 0.02 --crop-quantile 0.90 --crop-margin 1.4 --scale-ceiling 0.05 --target-count 480000",
+    "--center=-0.4807,-1.1365,-1.7104 --crop-radius 8 --crop-shape cylinder --up=0.0183,0.9976,0.0669 --alpha-min 0.02 --target-count 480000",
     "--cleaning-source",
-    "candidate",
-    "--note",
-    "Catalog date is the delivery date, not the capture date"
+    "candidate"
   ],
-  "date": "2026-09-04T21:21:39+00:00",
+  "date": "2026-09-06T01:37:05+00:00",
   "inputs": {
     "app_export": true,
     "cleaning": [
-      "--alpha-min 0.02 --crop-quantile 0.90 --crop-margin 1.4 --scale-ceiling 0.05 --target-count 480000"
+      "--center=-0.4807,-1.1365,-1.7104 --crop-radius 8 --crop-shape cylinder --up=0.0183,0.9976,0.0669 --alpha-min 0.02 --target-count 480000"
     ],
     "cleaning_source": "candidate",
     "export": [
@@ -29,20 +27,24 @@
     ],
     "mapper": "incremental",
     "masked": false,
-    "note": [
-      "Catalog date is the delivery date, not the capture date"
-    ],
+    "note": [],
     "out": "provenance/saguaro.html",
     "place": "",
-    "source": "Studio scan held in the hdc-holo data set as a 3DGS PLY; capture app and date unrecorded; cleaned with tools/clean_export.py and packed to SOG/SPZ",
+    "source": "Studio scan held in the hdc-holo data set as a 3DGS PLY (689,925 splats); capture app and date unrecorded, catalog date is the delivery date. Cleaned with tools/clean_export.py.",
     "source_commit": [
-      "e9d35a857c86dd87acef738c2eca58a32930e974"
+      "ddf96a93c7547da6dd7124c0cfa6fcae7b798ec2"
     ],
     "sparse": "sparse",
     "subject": "saguaro",
     "supervision": "masks",
     "title": null,
-    "trained": null
+    "trained": null,
+    "up_source": "explicit",
+    "up": [
+      0.0183,
+      0.9976,
+      0.0669
+    ]
   },
   "mode": "app-export",
   "schema_version": 1

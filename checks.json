@@ -668,23 +668,23 @@
       "count": 480000,
       "triangles": null,
       "texture_bytes": null,
-      "size_bytes": 5640538,
+      "size_bytes": 5557453,
       "metrics": {
         "nonfinite_count": 0,
-        "floater_fraction": 0.27868125,
+        "floater_fraction": 0.20496458333333334,
         "fog_fraction": 0.0,
-        "translucent_fraction": 3.541666666666667e-05,
+        "translucent_fraction": 1.4583333333333333e-05,
         "extent": [
-          44.21459960937499,
-          20.897705078124993,
-          44.211669921875014
+          15.952148437500004,
+          11.346435546875,
+          15.944824218750004
         ],
         "center": [
-          -0.5032173700231312,
-          1.1299450264862945,
-          1.7824077441266628
+          -0.4621433139412305,
+          1.1506176854236114,
+          1.7294709441301603
         ],
-        "mad": 1.4715739633876392
+        "mad": 0.8722744498670325
       },
       "checks": [
         {
@@ -700,7 +700,7 @@
         {
           "name": "size",
           "status": "pass",
-          "detail": "5640538 bytes; budget 20000000"
+          "detail": "5557453 bytes; budget 20000000"
         },
         {
           "name": "catalog",
@@ -710,7 +710,7 @@
         {
           "name": "floater",
           "status": "info",
-          "detail": "27.868125% far from centre; a place is its surroundings, so this is scenery, not floaters (catalog subject: place)"
+          "detail": "20.496458% far from centre; a place is its surroundings, so this is scenery, not floaters (catalog subject: place)"
         },
         {
           "name": "fog",
@@ -720,7 +720,7 @@
         {
           "name": "translucent",
           "status": "pass",
-          "detail": "0.003542% < 10%"
+          "detail": "0.001458% < 10%"
         },
         {
           "name": "nonfinite",

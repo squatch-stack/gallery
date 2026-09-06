@@ -106,11 +106,16 @@
     "stem": "saguaro",
     "title": "Saguaro",
     "place": "Tucson, Arizona",
-    "captured": "",
+    "captured": "2026-08-30",
     "splats": 480000,
-    "blurb": "A saguaro stand in the desert light, the studio's first big field scan.",
+    "blurb": "A saguaro stand in the desert light, the studio's first big field scan. Cropped to the stand itself rather than to a quantile of the whole capture, which drops the sky artefacts that sat above the old framing and halves the ground the scan was never really about.",
     "provenance": "provenance/saguaro.html",
-    "subject": "place"
+    "subject": "place",
+    "up": [
+      0.0183,
+      0.9976,
+      0.0669
+    ]
   },
   {
     "stem": "research-library-cannon",
