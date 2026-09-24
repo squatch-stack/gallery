@@ -1,0 +1,66 @@
+[
+  {
+    "stem": "research-library-cannon",
+    "title": "Field Gun at the Research Library",
+    "place": "Wilson's Creek National Battlefield, Missouri",
+    "captured": "2026-08-30",
+    "splats": 344729,
+    "blurb": "A field gun on the lawn outside the Hulston Civil War Research Library, captured on an overcast day so the light falls evenly all the way round it. Every other gun in this collection was scanned in direct sun, lit hard on one side and lost in shadow on the other; this one reads from every angle. Scanned on the phone, cropped to the piece and its patch of grass.",
+    "up": [
+      -0.0332,
+      0.999,
+      0.0309
+    ],
+    "provenance": "provenance/research-library-cannon.html"
+  },
+  {
+    "stem": "wilsons-creek-gun",
+    "title": "The Gun on the Line",
+    "place": "Wilson's Creek National Battlefield, Missouri",
+    "captured": "2026-08-30",
+    "splats": 460973,
+    "blurb": "The field gun standing where the line once stood, lifted out of a wider battlefield scan and cropped to itself: the piece, its carriage and the grass it sits on, and nothing else.",
+    "up": [
+      0.0392,
+      0.9986,
+      0.0367
+    ],
+    "provenance": "provenance/wilsons-creek-gun.html"
+  },
+  {
+    "stem": "redrock-cairn",
+    "title": "The Cairn at Red Rock",
+    "place": "American Southwest",
+    "captured": "2026-08-30",
+    "splats": 422702,
+    "blurb": "A dry-stacked stone cairn on a red rock ledge, cropped out of a wider desert capture. Every course of stone is legible.",
+    "up": [
+      -0.3122,
+      0.9291,
+      0.1982
+    ],
+    "provenance": "provenance/redrock-cairn.html"
+  },
+  {
+    "stem": "cannon-mesh",
+    "title": "Cannon — Mesh",
+    "place": "Wilson's Creek, Missouri",
+    "captured": "2026-08-30",
+    "mesh": "scenes/cannon-mesh.glb",
+    "splats": 0,
+    "blurb": "A field gun as Scaniverse's textured mesh: spoked wheels and carriage on a patch of shadowed grass.",
+    "provenance": "provenance/cannon-mesh.html",
+    "subject": "object"
+  },
+  {
+    "stem": "springhouse-outside",
+    "title": "Springhouse — Outside",
+    "place": "Wilson's Creek, Missouri",
+    "captured": "2026-08-30",
+    "mesh": "scenes/springhouse-outside.glb",
+    "splats": 0,
+    "blurb": "The springhouse from the yard, as Scaniverse's textured mesh — arched stone face, dark doorway, mossed roof.",
+    "provenance": "provenance/springhouse-outside.html",
+    "subject": "place"
+  }
+]

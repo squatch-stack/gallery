@@ -1,0 +1,51 @@
+{
+  "argv": [
+    "wilsons-creek-gun",
+    "--app-export",
+    "--source",
+    "Phone capture exported as a 3DGS PLY and held in the studio's hdc-holo data set (782,931 splats); capture date unrecorded, catalog date is the delivery date. Cropped to the subject with tools/clean_export.py.",
+    "--export",
+    "scenes/wilsons-creek-gun.sog",
+    "--out",
+    "provenance/wilsons-creek-gun.html",
+    "--source-commit",
+    "d6a25b16819436268965533450876c1dd872b43b",
+    "--cleaning",
+    "--center 0.8494,0.1580,-0.6501 --crop-radius 2.5 --crop-shape ellipsoid --alpha-min 0.10 --scale-ceiling 0.008",
+    "--cleaning-source",
+    "candidate"
+  ],
+  "date": "2026-09-05T17:22:39+00:00",
+  "inputs": {
+    "app_export": true,
+    "cleaning": [
+      "--center 0.8494,0.1580,-0.6501 --crop-radius 2.5 --crop-shape ellipsoid --alpha-min 0.10 --scale-ceiling 0.008"
+    ],
+    "cleaning_source": "candidate",
+    "export": [
+      "scenes/wilsons-creek-gun.sog"
+    ],
+    "mapper": "incremental",
+    "masked": false,
+    "note": [],
+    "out": "provenance/wilsons-creek-gun.html",
+    "place": "",
+    "source": "Phone capture exported as a 3DGS PLY and held in the studio's hdc-holo data set (782,931 splats); capture date unrecorded, catalog date is the delivery date. Cropped to the subject with tools/clean_export.py.",
+    "source_commit": [
+      "d6a25b16819436268965533450876c1dd872b43b"
+    ],
+    "sparse": "sparse",
+    "subject": "wilsons-creek-gun",
+    "supervision": "masks",
+    "title": null,
+    "trained": null,
+    "up_source": "explicit",
+    "up": [
+      0.0392,
+      0.9986,
+      0.0367
+    ]
+  },
+  "mode": "app-export",
+  "schema_version": 1
+}

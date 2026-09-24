@@ -1,0 +1,51 @@
+{
+  "argv": [
+    "redrock-cairn",
+    "--app-export",
+    "--source",
+    "Studio scan held in the hdc-holo data set as a 3DGS PLY (681,727 splats); capture app and date unrecorded, catalog date is the delivery date. Cropped to the subject with tools/clean_export.py.",
+    "--export",
+    "scenes/redrock-cairn.sog",
+    "--out",
+    "provenance/redrock-cairn.html",
+    "--source-commit",
+    "d6a25b16819436268965533450876c1dd872b43b",
+    "--cleaning",
+    "--center=-0.4463,0.0835,-0.3115 --crop-radius 2.5 --crop-shape ellipsoid --alpha-min 0.10 --scale-ceiling 0.008",
+    "--cleaning-source",
+    "candidate"
+  ],
+  "date": "2026-09-05T17:22:51+00:00",
+  "inputs": {
+    "app_export": true,
+    "cleaning": [
+      "--center=-0.4463,0.0835,-0.3115 --crop-radius 2.5 --crop-shape ellipsoid --alpha-min 0.10 --scale-ceiling 0.008"
+    ],
+    "cleaning_source": "candidate",
+    "export": [
+      "scenes/redrock-cairn.sog"
+    ],
+    "mapper": "incremental",
+    "masked": false,
+    "note": [],
+    "out": "provenance/redrock-cairn.html",
+    "place": "",
+    "source": "Studio scan held in the hdc-holo data set as a 3DGS PLY (681,727 splats); capture app and date unrecorded, catalog date is the delivery date. Cropped to the subject with tools/clean_export.py.",
+    "source_commit": [
+      "d6a25b16819436268965533450876c1dd872b43b"
+    ],
+    "sparse": "sparse",
+    "subject": "redrock-cairn",
+    "supervision": "masks",
+    "title": null,
+    "trained": null,
+    "up_source": "explicit",
+    "up": [
+      -0.3122,
+      0.9291,
+      0.1982
+    ]
+  },
+  "mode": "app-export",
+  "schema_version": 1
+}
